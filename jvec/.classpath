@@ -3,5 +3,7 @@
 	<classpathentry excluding="jvec/test/" kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/asm-all-4.1.jar"/>
+	<classpathentry kind="lib" path="lib/antlr-4.0-complete.jar"/>
+	<classpathentry kind="lib" path="lib/commons-io-2.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
