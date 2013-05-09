@@ -18,9 +18,19 @@
 
 public class HelloWorld {
 
-    public static void main(String[] args) {
-        System.out.println("Hello, World");
+    private int testSum(int n) {
+	int i;
+	int sum = 0;
+	for (i = 0; i < n; i++)
+		sum += i;
+	return i;
     }
 
+    public static void main(String[] args) {
+        System.out.println("Hello, World");
+	HelloWorld inst = new HelloWorld();
+	int res = inst.testSum(100);
+	System.out.println("Sum = " + res); 
+    }
 }
 
