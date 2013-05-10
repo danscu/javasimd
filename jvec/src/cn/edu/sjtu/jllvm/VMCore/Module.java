@@ -94,8 +94,7 @@ public class Module{
 		
 		for(Function f: functions){
 			f.syntaxAnalysis(numeralGlobalVars);
-		}
-		
+		}		
 	}
 	
 	public Function getFunction(String name){

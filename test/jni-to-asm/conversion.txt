@@ -1,0 +1,21 @@
+1. Function name convension: From Java to JNI
+	_ZN10HelloWorld7testumEJii --> Java_HelloWorld_testSum
+
+2. Argument list:
+
+First argument: Add %struct.JNINativeInterface_** %env,
+Second argument: Add mapping %struct.<ClassName>* unnamed_arg --> i8* %thisobj
+Third argument: align all up (error if no match), do mapping if needed.
+
+Change properties to unnamed_addr nounwind uwtable ssp
+
+3. Argument alloc
+%env_addr = alloca %struct.JNINativeInterface_**, align 8
+%thisobj_addr = alloca i8*, align 8
+
+Don't need to rename other arguments
+
+Examine all instructions.
+Remove call @llvm.dbg.declare
+
+
