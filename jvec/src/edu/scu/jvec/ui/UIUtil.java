@@ -3,10 +3,14 @@ package edu.scu.jvec.ui;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.InputStream;
 
-
-import org.antlr.runtime.ANTLRStringStream;
-import org.antlr.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.ANTLRFileStream;
+import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.TokenSource;
+import org.antlr.v4.runtime.TokenStream;
 
 import cn.edu.sjtu.jllvm.ESP.ESPChecking;
 import cn.edu.sjtu.jllvm.ESP.ESPProperty.ESPTransitionSystem;
@@ -18,8 +22,8 @@ import edu.scu.jvec.JNITransform;
 import edu.scu.jvec.LLVMTransform;
 
 public class UIUtil {
-	public static String filePath = "/home/danke/vm/test/java-to-asm/HelloWorld.s"; // default
-	public static String fileFolder = ".";
+	public static String filePath = "./Example/HelloWorld.s"; // default
+	public static String fileFolder = "./Example/";
 	
 	public static boolean DEBUG_ALL_INFO = false;
 	
@@ -36,21 +40,22 @@ public class UIUtil {
 		
 		fileFolder = file.getParent();
 		
-		byte[] buffer = new byte[(int) file.length()];
-		BufferedInputStream f = new BufferedInputStream(new FileInputStream(file));
-	   	f.read(buffer);
-	   	LLVMLexer l = new LLVMLexer(new ANTLRStringStream(new String(buffer)));
-		CommonTokenStream ct = new CommonTokenStream(l);
-		LLVMParser p = new LLVMParser(ct);
+		ANTLRFileStream f = new ANTLRFileStream(filePath);
+	   	LLVMLexer l = new LLVMLexer(f);
+		CommonTokenStream ct = new CommonTokenStream((TokenSource) l);
+		LLVMParser p = new LLVMParser((TokenStream) ct);
+		
 		BasicBlock.CONTACT=false;
-		Module module = p.program();
+		Module module = p.llvm_program().program;
 		if (module == null)
 			return "Error: Nothing to process in source file";
 		
 		// Target is JNI transform
 		LLVMTransform system = new JNITransform(module, null);
-		String result = system.getResult();
-		
-		return result;
+		boolean state = system.process();
+		if (state)
+			return system.getResult();
+		else
+			return system.getLog();
 	}
 }

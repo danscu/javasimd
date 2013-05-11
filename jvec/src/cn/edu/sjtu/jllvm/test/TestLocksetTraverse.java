@@ -8,8 +8,12 @@ import java.util.Collection;
 import java.util.Hashtable;
 import java.util.List;
 
+import org.antlr.runtime.ANTLRFileStream;
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
+import org.antlr.runtime.TokenSource;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.TokenStream;
 import org.apache.commons.io.FileUtils;
 
 import cn.edu.sjtu.jllvm.Lockset.FunctionCache;
@@ -19,15 +23,12 @@ import cn.edu.sjtu.jllvm.VMCore.Parser.LLVMLexer;
 import cn.edu.sjtu.jllvm.VMCore.Parser.LLVMParser;
 
 public class TestLocksetTraverse {
-	public void readFile(String name) throws Exception {
-		File file = new File(name);
-		byte[] buffer = new byte[(int) file.length()];
-		BufferedInputStream f = new BufferedInputStream(new FileInputStream(file));
-	   	f.read(buffer);
-	   	LLVMLexer l = new LLVMLexer(new ANTLRStringStream(new String(buffer)));
-		CommonTokenStream ct = new CommonTokenStream(l);
-		LLVMParser p = new LLVMParser(ct);
-		Module cfg = p.program();
+	public void readFile(String name) throws Exception {		
+		ANTLRFileStream f = new ANTLRFileStream(name);
+	   	LLVMLexer l = new LLVMLexer((CharStream) f);
+		CommonTokenStream ct = new CommonTokenStream((TokenSource) l);
+		LLVMParser p = new LLVMParser((TokenStream) ct);
+		Module cfg = p.llvm_program().program;
 		
 		LocksetTraverse traverse= new LocksetTraverse();
 		traverse.traverse_cfg(cfg);
@@ -39,7 +40,7 @@ public class TestLocksetTraverse {
 		for(String functionName: keys){
 			FunctionCache cache = caches.get(functionName);
 			if(cache.isRelateToLock()){
-				System.out.print(file.getAbsolutePath()+":"+functionName+"\n"+cache.toString());
+				System.out.print(f.getSourceName()+"\n"+cache.toString());
 				count++;
 			}
 		}

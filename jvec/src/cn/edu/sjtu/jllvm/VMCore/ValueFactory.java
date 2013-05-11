@@ -70,7 +70,7 @@ public class ValueFactory {
 	public Constant createConstantValue(int id, String value){
 		if(id<=SimpleConstantValue.voidConst)
 			return new SimpleConstantValue(id, value);
-		else 
+		else
 			return new ComplexConstantValue(id, value);
 	}
 	
