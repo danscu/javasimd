@@ -10,7 +10,6 @@ import java.io.PrintWriter;
 
 import javax.swing.GroupLayout;
 import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -19,15 +18,9 @@ import javax.swing.JMenuItem;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
-
-import javax.swing.WindowConstants;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.SwingUtilities;
+import javax.swing.WindowConstants;
 import javax.swing.filechooser.FileFilter;
-
-import cn.edu.sjtu.jllvm.ESP.ESPProperty.ESPTransitionSystem;
-import edu.scu.jvec.ui.UIUtil;
 
 /**
  * This code was edited or generated using CloudGarden's Jigloo SWT/Swing GUI
@@ -174,28 +167,6 @@ public class FileGUI extends javax.swing.JFrame {
 					{
 						jMenu3 = new JMenu();
 						jMenu2.add(jMenu3);
-						jMenu3.setText("Configure");
-						{
-							jCheckBoxMenuItem1 = new JCheckBoxMenuItem();
-							jMenu3.add(jCheckBoxMenuItem1);
-							jCheckBoxMenuItem1.setText("No Details");
-							jCheckBoxMenuItem1.addChangeListener(new ChangeListener() {
-								@Override
-								public void stateChanged(ChangeEvent evt) {
-									jCheckBoxMenuItem1StateChanged(evt);
-								}
-							});
-						}
-//						{
-//							jCheckBoxMenuItem2 = new JCheckBoxMenuItem();
-//							jMenu3.add(jCheckBoxMenuItem2);
-//							jCheckBoxMenuItem2.setText("Use STP Solver");
-//							jCheckBoxMenuItem2.addChangeListener(new ChangeListener() {
-//								public void stateChanged(ChangeEvent evt) {
-//									jCheckBoxMenuItem2StateChanged(evt);
-//								}
-//							});
-//						}
 					}
 				}
 			}
@@ -279,24 +250,6 @@ public class FileGUI extends javax.swing.JFrame {
 			resultTextArea.setText(result);
 		} catch (Exception e) {
 			e.printStackTrace();
-		}
-	}
-	
-	private void jCheckBoxMenuItem1StateChanged(ChangeEvent evt) {
-		//System.out.println("jCheckBoxMenuItem1.stateChanged, event="+evt);
-		if(ESPTransitionSystem.DEBUG_INFO==ESPTransitionSystem.ALL_INFO){
-			ESPTransitionSystem.DEBUG_INFO = ESPTransitionSystem.NOT_EXECUTIONSTATE;
-		}else{
-			ESPTransitionSystem.DEBUG_INFO = ESPTransitionSystem.ALL_INFO;
-		}
-	}
-	
-	private void jCheckBoxMenuItem2StateChanged(ChangeEvent evt) {
-		//System.out.println("jCheckBoxMenuItem2.stateChanged, event="+evt);
-		if(ESPTransitionSystem.USE_SOLVER){
-			ESPTransitionSystem.USE_SOLVER = false;
-		}else {
-			ESPTransitionSystem.USE_SOLVER = true;
 		}
 	}
 }

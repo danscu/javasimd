@@ -6,12 +6,12 @@ import java.util.Scanner;
 
 import cn.edu.sjtu.jllvm.VMCore.Module;
 
-public class JNITransform extends LLVMTransform {
+public class JNIConverter extends FunctionConverter {
 
 	private static final String PREAMBLE = "dat/jnipreamble.ll";
 	
-	public JNITransform(Module _module, String[] _functionNames) throws Exception {
-		super(_module, _functionNames, getJNIPreamble());
+	public JNIConverter(Module _module, String[] _functionNames) throws Exception {
+		super(_module, _functionNames, getJNIPreamble(), getJNIMapper());
 	}
 
 	static private String JNIPreamble;
@@ -24,5 +24,10 @@ public class JNITransform extends LLVMTransform {
 			throw e;
 		}
 		return content;
+	}
+	
+	static private VariableMapper getJNIMapper() {
+		VariableMapper mapper = new VariableMapper();
+		return mapper;
 	}
 }

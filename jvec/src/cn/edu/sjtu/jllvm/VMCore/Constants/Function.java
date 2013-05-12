@@ -13,19 +13,26 @@ import cn.edu.sjtu.jllvm.VMCore.Types.Type;
 import cn.edu.sjtu.jllvm.VMCore.Types.TypeFactory;
 
 public class Function extends GlobalValue{
-	private Type returnType;
-	private String functionName;
-	private List<BasicBlock> blockList;
-	private Hashtable<String, BasicBlock> blockTable;
+	public Type returnType;
+	public String functionName;
+	public  List<BasicBlock> blockList;
+	public  Hashtable<String, BasicBlock> blockTable;
 	
-	private Hashtable<String, Constant> localVarTable;
-	private List<Argument> arguments;
-	private List<Constant> argExprs;
-	private List<Type> argTypes;
-	boolean isVararg;
+	public  Hashtable<String, Constant> localVarTable;
+	public List<Argument> arguments;
+	public  List<Constant> argExprs;
+	public  List<Type> argTypes;
+	public boolean isVararg;	
 	private Module parent;
 
-	private Cell[] locals;
+	public Cell[] locals;
+	
+	public String linkage;
+	public String visibility;	
+	public String cconv;
+	public List<String> pAttributes;
+	public List<String> fAttributes;
+	public int align;
 	
 	public Function(String linkage, String visibility, String cconv,
 			List<String> pAttributes, 
@@ -37,7 +44,15 @@ public class Function extends GlobalValue{
 			List<BasicBlock> basicBlocks
 			){
 		this.returnType = returnType;
-		this.functionName = name;
+		this.functionName = name;		
+		
+		// store all args
+		this.linkage = linkage;
+		this.visibility = visibility;
+		this.cconv = cconv;
+		this.pAttributes = pAttributes;
+		this.fAttributes = fAttributes;
+		this.align = align;
 		
 		this.blockList = basicBlocks;
 		blockTable = new Hashtable<String, BasicBlock>();
@@ -243,7 +258,6 @@ public class Function extends GlobalValue{
 		this.parent = parent;
 	}
 	
-	@Override
 	public String toString(){
 		String value="function:" +functionName+"\n";
 		for(BasicBlock bb: blockList){

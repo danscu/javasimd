@@ -1,7 +1,7 @@
 package cn.edu.sjtu.jllvm.VMCore.Types;
 
 public class Type {
-	protected final static int
+	public final static int
 	    // PrimitiveTypes
 	    VoidTyID = 0,    	 ///<  0: type with no size
 	    FloatTyID = 1,       ///<  1: 32 bit floating point type
@@ -70,6 +70,7 @@ public class Type {
 	
 	public Type(int typeID, String name){
 		this(typeID);
+		typeString = name;
 	}
 
 	public int getTypeID() {
