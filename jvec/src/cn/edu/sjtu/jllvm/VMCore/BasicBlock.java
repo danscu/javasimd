@@ -52,6 +52,17 @@ public class BasicBlock extends Value{
 		setType(TypeFactory.getLabelType());
 	}
 	
+	private String getLabel(Constant c) {
+		String label;
+		if (c.toString().charAt(0) == '%')
+			label = c.toString().substring(1);
+		else if (c.toString().charAt(0) == '@')
+			label = c.toString().substring(1);
+		else
+			label = c.toString();
+		return label;
+	}
+	
 	public void parse(Hashtable<String, BasicBlock> bbBlocks){
 		if(hasSuccessor())
 			return;
@@ -62,13 +73,13 @@ public class BasicBlock extends Value{
 				//  br i1 <cond>, label <iftrue>, label <iffalse>
 				//  br label <dest>          ; Unconditional branch
 				if(numOperands==1){	//unconditional br
-					BasicBlock s = bbBlocks.get(terminator.getOperand(0).toString());
+					BasicBlock s = bbBlocks.get(getLabel(terminator.getOperand(0)));
 					successors.add(s);
 					s.addPredecessor(this);
 					s.parse(bbBlocks);
 				}else{	//conditional br
-					BasicBlock s = bbBlocks.get(terminator.getOperand(1).toString());
-					BasicBlock s2 = bbBlocks.get(terminator.getOperand(2).toString());
+					BasicBlock s = bbBlocks.get(getLabel(terminator.getOperand(1)));
+					BasicBlock s2 = bbBlocks.get(getLabel(terminator.getOperand(2)));
 					successors.add(s);
 					s.addPredecessor(this);
 					successors.add(s2);
@@ -81,7 +92,7 @@ public class BasicBlock extends Value{
 				//  switch <intty> <value>, label <defaultdest> [ <intty> <val>, label <dest> ... ]
 
 				for(int i=1; i<numOperands; ){
-					BasicBlock s = bbBlocks.get(terminator.getOperand(i).toString());
+					BasicBlock s = bbBlocks.get(getLabel(terminator.getOperand(i)));
 					successors.add(s);
 					s.addPredecessor(this);
 					s.parse(bbBlocks);

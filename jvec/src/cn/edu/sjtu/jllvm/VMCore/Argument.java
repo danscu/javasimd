@@ -42,14 +42,7 @@ public class Argument extends Value {
 		}
 		
 		if(expr!=null){
-			value+= " ";
-			
-			if (expr.constantID == expr.globalVar)
-				value += "@";
-			else if (expr.constantID == expr.localVar)
-				value += "%";										
-			
-			value += expr.toString();
+			value+=" "+expr.toString();
 		}
 		
 		return value;

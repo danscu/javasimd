@@ -17,6 +17,9 @@ public class FunctionWriter extends Function {
 				isVarargFunction, fAttributes, align, basicBlocks);
 	}
 
+	/**
+	 * Generates LLVM code for the function.
+	 */
 	@Override
 	public String toString(){
 		StringBuffer sb = new StringBuffer();
@@ -45,7 +48,6 @@ public class FunctionWriter extends Function {
 			sb.append(bb.getBlockID());
 			sb.append(":\n");
 			
-			// TODO
 			for (Instruction ins : bb.getInstructions()) {
 				sb.append(ins);
 				sb.append("\n");

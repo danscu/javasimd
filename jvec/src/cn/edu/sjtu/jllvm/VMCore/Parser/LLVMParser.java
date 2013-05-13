@@ -9,9 +9,11 @@ import java.util.ArrayList;
 
 import cn.edu.sjtu.jllvm.VMCore.*;
 import cn.edu.sjtu.jllvm.VMCore.Types.*;
-import cn.edu.sjtu.jllvm.VMCore.Instructions.*;
 import cn.edu.sjtu.jllvm.VMCore.Constants.*;
 import cn.edu.sjtu.jllvm.VMCore.Operators.*;
+import cn.edu.sjtu.jllvm.VMCore.Instructions.Instruction;
+
+import edu.scu.jvec.Instructions.*;
 
 import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;

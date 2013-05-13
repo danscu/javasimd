@@ -13,11 +13,13 @@ import java.util.ArrayList;
 
 import cn.edu.sjtu.jllvm.VMCore.*;
 import cn.edu.sjtu.jllvm.VMCore.Types.*;
-import cn.edu.sjtu.jllvm.VMCore.Instructions.*;
 import cn.edu.sjtu.jllvm.VMCore.Constants.*;
 import cn.edu.sjtu.jllvm.VMCore.Operators.*;
+import cn.edu.sjtu.jllvm.VMCore.Instructions.Instruction;
+
+import edu.scu.jvec.Instructions.*;
 }
- 
+
 @lexer::header {
 package cn.edu.sjtu.jllvm.VMCore.Parser;
 }
@@ -1258,9 +1260,11 @@ UNNAMED_ADDR : 'unnamed_addr';
 IDENTIFIER 
     : ('a'..'z' | 'A'..'Z' | '_' | '.') ('a'..'z' | 'A'..'Z' | '_' | '0'..'9' | '.' | '-')*;
 
-WS  : [ \t\r\n]+ -> skip
+WS  : [ \t\r\n]+
+      -> channel(HIDDEN)
     ;
 
 LINE_COMMENT
-    : ';' (~('\n' | '\r'))* '\r'? '\n' -> skip
+    : ';' (~('\n' | '\r'))* '\r'? '\n'
+      -> channel(HIDDEN)
     ;

@@ -77,10 +77,12 @@ public class ValueFactory {
 	//Expression
 	public Constant createVariable(String variable){
 		if(variable.startsWith("@")){
-			return new GlobalValue(variable.substring(1));
+			// return new GlobalValue(variable.substring(1));
+			return new GlobalValue(variable);
 		}else if(variable.startsWith("%")){
-			return new LocalVariable(variable.substring(1));
-		}else if(variable.startsWith("undef")){
+			// return new LocalVariable(variable.substring(1));
+			return new LocalVariable(variable);
+		}else  if(variable.startsWith("undef")){
 			return new UndefValue(variable);
 		}
 		return null;

@@ -18,7 +18,7 @@ import cn.edu.sjtu.jllvm.VMCore.Types.Type;
  *	and the parent BasicBlock the Instruction is embedded into. 
  *	To represent a specific type of instruction, one of many subclasses of Instruction are used.
  */
-public class Instruction extends User implements ILocation{
+public class Instruction extends User implements ILocation {
 	protected int opcode;
 	protected Constant dest;
 	protected List<Type> types;
@@ -206,5 +206,10 @@ public class Instruction extends User implements ILocation{
 	}
 	public List<Type> getTypes() {
 		return types;
-	}	
+	}
+
+	@Override
+	public String toString() {
+		return super.toString() + "; ****** NEED CODEGEN ******";
+	}
 }
