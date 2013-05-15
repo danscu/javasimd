@@ -27,7 +27,7 @@ public class BinaryInst extends
         StringBuffer sb = new StringBuffer();
         
         sb.append(dest); sb.append(" = ");
-        sb.append(InstrName.op(opcode)); sb.append(' ');
+        sb.append(getOpStr()); sb.append(' ');
         
         if (getNuw() != null) {
             sb.append(getNuw());

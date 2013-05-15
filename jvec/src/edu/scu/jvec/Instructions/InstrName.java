@@ -15,9 +15,21 @@ public class InstrName {
 		// TODO Fill the table
 		table[InstType.allocaInst] = "alloca";
 		table[InstType.storeInst] = "store";
+		table[InstType.callInst] = "call";
+		table[InstType.loadInst] = "load";
+		table[InstType.icmpInst] = "icmp";
+		table[InstType.fcmpInst] = "fcmp";
+		table[InstType.retInst] = "ret";
+		table[InstType.brInst] = "br";
+		table[InstType.phiInst] = "phi";
 	}
 	
-	public static String op(int opcode) {		
-		return table[opcode];
+	public static String op(int opcode) {
+	    String res = table[opcode];
+	    if (res == null) {
+	        System.err.println("Error: opcode is not yet implemented " + opcode);
+	        return "****FIXME****";
+	    }
+	    return res;
 	}
 }
