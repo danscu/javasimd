@@ -1,3 +1,4 @@
+; ModuleID = 'HelloWorld.java'
 target datalayout = "e-p:64:64:64-S128-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:64:64-f16:16:16-f32:32:32-f64:64:64-f128:128:128-v64:64:64-v128:128:128-a0:0:64-s0:64:64-f80:128:128-n8:16:32:64"
 target triple = "x86_64--linux-gnu"
 
@@ -133,7 +134,7 @@ entry:
   br i1 %5, label %"3", label %"5", !dbg !152
 
 "5":                                              ; preds = %"4"
-  store i32 %4, i32* %"<retval>", align 1, !dbg !154
+  store i32 %3, i32* %"<retval>", align 1, !dbg !154
   br label %return, !dbg !154
 
 return:                                           ; preds = %"5"
