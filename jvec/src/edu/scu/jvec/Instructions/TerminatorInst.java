@@ -11,7 +11,7 @@ import cn.edu.sjtu.jllvm.VMCore.Types.Type;
  * Terminator instructions
  * 
  * ret (void | t0 op0) 
- * br (op0 | t0 op0, op1, op2)
+ * br label (op0 | t0 op0, op1, op2)
  *
  */
 public class TerminatorInst extends
@@ -39,15 +39,18 @@ public class TerminatorInst extends
             sb.append(operands.get(0));
         } else if (opcode == InstType.brInst) {
             if (types.size() == 0) {
-                sb.append(operands.get(0));    
+                sb.append("label ");
+                sb.append(operands.get(0));
             } else {
                 assert(operands.size() == 3);
                 sb.append(types.get(0));
                 sb.append(' ');
                 sb.append(operands.get(0));
                 sb.append(", ");
-                sb.append(operands.get(1));
+                sb.append("label ");
+                sb.append(operands.get(1));                
                 sb.append(", ");
+                sb.append("label ");
                 sb.append(operands.get(2));
             }
         } else
