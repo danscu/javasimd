@@ -156,7 +156,8 @@ public class Java2Jni extends ClassVisitor {
      * @param functionNames
      * @return the transformed Java class
      */
-	public static byte[] transformClass(String clsName, String jniLibName, String[] functionNames)
+	public static byte[] transformClass(String clsName, String jniLibName, String[] functionNames,
+			boolean printResult)
 	{
 		/*
 		 *  Creates a class writer, and automatically computes stack & locals instead of using specified value.
@@ -164,8 +165,15 @@ public class Java2Jni extends ClassVisitor {
 		 *  class constructor.
 		 */
 		ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
-		PrintWriter cp = new PrintWriter(System.out);
-		TraceClassVisitor cv = new TraceClassVisitor(cw, cp);
+		ClassVisitor cv;
+		
+		if (printResult) {
+			PrintWriter cp = new PrintWriter(System.out);
+			cv = new TraceClassVisitor(cw, cp);
+		} else {
+			cv = cw;
+		}
+		
 		Java2Jni cmod = new Java2Jni(cv, jniLibName, functionNames);
 		ClassReader cr;
 		
@@ -207,7 +215,7 @@ public class Java2Jni extends ClassVisitor {
 		}
 		
 		byte[] modifiedClass = transformClass(args[0], args[2],
-				Arrays.copyOfRange(args, 3, args.length));
+				Arrays.copyOfRange(args, 3, args.length), true);
 		if (modifiedClass == null)
 			System.exit(-2);
 		

@@ -68,9 +68,12 @@ public class JavaOptimizer {
 		for (String s : convertedFuncs)
 			System.out.print(s + " ");
 		System.out.println();
+
+		System.out.println("Modifying the Java class " + className);
+		System.out.println("Dynaically links to library " + libraryName);
 		
 		byte[] modifiedClass = Java2Jni.transformClass(className, libraryName,
-				convertedFuncs);
+				convertedFuncs, false);
 
 		if (modifiedClass != null) {
 			Java2Jni.writeClass(outputName, modifiedClass);

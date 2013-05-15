@@ -17,5 +17,5 @@ gcc -o $FILE.o -c -fPIC $FILE.ll.s
 echo 5. Generate dynamic library
 gcc -shared -o lib$FILE.so -Wl,-soname,$FILE $FILE.o
 
-echo 7. Run JAVA code
+echo 6. Run JAVA code
 java -Djava.library.path=. $FILE

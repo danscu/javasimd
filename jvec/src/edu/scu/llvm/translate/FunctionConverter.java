@@ -14,6 +14,7 @@ import cn.edu.sjtu.jllvm.VMCore.Instructions.Instruction;
 import cn.edu.sjtu.jllvm.VMCore.Operators.InstType;
 import cn.edu.sjtu.jllvm.VMCore.Types.Type;
 import cn.edu.sjtu.jllvm.VMCore.Types.TypeFactory;
+import edu.scu.jjni.aotc.Debug;
 
 public class FunctionConverter {
 	/**
@@ -188,9 +189,11 @@ public class FunctionConverter {
 					boolean ignoreIns = false;
 					for (String ignoredFunc : ignoreCalls)
 						if (funcName.equals(ignoredFunc)) {
-							System.out.println("In function "
-									+ fn.getFunctionName() + ", ignored call "
-									+ funcName);
+							if (Debug.level >= 1) {
+								System.out.println("In function "
+										+ fn.getFunctionName() + ", ignored call "
+										+ funcName);
+							}
 							ignoreIns = true;
 							break;
 						}
@@ -273,10 +276,7 @@ public class FunctionConverter {
 			
 			List<String> nameParts = new ArrayList<String>();
 			for (Function fn : module.getFunctions()) {
-				String fullname = mapper.convertFuncName(fn.getFunctionName(), nameParts);
-				System.out.println(fn.getFunctionName());
-				System.out.println(nameParts.toString());
-				
+				String fullname = mapper.convertFuncName(fn.getFunctionName(), nameParts);				
 				for (String specifiedName : functionNames)
 					// Match full JNI name or first-level method name
 					if (specifiedName.equals(fullname) || (nameParts.size() > 1 &&
