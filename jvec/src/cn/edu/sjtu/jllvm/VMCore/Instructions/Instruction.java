@@ -2,7 +2,6 @@ package cn.edu.sjtu.jllvm.VMCore.Instructions;
 
 import java.util.List;
 
-import cn.edu.sjtu.jllvm.ESP.ILocation;
 import cn.edu.sjtu.jllvm.VMCore.BasicBlock;
 import cn.edu.sjtu.jllvm.VMCore.User;
 import cn.edu.sjtu.jllvm.VMCore.Constants.Constant;
@@ -18,7 +17,7 @@ import cn.edu.sjtu.jllvm.VMCore.Types.Type;
  *	and the parent BasicBlock the Instruction is embedded into. 
  *	To represent a specific type of instruction, one of many subclasses of Instruction are used.
  */
-public class Instruction extends User implements ILocation {
+public class Instruction extends User {
 	protected int opcode;
 	protected Constant dest;
 	protected List<Type> types;
