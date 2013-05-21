@@ -82,7 +82,7 @@ public class LLVM2Jni extends FunctionConverter {
 	private static VariableMapper getJNIMapper() {
 		VariableMapper mapper = new VariableMapper();
 		
-		addStructTransform(mapper);
+		// addStructTransform(mapper);
 		
 		return mapper;
 	}
