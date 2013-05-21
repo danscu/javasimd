@@ -23,7 +23,7 @@ public class VariableMapper {
 		DESTRUCT, // clear up jniType
 		
 		// For struct
-		GET_ELEM,
+		GET_STRUCT_ELEM,
 		
 		// For arrays
 		GET_ARRAY_BASE,

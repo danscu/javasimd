@@ -7,9 +7,13 @@ import java.util.List;
 import java.util.Scanner;
 
 import cn.edu.sjtu.jllvm.VMCore.Module;
+import cn.edu.sjtu.jllvm.VMCore.Constants.Constant;
+import cn.edu.sjtu.jllvm.VMCore.Constants.LocalVariable;
 import cn.edu.sjtu.jllvm.VMCore.Instructions.Instruction;
+import cn.edu.sjtu.jllvm.VMCore.Operators.InstType;
 import cn.edu.sjtu.jllvm.VMCore.Types.Type;
 import cn.edu.sjtu.jllvm.VMCore.Types.TypeFactory;
+import edu.scu.llvm.asm.InstFactory;
 import edu.scu.llvm.translate.FunctionConverter;
 import edu.scu.llvm.translate.VariableMapper;
 import edu.scu.llvm.translate.VariableMapper.Operator;
@@ -35,7 +39,26 @@ public class LLVM2Jni extends FunctionConverter {
 		return content;
 	}
 	
-	protected static void addStructTransform(VariableMapper mapper) {		
+	protected static void addStructTransform(VariableMapper mapper) {
+		InstFactory fac = new InstFactory();
+		
+		// Initialize the mapper with rich type support
+		Type javaStructBase = new Type(Type.StructTyID, "%\"struct.*\""); // TODO handle the wild card
+		Type javaStructPtr = TypeFactory.getPointerType(javaStructBase);		
+		
+		VariableMapper.OpRecognizer elemOpRec = new VariableMapper.OpRecognizer(VariableMapper.Opcode.GET_STRUCT_ELEM,
+				javaStructPtr, null);
+		
+		int vnum = 0;
+		
+		Constant var0 = new LocalVariable(VariableMapper.OpRecognizer.getTmpName(vnum++));
+		Instruction ins = fac.createOperationInst(var0, 0, null, null, "bitcast");
+		
+		elemOpRec.addInstruction(ins);
+	}
+
+	/*
+	protected static void addArrayTransform(VariableMapper mapper) {		
 		// Initialize the mapper with rich type support
 		Type javaArrayIntBase = new Type(Type.StructTyID, "%\"struct.int[]\"");
 		Type javaArrayInt = TypeFactory.getPointerType(javaArrayIntBase);
@@ -54,6 +77,7 @@ public class LLVM2Jni extends FunctionConverter {
 				}
 				);
 	}
+	*/	
 	
 	private static VariableMapper getJNIMapper() {
 		VariableMapper mapper = new VariableMapper();
