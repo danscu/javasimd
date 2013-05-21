@@ -22,7 +22,7 @@ public class JavaOptimizer {
 	 */
 	public static void main(String[] args) {
 		if (args.length <= 5) {
-			System.out.println("Usage: java JavaOptimizer <input_class> <output_path> <jni_lib_name> <llvm_in> <llvm_out> <<methods>...");
+			System.out.println("Usage: java JavaOptimizer <input_class> <output_class> <jni_lib_name> <llvm_in> <llvm_out> <<methods>...");
 			System.exit(-1);
 		}
 		

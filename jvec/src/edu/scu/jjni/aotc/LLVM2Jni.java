@@ -3,17 +3,16 @@ package edu.scu.jjni.aotc;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
-import cn.edu.sjtu.jllvm.VMCore.BasicBlock;
 import cn.edu.sjtu.jllvm.VMCore.Module;
-import cn.edu.sjtu.jllvm.VMCore.Constants.Function;
 import cn.edu.sjtu.jllvm.VMCore.Instructions.Instruction;
 import cn.edu.sjtu.jllvm.VMCore.Types.Type;
+import cn.edu.sjtu.jllvm.VMCore.Types.TypeFactory;
 import edu.scu.llvm.translate.FunctionConverter;
 import edu.scu.llvm.translate.VariableMapper;
+import edu.scu.llvm.translate.VariableMapper.Operator;
 
 public class LLVM2Jni extends FunctionConverter {
 
@@ -36,8 +35,31 @@ public class LLVM2Jni extends FunctionConverter {
 		return content;
 	}
 	
+	protected static void addStructTransform(VariableMapper mapper) {		
+		// Initialize the mapper with rich type support
+		Type javaArrayIntBase = new Type(Type.StructTyID, "%\"struct.int[]\"");
+		Type javaArrayInt = TypeFactory.getPointerType(javaArrayIntBase);
+		
+		Type jniArrayIntBase = TypeFactory.getInt8Type();
+		Type jniArrayInt = TypeFactory.getPointerType(jniArrayIntBase);			
+		
+		VariableMapper.TypeMap tmArrayInt = mapper.addGlobalTypeMap(javaArrayInt, jniArrayInt);		
+		
+		tmArrayInt.addOp(
+				new VariableMapper.Operator(VariableMapper.Opcode.READ) {
+					@Override
+					public List<Instruction> exec(Object... args) {
+						return null;
+					}
+				}
+				);
+	}
+	
 	private static VariableMapper getJNIMapper() {
 		VariableMapper mapper = new VariableMapper();
+		
+		addStructTransform(mapper);
+		
 		return mapper;
 	}
 	

@@ -16,16 +16,14 @@ JNIEXPORT jint JNICALL Java_HelloWorld_testSum
 	return sum;
 }
 
-JNIEXPORT void JNICALL Java_HelloWorld_printArray
+JNIEXPORT jint JNICALL Java_HelloWorld_testArraySum_
        (JNIEnv* env, jclass obj, jintArray arr) {
   int i;
+  jint sum = 0;
   jsize len = (*env)->GetArrayLength(env, arr);
-  printf("int[] : [");
-  if (len > 0) {
-    jboolean iscopy;
-    jint* tab = (*env)->GetIntArrayElements(env, arr, &iscopy);
-    for (i = 0; i < len ; i++) printf(" %d", (int)tab[i]);
-    if (iscopy == JNI_TRUE) (*env)->ReleaseIntArrayElements(env, arr, tab, JNI_ABORT);
-  }
-  printf(" ]\n"); fflush(stdout);
+  jboolean iscopy;
+  jint* tab = (*env)->GetIntArrayElements(env, arr, &iscopy);
+  for (i = 0; i < len ; i++) sum += tab[i];
+  if (iscopy == JNI_TRUE) (*env)->ReleaseIntArrayElements(env, arr, tab, JNI_ABORT);
+  return sum;
 }

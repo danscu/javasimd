@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.antlr.v4.runtime.misc.Pair;
 import cn.edu.sjtu.jllvm.VMCore.Constants.Constant;
+import cn.edu.sjtu.jllvm.VMCore.Instructions.Instruction;
 import cn.edu.sjtu.jllvm.VMCore.Types.Type;
 import cn.edu.sjtu.jllvm.VMCore.Types.TypeFactory;
 
@@ -15,9 +16,132 @@ public class VariableMapper {
 	 * Template for variable mapping. Used for
 	 * Java type to JNI type mapping.
 	 */
-	class TypeMap {
+	
+	public enum Opcode {
+		READ,	// javaType -> jniType
+		WRITE,	// jniType -> javaType
+		DESTRUCT, // clear up jniType
+		
+		// For struct
+		GET_ELEM,
+		
+		// For arrays
+		GET_ARRAY_BASE,
+		GET_ARRAY_LENGTH,
+	};
+	
+	/**
+	 * Define a pattern of instructions to implement an operation on a type.
+	 * In the inserted instruction the dest variable names follow the pattern
+	 * %R.i where i = 0, 1, 2, ..., N. It must be strictly sequential in the
+	 * pattern, but it will match any variable name in the function.
+	 * 
+	 * The output value %R.N has the type typeOut
+	 * 
+	 * @author danke
+	 */
+	public static class OpRecognizer {
+		protected Opcode op;
+		protected Type typeIn;
+		protected Type typeOut;
+		List<Instruction> seq;
+		Map<String, String> match;
+		
+		public OpRecognizer(Opcode op, Type typeIn, Type typeOut) {
+			this.op = op;
+			this.typeIn = typeIn;
+			this.typeOut = typeOut;
+			seq = new ArrayList<Instruction>();
+			match = new HashMap<String, String>();
+		}
+		
+		/**
+		 * Use this function to generate temporary variable names for
+		 * the destination of the instructions.
+		 * 
+		 * @param n The sequential 
+		 * @return the destination variable name
+		 */
+		public static String getTmpName(int n) {
+			return String.format("%%R.%d", n);
+		}
+		
+		/**
+		 * Use this function to generate variable names to match specific
+		 * operands in the instructions
+		 * @param m
+		 * @return the matching variable name
+		 */
+		public static String getMatchName(String id) {
+			return String.format("%%RM.%s", id);
+		}
+		
+		public void addInstruction(Instruction inst) {
+			seq.add(inst);
+		}
+		
+		public String getMatchContent(String id) {
+			return match.get(id);
+		}		
+	}
+	
+	/**
+	 * Define a sequence of instructions for one operation.
+	 * @author danke
+	 */
+	public static class OpGenerator {
+		protected Opcode op;
+		protected Type typeIn;
+		protected Type typeOut;
+		List<Instruction> seq;
+		List<Instruction> destructor;
+		
+		public OpGenerator(Opcode op, Type typeIn, Type typeOut) {
+			this.op = op;
+			this.typeIn = typeIn;
+			this.typeOut = typeOut;
+			seq = new ArrayList<Instruction>();
+		}
+		
+		/**
+		 * Use this function to generate temporary variable names in the 
+		 * pattern. In the actual generated code, the variable names will be
+		 * automatically renamed.
+		 * 
+		 * @param n The sequential 
+		 * @return the variable name
+		 */
+		public static String getTmpName(int n) {
+			return String.format("%%R.%d", n);
+		}
+		
+		public void addInstruction(Instruction inst) {
+			seq.add(inst);
+		}
+		
+		/**
+		 * Use this to define operations to release resources
+		 * @param inst
+		 */
+		public void addDestuctorInst(Instruction inst) {			
+			if (destructor == null)
+				destructor = new ArrayList<Instruction>();
+			destructor.add(inst);
+		}
+	}
+	
+	public static abstract class Operator {
+		private Opcode op;		
+		public Operator(Opcode op) { this.op = op; }
+		public Opcode getOpcode() { return op; }
+		public abstract List<Instruction> exec(Object... args);
+	}
+	
+	public static class TypeMap {
 		public Type javaType;
 		public Type jniType;
+		
+		private Map<Opcode, Operator> ops;
 		
 		/**
 		 * Constructor.
@@ -28,6 +152,19 @@ public class VariableMapper {
 		{
 			javaType = _srcType;
 			jniType = _dstType;
+			
+			ops = new HashMap<Opcode, Operator>();
+		}
+		
+		public void addOp(Operator op) {
+			ops.put(op.getOpcode(), op);
+		}
+		
+		public List<Instruction> translateOp(Opcode opcode, Object... args) {
+			Operator op = ops.get(opcode);
+			if (op == null)
+				return null;
+			return op.exec(args);
 		}
 	}
 	
@@ -60,22 +197,26 @@ public class VariableMapper {
 	 * Add a global template.
 	 * @param javaType
 	 * @param jniType
+	 * @return the map for adding more ops
 	 */
-	public void addGlobalTypeMap(Type javaType, Type jniType)
+	public TypeMap addGlobalTypeMap(Type javaType, Type jniType)
 	{
 		TypeMap tmap = new TypeMap(javaType, jniType);
 		globalTypeMap.add(tmap);
+		return tmap;
 	}
 	
 	/**
 	 * Add a local template.
 	 * @param javaType
 	 * @param jniType
+	 * @return the map for adding more ops
 	 */
-	public void addLocalTypeMap(Type javaType, Type jniType)
+	public TypeMap addLocalTypeMap(Type javaType, Type jniType)
 	{
 		TypeMap tmap = new TypeMap(javaType, jniType);
 		localTypeMap.add(tmap);
+		return tmap;
 	}
 	
 	/**
