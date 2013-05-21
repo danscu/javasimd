@@ -2,6 +2,8 @@ DRAGONEGG=../../dragonegg.so
 GCJ=gcj
 FILE=$1
 
+FUNC="testSum testArraySum"
+
 if [ "$1" == "" ]; then
   echo Usage: test.sh ClassName
 else
@@ -17,7 +19,7 @@ echo 2. Compile java byte code to LLVM
 opt -S -vectorize-loops -bb-vectorize -loop-vectorize -vectorize -force-vector-width=2 -o $FILE.opt.s $FILE.s
 
 echo 3. Compiling LLVM-IR to LLVM bitcode \(.bc\)
-./optimize.sh $FILE $FILE.opt.s testSum
+./optimize.sh $FILE $FILE.opt.s ${FUNC}
 
 echo 4. Compile modified LLVM IR
 llvm-as vdir/$FILE.opt.s -o $FILE.ll.bc

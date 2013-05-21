@@ -25,11 +25,27 @@ public class HelloWorld {
 	return sum;
     }
 
+    private int testArraySum(int[] ia) {
+      int sum = 0;
+      for (int i = 0; i < ia.length; i++)
+         sum += ia[i];
+      return sum;
+    }
+
     public static void main(String[] args) {
         System.out.println("Hello, World");
 	HelloWorld inst = new HelloWorld();
+
+	// Test 1	
 	int res = inst.testSum(100);
 	System.out.println("Sum = " + res); 
+
+	// Test 2
+	int[] ia = new int[200];
+	for (int i = 0; i < 200; i++)
+		ia[i] = i;
+	res = inst.testArraySum(ia);
+	System.out.println("Array sum = " + res); 
     }
 }
 

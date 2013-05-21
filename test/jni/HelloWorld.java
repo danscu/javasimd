@@ -24,12 +24,18 @@ public class HelloWorld {
     }
 
     private native int testSum(int n);
+    private native void printArray(int a[]);
 
     public static void main(String[] args) {
         System.out.println("Hello, World");
 	HelloWorld inst = new HelloWorld();
 	int res = inst.testSum(100);
 	System.out.println("Sum = " + res); 
+
+	int a[] = new int[20];
+	for (int i = 0; i < 20; i++)
+		a[i] = i * 10;
+	inst.printArray(a);
     }
 }
 
