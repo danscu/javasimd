@@ -1,5 +1,5 @@
 VDIR=vdir
-JVECBIN=~/work/javasimd/jvec/bin
+JVECBIN=../../jvec/bin
 JLIB=../../jvec/lib
 JFLAGS="-cp .:$JLIB/asm-all-4.1.jar:$JLIB/antlr-4.0-complete.jar:$JVECBIN"
 

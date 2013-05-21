@@ -32,4 +32,4 @@ $(BINDIR)/%.class: $(SRCDIR)/%.java
 	$(JC) $(JFLAGS) $<
 
 clean:
-	$(RM) *.class
+	$(RM) $(CLASSES)
