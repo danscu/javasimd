@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.antlr.v4.runtime.misc.Pair;
+
+import cn.edu.sjtu.jllvm.VMCore.BasicBlock;
 import cn.edu.sjtu.jllvm.VMCore.Constants.Constant;
 import cn.edu.sjtu.jllvm.VMCore.Instructions.Instruction;
 import cn.edu.sjtu.jllvm.VMCore.Types.Type;
@@ -30,105 +32,7 @@ public class VariableMapper {
 		GET_ARRAY_LENGTH,
 	};
 	
-	/**
-	 * Define a pattern of instructions to implement an operation on a type.
-	 * In the inserted instruction the dest variable names follow the pattern
-	 * %R.i where i = 0, 1, 2, ..., N. It must be strictly sequential in the
-	 * pattern, but it will match any variable name in the function.
-	 * 
-	 * The output value %R.N has the type typeOut
-	 * 
-	 * @author danke
-	 */
-	public static class OpRecognizer {
-		protected Opcode op;
-		protected Type typeIn;
-		protected Type typeOut;
-		List<Instruction> seq;
-		Map<String, String> match;
-		
-		public OpRecognizer(Opcode op, Type typeIn, Type typeOut) {
-			this.op = op;
-			this.typeIn = typeIn;
-			this.typeOut = typeOut;
-			seq = new ArrayList<Instruction>();
-			match = new HashMap<String, String>();
-		}
-		
-		/**
-		 * Use this function to generate temporary variable names for
-		 * the destination of the instructions.
-		 * 
-		 * @param n The sequential 
-		 * @return the destination variable name
-		 */
-		public static String getTmpName(int n) {
-			return String.format("%%R.%d", n);
-		}
-		
-		/**
-		 * Use this function to generate variable names to match specific
-		 * operands in the instructions
-		 * @param m
-		 * @return the matching variable name
-		 */
-		public static String getMatchName(String id) {
-			return String.format("%%RM.%s", id);
-		}
-		
-		public void addInstruction(Instruction inst) {
-			seq.add(inst);
-		}
-		
-		public String getMatchContent(String id) {
-			return match.get(id);
-		}		
-	}
-	
-	/**
-	 * Define a sequence of instructions for one operation.
-	 * @author danke
-	 */
-	public static class OpGenerator {
-		protected Opcode op;
-		protected Type typeIn;
-		protected Type typeOut;
-		List<Instruction> seq;
-		List<Instruction> destructor;
-		
-		public OpGenerator(Opcode op, Type typeIn, Type typeOut) {
-			this.op = op;
-			this.typeIn = typeIn;
-			this.typeOut = typeOut;
-			seq = new ArrayList<Instruction>();
-		}
-		
-		/**
-		 * Use this function to generate temporary variable names in the 
-		 * pattern. In the actual generated code, the variable names will be
-		 * automatically renamed.
-		 * 
-		 * @param n The sequential 
-		 * @return the variable name
-		 */
-		public static String getTmpName(int n) {
-			return String.format("%%R.%d", n);
-		}
-		
-		public void addInstruction(Instruction inst) {
-			seq.add(inst);
-		}
-		
-		/**
-		 * Use this to define operations to release resources
-		 * @param inst
-		 */
-		public void addDestuctorInst(Instruction inst) {			
-			if (destructor == null)
-				destructor = new ArrayList<Instruction>();
-			destructor.add(inst);
-		}
-	}
+
 	
 	public static abstract class Operator {
 		private Opcode op;		
@@ -184,6 +88,16 @@ public class VariableMapper {
 	protected Map<String, Constant> varMap;
 	
 	/**
+	 * Recognizer
+	 */
+	protected List<InstMatcher.OpRecognizer> recognizers;
+	
+	/**
+	 * Matcher
+	 */
+	protected InstMatcher matcher;	
+	
+	/**
 	 * Constructor.
 	 */
 	public VariableMapper()
@@ -191,6 +105,8 @@ public class VariableMapper {
 		globalTypeMap = new ArrayList<TypeMap>();
 		localTypeMap = new ArrayList<TypeMap>();
 		varMap = new HashMap<String, Constant>();
+		recognizers = new ArrayList<InstMatcher.OpRecognizer>();
+		matcher = new InstMatcher();
 	}
 	
  	/**
@@ -217,6 +133,10 @@ public class VariableMapper {
 		TypeMap tmap = new TypeMap(javaType, jniType);
 		localTypeMap.add(tmap);
 		return tmap;
+	}
+	
+	public void addRecognizer(InstMatcher.OpRecognizer opr) {
+		recognizers.add(opr);
 	}
 	
 	/**
@@ -338,5 +258,15 @@ public class VariableMapper {
 			return parseGCJName(functionName.substring(3), nameParts);		
 		
 		return functionName;
+	}
+
+	/**
+	 * Recognizes operation patterns and convert to new instructions
+	 * @param bs BasicBlock to search
+	 */
+	public void mapOperations(BasicBlock bs) {
+		for (InstMatcher.OpRecognizer opr : recognizers) {
+			List<Instruction> insList = bs.getInstructions();			
+		}
 	}
 }

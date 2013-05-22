@@ -26,7 +26,7 @@ public class HelloWorld {
 	return i;
     }
 
-    private static int testArraySum(int[] array) {
+    private int testArraySum(int[] array) {
 	int sum = 0;
 	for (int i = 0; i < array.length; i++)
 	    sum += i;
@@ -42,7 +42,7 @@ public class HelloWorld {
 	int a[] = new int[20];
 	for (int i = 0; i < 20; i++)
 	    a[i] = i * 10;
-	res = testArraySum(a);
+	res = inst.testArraySum(a);
 	System.out.println("Sum = " + res);
     }
 }

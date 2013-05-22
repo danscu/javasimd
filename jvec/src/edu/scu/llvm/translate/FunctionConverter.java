@@ -122,7 +122,8 @@ public class FunctionConverter {
 		List<String> fAttributes = fn.fAttributes;
 		int align = fn.align;
 		List<BasicBlock> basicBlocks = new LinkedList<BasicBlock>();
-
+		List<BasicBlock> basicBlocksPass2 = new LinkedList<BasicBlock>();
+		
 		mapper.clear();
 
 		// Function name conversion
@@ -176,7 +177,7 @@ public class FunctionConverter {
 			}
 		}
 
-		// Convert code
+		// Convert code - Pass 1 (simple type mapping)
 		for (BasicBlock bs : fn.getBasicBlocks()) {
 			List<Instruction> list = new LinkedList<Instruction>();
 
@@ -236,8 +237,16 @@ public class FunctionConverter {
 			}
 
 			basicBlocks.add(new BasicBlock(bs.getBlockID(), list));
+		}		
+		
+		// Pass 2 - Semantic recognizer
+		for (BasicBlock bs : basicBlocks) {
+			mapper.mapOperations(bs);
+			
+			basicBlocksPass2.add(bs);
 		}
-
+		
+		
 		// Function attributes
 		if (ignoreFAttr != null) {
 			fAttributes = new ArrayList<String>();
