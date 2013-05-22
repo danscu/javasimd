@@ -14,14 +14,17 @@ module asm "\09.ident\09\22GCC: (Ubuntu/Linaro 4.6.3-1ubuntu2) 4.6.3 LLVM: 3.2sv
 %7 = type { i16, i16, [12 x i8] }
 %8 = type { i16, i16, [14 x i8] }
 %9 = type { i16, i16, [8 x i8] }
-%10 = type { i16, i16, [8 x i8] }
-%11 = type { i16, i16, [4 x i8] }
-%12 = type { i16, i16, [8 x i8] }
-%13 = type { i16, i16, [6 x i8] }
+%10 = type { i16, i16, [14 x i8] }
+%11 = type { i16, i16, [8 x i8] }
+%12 = type { i16, i16, [4 x i8] }
+%13 = type { i16, i16, [8 x i8] }
 %14 = type { i16, i16, [6 x i8] }
-%15 = type { i16, i16, [24 x i8] }
-%16 = type { %1*, i8* }
-%17 = type { i32, i32, [6 x i8], [2 x i8] }
+%15 = type { i16, i16, [14 x i8] }
+%16 = type { i16, i16, [6 x i8] }
+%17 = type { i16, i16, [6 x i8] }
+%18 = type { i16, i16, [24 x i8] }
+%19 = type { %1*, i8* }
+%20 = type { i32, i32, [6 x i8], [2 x i8] }
 %struct.java.lang.Class = type { %struct.java.lang.Object, %struct.java.lang.Class*, %1*, i16, %struct.java.lang.Class*, %2, %3*, i16, i16, %4*, i32, i16, i16, %0*, [2 x i32]*, [2 x %6]*, [2 x i8*]*, [2 x %6]*, [2 x i8*]*, [2 x %6]*, i8*, {}*, i8*, i16, i8, i8*, i16, i8*, i8*, i8*, i8*, i8*, i8*, i8*, i8*, i8*, i8* }
 %struct.java.lang.Object = type { %0* }
 %struct.java.io.PrintStream = type { %struct.java.io.FilterOutputStream, %struct.gnu.gcj.convert.UnicodeToBytes*, %"struct.char[]"*, %"struct.byte[]"*, i8, i8, [6 x i8] }
@@ -32,32 +35,38 @@ module asm "\09.ident\09\22GCC: (Ubuntu/Linaro 4.6.3-1ubuntu2) 4.6.3 LLVM: 3.2sv
 %"struct.byte[]" = type { %struct.java.lang.Object, i32, [4 x i8] }
 %struct.java.lang.String = type opaque
 %struct.HelloWorld = type { %struct.java.lang.Object }
+%"struct.int[]" = type { %struct.java.lang.Object, i32, [4 x i8] }
+%"struct.java.lang.Object[]" = type { %struct.java.lang.Object, i32, [4 x i8] }
 %"struct.java.lang.String[]" = type { %struct.java.lang.Object, i32, [4 x i8] }
 %struct.java.lang.StringBuilder = type { %struct.java.lang.AbstractStringBuffer }
 %struct.java.lang.AbstractStringBuffer = type { %struct.java.lang.Object, i32, %"struct.char[]"* }
 
 @"_ZN10HelloWorld7class$$E" = hidden unnamed_addr constant %struct.java.lang.Class* @"_ZN10HelloWorld6class$E"
-@"_ZN10HelloWorld6class$E" = global %struct.java.lang.Class { %struct.java.lang.Object { %0* bitcast (i8** getelementptr inbounds (%0* @_ZTVN4java4lang5ClassE, i64 0, i32 1, i64 1) to %0*) }, %struct.java.lang.Class* inttoptr (i64 406000 to %struct.java.lang.Class*), %1* bitcast (%7* @_Utf9 to %1*), i16 33, %struct.java.lang.Class* @"_ZN4java4lang6Object6class$E", %2 { i32 3, i8* getelementptr inbounds ([3 x i8]* @_CT_HelloWorld, i64 0, i64 0), i8* bitcast ([3 x i8*]* @_CD_HelloWorld to i8*) }, %3* getelementptr inbounds ([3 x %3]* @_MT_HelloWorld, i64 0, i64 0), i16 3, i16 6, %4* null, i32 8, i16 0, i16 0, %0* bitcast (i8** getelementptr inbounds ([10 x i8*]* @_ZTVN10HelloWorldE, i64 0, i64 2) to %0*), [2 x i32]* null, [2 x %6]* null, [2 x i8*]* null, [2 x %6]* null, [2 x i8*]* null, [2 x %6]* null, i8* bitcast ([3 x %16]* @_catch_classes_HelloWorld to i8*), {}* null, i8* null, i16 0, i8 1, i8* null, i16 0, i8* null, i8* null, i8* null, i8* null, i8* null, i8* null, i8* null, i8* null, i8* null, i8* null }, align 32
+@"_ZN10HelloWorld6class$E" = global %struct.java.lang.Class { %struct.java.lang.Object { %0* bitcast (i8** getelementptr inbounds (%0* @_ZTVN4java4lang5ClassE, i64 0, i32 1, i64 1) to %0*) }, %struct.java.lang.Class* inttoptr (i64 406000 to %struct.java.lang.Class*), %1* bitcast (%7* @_Utf12 to %1*), i16 33, %struct.java.lang.Class* @"_ZN4java4lang6Object6class$E", %2 { i32 4, i8* getelementptr inbounds ([4 x i8]* @_CT_HelloWorld, i64 0, i64 0), i8* bitcast ([4 x i8*]* @_CD_HelloWorld to i8*) }, %3* getelementptr inbounds ([4 x %3]* @_MT_HelloWorld, i64 0, i64 0), i16 4, i16 6, %4* null, i32 8, i16 0, i16 0, %0* bitcast (i8** getelementptr inbounds ([10 x i8*]* @_ZTVN10HelloWorldE, i64 0, i64 2) to %0*), [2 x i32]* null, [2 x %6]* null, [2 x i8*]* null, [2 x %6]* null, [2 x i8*]* null, [2 x %6]* null, i8* bitcast ([3 x %19]* @_catch_classes_HelloWorld to i8*), {}* null, i8* null, i16 0, i8 1, i8* null, i16 0, i8* null, i8* null, i8* null, i8* null, i8* null, i8* null, i8* null, i8* null, i8* null, i8* null }, align 32
 @_ZTVN4java4lang5ClassE = external global %0
-@_Utf9 = internal unnamed_addr constant %7 { i16 -24064, i16 10, [12 x i8] c"HelloWorld\00\00" }
+@_Utf12 = internal unnamed_addr constant %7 { i16 -24064, i16 10, [12 x i8] c"HelloWorld\00\00" }
 @"_ZN4java4lang6Object6class$E" = external global %struct.java.lang.Class
-@_CT_HelloWorld = internal unnamed_addr global [3 x i8] c"\00\08\08"
-@_CD_HelloWorld = internal unnamed_addr global [3 x i8*] [i8* null, i8* bitcast (%8* @_Utf8 to i8*), i8* bitcast (%9* @_Utf7 to i8*)], align 16
-@_Utf8 = internal unnamed_addr constant %8 { i16 31116, i16 12, [14 x i8] c"Hello, World\00\00" }
-@_Utf7 = internal unnamed_addr constant %9 { i16 1432, i16 6, [8 x i8] c"Sum = \00\00" }
-@_MT_HelloWorld = internal unnamed_addr global [3 x %3] [%3 { %1* bitcast (%10* @_Utf1 to %1*), %1* bitcast (%11* @_Utf2 to %1*), i16 16385, i16 -1, i8* bitcast (void (%struct.HelloWorld*)* @_ZN10HelloWorldC1Ev to i8*), i8* null }, %3 { %1* bitcast (%12* @_Utf3 to %1*), %1* bitcast (%13* @_Utf4 to %1*), i16 16386, i16 -1, i8* bitcast (i32 (%struct.HelloWorld*, i32)* @_ZN10HelloWorld7testSumEJii to i8*), i8* null }, %3 { %1* bitcast (%14* @_Utf5 to %1*), %1* bitcast (%15* @_Utf6 to %1*), i16 16393, i16 -1, i8* bitcast (void (%"struct.java.lang.String[]"*)* @_ZN10HelloWorld4mainEJvP6JArrayIPN4java4lang6StringEE to i8*), i8* null }], align 32
-@_Utf1 = internal unnamed_addr constant %10 { i16 626, i16 6, [8 x i8] c"<init>\00\00" }
-@_Utf2 = internal unnamed_addr constant %11 { i16 -25739, i16 3, [4 x i8] c"()V\00" }
-@_Utf3 = internal unnamed_addr constant %12 { i16 -8103, i16 7, [8 x i8] c"testSum\00" }
-@_Utf4 = internal unnamed_addr constant %13 { i16 17953, i16 4, [6 x i8] c"(I)I\00\00" }
-@_Utf5 = internal unnamed_addr constant %14 { i16 1465, i16 4, [6 x i8] c"main\00\00" }
-@_Utf6 = internal unnamed_addr constant %15 { i16 -6102, i16 22, [24 x i8] c"([Ljava.lang.String;)V\00\00" }
+@_CT_HelloWorld = internal unnamed_addr global [4 x i8] c"\00\08\08\08"
+@_CD_HelloWorld = internal unnamed_addr global [4 x i8*] [i8* null, i8* bitcast (%8* @_Utf11 to i8*), i8* bitcast (%9* @_Utf10 to i8*), i8* bitcast (%10* @_Utf9 to i8*)], align 32
+@_Utf11 = internal unnamed_addr constant %8 { i16 31116, i16 12, [14 x i8] c"Hello, World\00\00" }
+@_Utf10 = internal unnamed_addr constant %9 { i16 1432, i16 6, [8 x i8] c"Sum = \00\00" }
+@_Utf9 = internal unnamed_addr constant %10 { i16 -17089, i16 12, [14 x i8] c"Array sum = \00\00" }
+@_MT_HelloWorld = internal unnamed_addr global [4 x %3] [%3 { %1* bitcast (%11* @_Utf1 to %1*), %1* bitcast (%12* @_Utf2 to %1*), i16 16385, i16 -1, i8* bitcast (void (%struct.HelloWorld*)* @_ZN10HelloWorldC1Ev to i8*), i8* null }, %3 { %1* bitcast (%13* @_Utf3 to %1*), %1* bitcast (%14* @_Utf4 to %1*), i16 16386, i16 -1, i8* bitcast (i32 (%struct.HelloWorld*, i32)* @_ZN10HelloWorld7testSumEJii to i8*), i8* null }, %3 { %1* bitcast (%15* @_Utf5 to %1*), %1* bitcast (%16* @_Utf6 to %1*), i16 16386, i16 -1, i8* bitcast (i32 (%struct.HelloWorld*, %"struct.int[]"*)* @_ZN10HelloWorld12testArraySumEJiP6JArrayIiE to i8*), i8* null }, %3 { %1* bitcast (%17* @_Utf7 to %1*), %1* bitcast (%18* @_Utf8 to %1*), i16 16393, i16 -1, i8* bitcast (void (%"struct.java.lang.String[]"*)* @_ZN10HelloWorld4mainEJvP6JArrayIPN4java4lang6StringEE to i8*), i8* null }], align 32
+@_Utf1 = internal unnamed_addr constant %11 { i16 626, i16 6, [8 x i8] c"<init>\00\00" }
+@_Utf2 = internal unnamed_addr constant %12 { i16 -25739, i16 3, [4 x i8] c"()V\00" }
+@_Utf3 = internal unnamed_addr constant %13 { i16 -8103, i16 7, [8 x i8] c"testSum\00" }
+@_Utf4 = internal unnamed_addr constant %14 { i16 17953, i16 4, [6 x i8] c"(I)I\00\00" }
+@_Utf5 = internal unnamed_addr constant %15 { i16 -28, i16 12, [14 x i8] c"testArraySum\00\00" }
+@_Utf6 = internal unnamed_addr constant %16 { i16 8502, i16 5, [6 x i8] c"([I)I\00" }
+@_Utf7 = internal unnamed_addr constant %17 { i16 1465, i16 4, [6 x i8] c"main\00\00" }
+@_Utf8 = internal unnamed_addr constant %18 { i16 -6102, i16 22, [24 x i8] c"([Ljava.lang.String;)V\00\00" }
 @_ZTVN10HelloWorldE = hidden unnamed_addr global [10 x i8*] [i8* null, i8* null, i8* bitcast (%struct.java.lang.Class* @"_ZN10HelloWorld6class$E" to i8*), i8* inttoptr (i64 8 to i8*), i8* bitcast (void (%struct.java.lang.Object*)* @_ZN4java4lang6Object8finalizeEJvv to i8*), i8* bitcast (i32 (%struct.java.lang.Object*)* @_ZN4java4lang6Object8hashCodeEJiv to i8*), i8* bitcast (i8 (%struct.java.lang.Object*, %struct.java.lang.Object*)* @_ZN4java4lang6Object6equalsEJbPS1_ to i8*), i8* bitcast (%struct.java.lang.String* (%struct.java.lang.Object*)* @_ZN4java4lang6Object8toStringEJPNS0_6StringEv to i8*), i8* bitcast (%struct.java.lang.Object* (%struct.java.lang.Object*)* @_ZN4java4lang6Object5cloneEJPS1_v to i8*), i8* bitcast (void (%struct.java.lang.Object*)* @_ZN4java4lang6Object22throwNoSuchMethodErrorEJvv to i8*)], align 32
-@_catch_classes_HelloWorld = internal unnamed_addr global [3 x %16] zeroinitializer, align 32
-@"_ZGr8_$_dummy" = hidden constant %17 { i32 6, i32 0, [6 x i8] c".dummy", [2 x i8] undef }, align 16
+@_catch_classes_HelloWorld = internal unnamed_addr global [3 x %19] zeroinitializer, align 32
+@"_ZGr8_$_dummy" = hidden constant %20 { i32 6, i32 0, [6 x i8] c".dummy", [2 x i8] undef }, align 16
 @"_ZN4java4lang6System6class$E" = external global %struct.java.lang.Class
 @_ZN4java4lang6System3outE = external global %struct.java.io.PrintStream*
 @"_ZN4java4lang13StringBuilder6class$E" = external global %struct.java.lang.Class
+@_Jv_intClass = external global %struct.java.lang.Class
 @llvm.global_ctors = appending global [1 x { i32, void ()* }] [{ i32, void ()* } { i32 65535, void ()* @_Jv_global_static_constructor }]
 
 declare void @_ZN4java4lang6Object8finalizeEJvv(%struct.java.lang.Object*)
@@ -76,24 +85,24 @@ define void @_ZN10HelloWorldC1Ev(%struct.HelloWorld* %unnamed_arg) uwtable align
 entry:
   %unnamed_arg_addr = alloca %struct.HelloWorld*, align 8
   %"#ref#0#0" = alloca i8*
-  %D.236 = alloca %struct.java.lang.Object*
+  %D.241 = alloca %struct.java.lang.Object*
   %"#ref#1#2" = alloca i8*
   %"alloca point" = bitcast i32 0 to i32
-  call void @llvm.dbg.declare(metadata !{%struct.HelloWorld** %unnamed_arg_addr}, metadata !147), !dbg !148
+  call void @llvm.dbg.declare(metadata !{%struct.HelloWorld** %unnamed_arg_addr}, metadata !156), !dbg !157
   store %struct.HelloWorld* %unnamed_arg, %struct.HelloWorld** %unnamed_arg_addr, align 1
   %0 = load %struct.HelloWorld** %unnamed_arg_addr, align 8
   %"ssa point" = bitcast i32 0 to i32
-  br label %"2", !dbg !148
+  br label %"2", !dbg !157
 
 "2":                                              ; preds = %entry
-  %1 = bitcast %struct.HelloWorld* %0 to %struct.java.lang.Object*, !dbg !148
-  %2 = bitcast %struct.java.lang.Object* %1 to i8*, !dbg !148
-  %3 = bitcast i8* %2 to %struct.java.lang.Object*, !dbg !148
-  call void @_ZN4java4lang6ObjectC1Ev(%struct.java.lang.Object* %3), !dbg !148
-  br label %return, !dbg !148
+  %1 = bitcast %struct.HelloWorld* %0 to %struct.java.lang.Object*, !dbg !157
+  %2 = bitcast %struct.java.lang.Object* %1 to i8*, !dbg !157
+  %3 = bitcast i8* %2 to %struct.java.lang.Object*, !dbg !157
+  call void @_ZN4java4lang6ObjectC1Ev(%struct.java.lang.Object* %3), !dbg !157
+  br label %return, !dbg !157
 
 return:                                           ; preds = %"2"
-  ret void, !dbg !148
+  ret void, !dbg !157
 }
 
 define i32 @_ZN10HelloWorld7testSumEJii(%struct.HelloWorld* %unnamed_arg, i32 %unnamed_arg2) uwtable align 2 {
@@ -103,166 +112,356 @@ entry:
   %"#slot#4#0" = alloca i32
   %"#slot#3#1" = alloca i32
   %"#slot#2#2" = alloca i32
-  %D.250 = alloca i32
-  %D.251 = alloca i32
-  %"#slot#5#3" = alloca i32
-  %D.253 = alloca i32
-  %D.254 = alloca i32
   %D.255 = alloca i32
+  %D.256 = alloca i32
+  %"#slot#5#3" = alloca i32
+  %D.258 = alloca i32
+  %D.259 = alloca i32
+  %D.260 = alloca i32
   %"<retval>" = alloca i32
   %"alloca point" = bitcast i32 0 to i32
-  call void @llvm.dbg.declare(metadata !{%struct.HelloWorld** %unnamed_arg_addr}, metadata !149), !dbg !150
+  call void @llvm.dbg.declare(metadata !{%struct.HelloWorld** %unnamed_arg_addr}, metadata !158), !dbg !159
   store %struct.HelloWorld* %unnamed_arg, %struct.HelloWorld** %unnamed_arg_addr, align 1
-  call void @llvm.dbg.declare(metadata !{i32* %unnamed_arg_addr1}, metadata !151), !dbg !150
+  call void @llvm.dbg.declare(metadata !{i32* %unnamed_arg_addr1}, metadata !160), !dbg !159
   store i32 %unnamed_arg2, i32* %unnamed_arg_addr1, align 1
   %0 = load i32* %unnamed_arg_addr1, align 4
   %"ssa point" = bitcast i32 0 to i32
-  br label %"2", !dbg !150
+  br label %"2", !dbg !159
 
 "2":                                              ; preds = %entry
-  br label %"4", !dbg !152
+  br label %"4", !dbg !161
 
 "3":                                              ; preds = %"4"
-  %1 = add i32 %3, %4, !dbg !153
-  %2 = add i32 %4, 1, !dbg !152
-  br label %"4", !dbg !152
+  %1 = add i32 %3, %4, !dbg !162
+  %2 = add i32 %4, 1, !dbg !161
+  br label %"4", !dbg !161
 
 "4":                                              ; preds = %"3", %"2"
-  %3 = phi i32 [ %1, %"3" ], [ 0, %"2" ], !dbg !152
-  %4 = phi i32 [ %2, %"3" ], [ 0, %"2" ], !dbg !152
-  %5 = icmp slt i32 %4, %0, !dbg !152
-  br i1 %5, label %"3", label %"5", !dbg !152
+  %3 = phi i32 [ %1, %"3" ], [ 0, %"2" ], !dbg !161
+  %4 = phi i32 [ %2, %"3" ], [ 0, %"2" ], !dbg !161
+  %5 = icmp slt i32 %4, %0, !dbg !161
+  br i1 %5, label %"3", label %"5", !dbg !161
 
 "5":                                              ; preds = %"4"
-  store i32 %3, i32* %"<retval>", align 1, !dbg !154
-  br label %return, !dbg !154
+  store i32 %3, i32* %"<retval>", align 1, !dbg !163
+  br label %return, !dbg !163
 
 return:                                           ; preds = %"5"
-  %6 = load i32* %"<retval>", align 4, !dbg !154
-  ret i32 %6, !dbg !154
+  %6 = load i32* %"<retval>", align 4, !dbg !163
+  ret i32 %6, !dbg !163
+}
+
+define i32 @_ZN10HelloWorld12testArraySumEJiP6JArrayIiE(%struct.HelloWorld* %unnamed_arg, %"struct.int[]"* %unnamed_arg2) uwtable align 2 {
+entry:
+  %unnamed_arg_addr = alloca %struct.HelloWorld*, align 8
+  %unnamed_arg_addr1 = alloca %"struct.int[]"*, align 8
+  %"#slot#4#0" = alloca i32
+  %"#slot#2#1" = alloca i32
+  %"#slot#3#2" = alloca i32
+  %D.272 = alloca i32
+  %"#ref#1#3" = alloca i8*
+  %D.274 = alloca %struct.java.lang.Object*
+  %"#ref#5#5" = alloca i8*
+  %D.277 = alloca i32
+  %"#slot#6#6" = alloca i32
+  %"#slot#5#8" = alloca i32
+  %D.281 = alloca i32
+  %D.282 = alloca %struct.java.lang.Object*
+  %D.287 = alloca i32
+  %"<retval>" = alloca i32
+  %"alloca point" = bitcast i32 0 to i32
+  call void @llvm.dbg.declare(metadata !{%struct.HelloWorld** %unnamed_arg_addr}, metadata !164), !dbg !165
+  store %struct.HelloWorld* %unnamed_arg, %struct.HelloWorld** %unnamed_arg_addr, align 1
+  call void @llvm.dbg.declare(metadata !{%"struct.int[]"** %unnamed_arg_addr1}, metadata !166), !dbg !165
+  store %"struct.int[]"* %unnamed_arg2, %"struct.int[]"** %unnamed_arg_addr1, align 1
+  %0 = load %"struct.int[]"** %unnamed_arg_addr1, align 8
+  %"ssa point" = bitcast i32 0 to i32
+  br label %"2", !dbg !165
+
+"2":                                              ; preds = %entry
+  br label %"6", !dbg !167
+
+"3":                                              ; preds = %"6"
+  %1 = bitcast %"struct.int[]"* %0 to %struct.java.lang.Object*, !dbg !168
+  %2 = bitcast %struct.java.lang.Object* %1 to i8*, !dbg !168
+  %3 = bitcast i8* %2 to %"struct.int[]"*, !dbg !168
+  %4 = getelementptr inbounds %"struct.int[]"* %3, i32 0, i32 2, !dbg !168
+  %5 = bitcast [4 x i8]* %4 to [0 x i32]*, !dbg !168
+  %6 = bitcast i8* %2 to %"struct.int[]"*, !dbg !168
+  %7 = getelementptr inbounds %"struct.int[]"* %6, i32 0, i32 1, !dbg !168
+  %8 = load i32* %7, align 8, !dbg !168
+  %9 = icmp uge i32 %19, %8, !dbg !168
+  br i1 %9, label %"4", label %"5", !dbg !168
+
+"4":                                              ; preds = %"3"
+  call void (i32, ...)* @_Jv_ThrowBadArrayIndex(i32 %19) noreturn, !dbg !168
+  unreachable, !dbg !168
+
+"5":                                              ; preds = %"3"
+  %10 = sext i32 %19 to i64, !dbg !168
+  %11 = mul i64 %10, 4, !dbg !168
+  %12 = bitcast [0 x i32]* %5 to i8*, !dbg !168
+  %13 = getelementptr i8* %12, i64 %11, !dbg !168
+  %14 = bitcast i8* %13 to i32*, !dbg !168
+  %15 = load i32* %14, align 4, !dbg !168
+  %16 = add i32 %18, %15, !dbg !168
+  %17 = add i32 %19, 1, !dbg !167
+  br label %"6", !dbg !167
+
+"6":                                              ; preds = %"5", %"2"
+  %18 = phi i32 [ %16, %"5" ], [ 0, %"2" ], !dbg !167
+  %19 = phi i32 [ %17, %"5" ], [ 0, %"2" ], !dbg !167
+  %20 = bitcast %"struct.int[]"* %0 to %struct.java.lang.Object*, !dbg !167
+  %21 = bitcast %struct.java.lang.Object* %20 to i8*, !dbg !167
+  %22 = bitcast i8* %21 to %"struct.java.lang.Object[]"*, !dbg !167
+  %23 = getelementptr inbounds %"struct.java.lang.Object[]"* %22, i32 0, i32 1, !dbg !167
+  %24 = load i32* %23, align 8, !dbg !167
+  %25 = icmp slt i32 %19, %24, !dbg !167
+  br i1 %25, label %"3", label %"7", !dbg !167
+
+"7":                                              ; preds = %"6"
+  store i32 %18, i32* %"<retval>", align 1, !dbg !169
+  br label %return, !dbg !169
+
+return:                                           ; preds = %"7"
+  %26 = load i32* %"<retval>", align 4, !dbg !169
+  ret i32 %26, !dbg !169
 }
 
 define void @_ZN10HelloWorld4mainEJvP6JArrayIPN4java4lang6StringEE(%"struct.java.lang.String[]"* %unnamed_arg) unnamed_addr uwtable {
 entry:
   %unnamed_arg_addr = alloca %"struct.java.lang.String[]"*, align 8
-  %D.570 = alloca %struct.java.io.PrintStream*
-  %"#ref#3#1" = alloca i8*
-  %"#ref#4#3" = alloca i8*
+  %D.602 = alloca %struct.java.io.PrintStream*
+  %"#ref#5#1" = alloca i8*
+  %"#ref#6#3" = alloca i8*
   %"#ref#1#7" = alloca i8*
-  %D.682 = alloca %struct.HelloWorld*
-  %"#slot#4#8" = alloca i32
-  %"#slot#3#9" = alloca i32
+  %D.714 = alloca %struct.HelloWorld*
+  %"#slot#6#8" = alloca i32
+  %"#slot#5#9" = alloca i32
   %"#slot#2#10" = alloca i32
-  %D.686 = alloca %struct.java.io.PrintStream*
-  %"#ref#5#13" = alloca i8*
-  %"#ref#6#15" = alloca i8*
-  %D.839 = alloca i32
-  %"#slot#5#16" = alloca i32
+  %D.718 = alloca %struct.java.io.PrintStream*
+  %"#ref#7#13" = alloca i8*
+  %"#ref#8#15" = alloca i8*
+  %D.871 = alloca i32
+  %"#slot#7#16" = alloca i32
+  %"#ref#3#19" = alloca i8*
+  %"#slot#4#20" = alloca i32
+  %D.879 = alloca %struct.java.lang.Object*
+  %D.881 = alloca i32
+  %D.882 = alloca i32
+  %D.883 = alloca i32*
+  %D.884 = alloca i32
+  %D.886 = alloca %struct.java.lang.Object*
+  %D.887 = alloca %struct.java.lang.Object*
+  %D.890 = alloca %struct.java.io.PrintStream*
+  %D.891 = alloca i32
   %"alloca point" = bitcast i32 0 to i32
-  call void @llvm.dbg.declare(metadata !{%"struct.java.lang.String[]"** %unnamed_arg_addr}, metadata !155), !dbg !156
+  call void @llvm.dbg.declare(metadata !{%"struct.java.lang.String[]"** %unnamed_arg_addr}, metadata !170), !dbg !171
   store %"struct.java.lang.String[]"* %unnamed_arg, %"struct.java.lang.String[]"** %unnamed_arg_addr, align 1
   %"ssa point" = bitcast i32 0 to i32
-  br label %"2", !dbg !156
+  br label %"2", !dbg !171
 
 "2":                                              ; preds = %entry
-  %0 = load %struct.java.lang.Class** @"_ZN10HelloWorld7class$$E", align 8, !dbg !156
-  %1 = bitcast %struct.java.lang.Class* %0 to i8*, !dbg !156
-  call void (i8*, ...)* @_Jv_InitClass(i8* %1), !dbg !156
-  br i1 true, label %"3", label %"4", !dbg !156
+  %0 = load %struct.java.lang.Class** @"_ZN10HelloWorld7class$$E", align 8, !dbg !171
+  %1 = bitcast %struct.java.lang.Class* %0 to i8*, !dbg !171
+  call void (i8*, ...)* @_Jv_InitClass(i8* %1), !dbg !171
+  br i1 true, label %"3", label %"4", !dbg !171
 
 "3":                                              ; preds = %"2"
-  call void (i8*, ...)* @_Jv_InitClass(i8* bitcast (%struct.java.lang.Class* @"_ZN4java4lang6System6class$E" to i8*)), !dbg !156
-  br label %"4", !dbg !156
+  call void (i8*, ...)* @_Jv_InitClass(i8* bitcast (%struct.java.lang.Class* @"_ZN4java4lang6System6class$E" to i8*)), !dbg !171
+  br label %"4", !dbg !171
 
 "4":                                              ; preds = %"3", %"2"
-  %2 = load %struct.java.io.PrintStream** @_ZN4java4lang6System3outE, align 8, !dbg !156
-  %3 = bitcast %struct.java.io.PrintStream* %2 to i8*, !dbg !156
-  %4 = load i8** getelementptr inbounds ([3 x i8*]* @_CD_HelloWorld, i64 0, i64 1), align 8, !dbg !156
-  %5 = bitcast i8* %3 to %struct.java.lang.Object*, !dbg !156
-  %6 = getelementptr inbounds %struct.java.lang.Object* %5, i32 0, i32 0, !dbg !156
-  %7 = load %0** %6, align 8, !dbg !156
-  %8 = bitcast %0* %7 to i8*, !dbg !156
-  %9 = getelementptr i8* %8, i64 248, !dbg !156
-  %10 = bitcast i8* %9 to i8**, !dbg !156
-  %11 = load i8** %10, align 8, !dbg !156
-  %12 = bitcast i8* %11 to void (%struct.java.io.PrintStream*, %struct.java.lang.String*)*, !dbg !156
-  %13 = bitcast i8* %3 to %struct.java.io.PrintStream*, !dbg !156
-  %14 = bitcast i8* %4 to %struct.java.lang.String*, !dbg !156
-  call void %12(%struct.java.io.PrintStream* %13, %struct.java.lang.String* %14), !dbg !156
-  %15 = call noalias i8* (%struct.java.lang.Class*, ...)* @_Jv_AllocObjectNoFinalizer(%struct.java.lang.Class* @"_ZN10HelloWorld6class$E"), !dbg !157
-  %16 = bitcast i8* %15 to %struct.HelloWorld*, !dbg !157
-  call void @_ZN10HelloWorldC1Ev(%struct.HelloWorld* %16) uwtable, !dbg !157
-  %17 = bitcast i8* %15 to %struct.HelloWorld*, !dbg !158
-  %18 = bitcast %struct.HelloWorld* %17 to i8*, !dbg !158
-  %19 = icmp eq i8* %18, null, !dbg !158
-  br i1 %19, label %"5", label %"6", !dbg !158
+  %2 = load %struct.java.io.PrintStream** @_ZN4java4lang6System3outE, align 8, !dbg !171
+  %3 = bitcast %struct.java.io.PrintStream* %2 to i8*, !dbg !171
+  %4 = load i8** getelementptr inbounds ([4 x i8*]* @_CD_HelloWorld, i64 0, i64 1), align 8, !dbg !171
+  %5 = bitcast i8* %3 to %struct.java.lang.Object*, !dbg !171
+  %6 = getelementptr inbounds %struct.java.lang.Object* %5, i32 0, i32 0, !dbg !171
+  %7 = load %0** %6, align 8, !dbg !171
+  %8 = bitcast %0* %7 to i8*, !dbg !171
+  %9 = getelementptr i8* %8, i64 248, !dbg !171
+  %10 = bitcast i8* %9 to i8**, !dbg !171
+  %11 = load i8** %10, align 8, !dbg !171
+  %12 = bitcast i8* %11 to void (%struct.java.io.PrintStream*, %struct.java.lang.String*)*, !dbg !171
+  %13 = bitcast i8* %3 to %struct.java.io.PrintStream*, !dbg !171
+  %14 = bitcast i8* %4 to %struct.java.lang.String*, !dbg !171
+  call void %12(%struct.java.io.PrintStream* %13, %struct.java.lang.String* %14), !dbg !171
+  %15 = call noalias i8* (%struct.java.lang.Class*, ...)* @_Jv_AllocObjectNoFinalizer(%struct.java.lang.Class* @"_ZN10HelloWorld6class$E"), !dbg !172
+  %16 = bitcast i8* %15 to %struct.HelloWorld*, !dbg !172
+  call void @_ZN10HelloWorldC1Ev(%struct.HelloWorld* %16) uwtable, !dbg !172
+  %17 = bitcast i8* %15 to %struct.HelloWorld*, !dbg !173
+  %18 = bitcast %struct.HelloWorld* %17 to i8*, !dbg !173
+  %19 = icmp eq i8* %18, null, !dbg !173
+  br i1 %19, label %"5", label %"6", !dbg !173
 
 "5":                                              ; preds = %"4"
-  call void (...)* @_Jv_ThrowNullPointerException() noreturn, !dbg !158
-  unreachable, !dbg !158
+  call void (...)* @_Jv_ThrowNullPointerException() noreturn, !dbg !173
+  unreachable, !dbg !173
 
 "6":                                              ; preds = %"4"
-  %20 = bitcast i8* %18 to %struct.HelloWorld*, !dbg !158
-  %21 = bitcast i8* %18 to %struct.HelloWorld*, !dbg !158
-  %22 = call i32 @_ZN10HelloWorld7testSumEJii(%struct.HelloWorld* %21, i32 100) uwtable, !dbg !158
-  br i1 false, label %"7", label %"8", !dbg !159
+  %20 = bitcast i8* %18 to %struct.HelloWorld*, !dbg !173
+  %21 = bitcast i8* %18 to %struct.HelloWorld*, !dbg !173
+  %22 = call i32 @_ZN10HelloWorld7testSumEJii(%struct.HelloWorld* %21, i32 100) uwtable, !dbg !173
+  br i1 false, label %"7", label %"8", !dbg !174
 
 "7":                                              ; preds = %"6"
-  call void (i8*, ...)* @_Jv_InitClass(i8* bitcast (%struct.java.lang.Class* @"_ZN4java4lang6System6class$E" to i8*)), !dbg !159
-  br label %"8", !dbg !159
+  call void (i8*, ...)* @_Jv_InitClass(i8* bitcast (%struct.java.lang.Class* @"_ZN4java4lang6System6class$E" to i8*)), !dbg !174
+  br label %"8", !dbg !174
 
 "8":                                              ; preds = %"7", %"6"
-  %23 = load %struct.java.io.PrintStream** @_ZN4java4lang6System3outE, align 8, !dbg !159
-  %24 = bitcast %struct.java.io.PrintStream* %23 to i8*, !dbg !159
-  %25 = call noalias i8* (%struct.java.lang.Class*, ...)* @_Jv_AllocObjectNoFinalizer(%struct.java.lang.Class* @"_ZN4java4lang13StringBuilder6class$E"), !dbg !159
-  %26 = load i8** getelementptr inbounds ([3 x i8*]* @_CD_HelloWorld, i64 0, i64 2), align 8, !dbg !159
-  %27 = bitcast i8* %25 to %struct.java.lang.StringBuilder*, !dbg !159
-  %28 = bitcast i8* %26 to %struct.java.lang.String*, !dbg !159
-  call void @_ZN4java4lang13StringBuilderC1EPNS0_6StringE(%struct.java.lang.StringBuilder* %27, %struct.java.lang.String* %28), !dbg !159
-  %29 = icmp eq i8* %25, null, !dbg !159
-  br i1 %29, label %"9", label %"10", !dbg !159
+  %23 = load %struct.java.io.PrintStream** @_ZN4java4lang6System3outE, align 8, !dbg !174
+  %24 = bitcast %struct.java.io.PrintStream* %23 to i8*, !dbg !174
+  %25 = call noalias i8* (%struct.java.lang.Class*, ...)* @_Jv_AllocObjectNoFinalizer(%struct.java.lang.Class* @"_ZN4java4lang13StringBuilder6class$E"), !dbg !174
+  %26 = load i8** getelementptr inbounds ([4 x i8*]* @_CD_HelloWorld, i64 0, i64 2), align 8, !dbg !174
+  %27 = bitcast i8* %25 to %struct.java.lang.StringBuilder*, !dbg !174
+  %28 = bitcast i8* %26 to %struct.java.lang.String*, !dbg !174
+  call void @_ZN4java4lang13StringBuilderC1EPNS0_6StringE(%struct.java.lang.StringBuilder* %27, %struct.java.lang.String* %28), !dbg !174
+  %29 = icmp eq i8* %25, null, !dbg !174
+  br i1 %29, label %"9", label %"10", !dbg !174
 
 "9":                                              ; preds = %"8"
-  call void (...)* @_Jv_ThrowNullPointerException() noreturn, !dbg !159
-  unreachable, !dbg !159
+  call void (...)* @_Jv_ThrowNullPointerException() noreturn, !dbg !174
+  unreachable, !dbg !174
 
 "10":                                             ; preds = %"8"
-  %30 = bitcast i8* %25 to %struct.java.lang.StringBuilder*, !dbg !159
-  %31 = bitcast i8* %25 to %struct.java.lang.StringBuilder*, !dbg !159
-  %32 = call %struct.java.lang.StringBuilder* @_ZN4java4lang13StringBuilder6appendEJPS1_i(%struct.java.lang.StringBuilder* %31, i32 %22), !dbg !159
-  %33 = bitcast %struct.java.lang.StringBuilder* %32 to i8*, !dbg !159
-  %34 = icmp eq i8* %33, null, !dbg !159
-  br i1 %34, label %"11", label %"12", !dbg !159
+  %30 = bitcast i8* %25 to %struct.java.lang.StringBuilder*, !dbg !174
+  %31 = bitcast i8* %25 to %struct.java.lang.StringBuilder*, !dbg !174
+  %32 = call %struct.java.lang.StringBuilder* @_ZN4java4lang13StringBuilder6appendEJPS1_i(%struct.java.lang.StringBuilder* %31, i32 %22), !dbg !174
+  %33 = bitcast %struct.java.lang.StringBuilder* %32 to i8*, !dbg !174
+  %34 = icmp eq i8* %33, null, !dbg !174
+  br i1 %34, label %"11", label %"12", !dbg !174
 
 "11":                                             ; preds = %"10"
-  call void (...)* @_Jv_ThrowNullPointerException() noreturn, !dbg !159
-  unreachable, !dbg !159
+  call void (...)* @_Jv_ThrowNullPointerException() noreturn, !dbg !174
+  unreachable, !dbg !174
 
 "12":                                             ; preds = %"10"
-  %35 = bitcast i8* %33 to %struct.java.lang.StringBuilder*, !dbg !159
-  %36 = bitcast i8* %33 to %struct.java.lang.StringBuilder*, !dbg !159
-  %37 = call %struct.java.lang.String* @_ZN4java4lang13StringBuilder8toStringEJPNS0_6StringEv(%struct.java.lang.StringBuilder* %36), !dbg !159
-  %38 = bitcast %struct.java.lang.String* %37 to i8*, !dbg !159
-  %39 = bitcast i8* %24 to %struct.java.lang.Object*, !dbg !159
-  %40 = getelementptr inbounds %struct.java.lang.Object* %39, i32 0, i32 0, !dbg !159
-  %41 = load %0** %40, align 8, !dbg !159
-  %42 = bitcast %0* %41 to i8*, !dbg !159
-  %43 = getelementptr i8* %42, i64 248, !dbg !159
-  %44 = bitcast i8* %43 to i8**, !dbg !159
-  %45 = load i8** %44, align 8, !dbg !159
-  %46 = bitcast i8* %45 to void (%struct.java.io.PrintStream*, %struct.java.lang.String*)*, !dbg !159
-  %47 = bitcast i8* %24 to %struct.java.io.PrintStream*, !dbg !159
-  %48 = bitcast i8* %38 to %struct.java.lang.String*, !dbg !159
-  call void %46(%struct.java.io.PrintStream* %47, %struct.java.lang.String* %48), !dbg !159
-  br label %return, !dbg !160
+  %35 = bitcast i8* %33 to %struct.java.lang.StringBuilder*, !dbg !174
+  %36 = bitcast i8* %33 to %struct.java.lang.StringBuilder*, !dbg !174
+  %37 = call %struct.java.lang.String* @_ZN4java4lang13StringBuilder8toStringEJPNS0_6StringEv(%struct.java.lang.StringBuilder* %36), !dbg !174
+  %38 = bitcast %struct.java.lang.String* %37 to i8*, !dbg !174
+  %39 = bitcast i8* %24 to %struct.java.lang.Object*, !dbg !174
+  %40 = getelementptr inbounds %struct.java.lang.Object* %39, i32 0, i32 0, !dbg !174
+  %41 = load %0** %40, align 8, !dbg !174
+  %42 = bitcast %0* %41 to i8*, !dbg !174
+  %43 = getelementptr i8* %42, i64 248, !dbg !174
+  %44 = bitcast i8* %43 to i8**, !dbg !174
+  %45 = load i8** %44, align 8, !dbg !174
+  %46 = bitcast i8* %45 to void (%struct.java.io.PrintStream*, %struct.java.lang.String*)*, !dbg !174
+  %47 = bitcast i8* %24 to %struct.java.io.PrintStream*, !dbg !174
+  %48 = bitcast i8* %38 to %struct.java.lang.String*, !dbg !174
+  call void %46(%struct.java.io.PrintStream* %47, %struct.java.lang.String* %48), !dbg !174
+  %49 = call noalias i8* (i8*, i32, ...)* @_Jv_NewPrimArray(i8* bitcast (%struct.java.lang.Class* @_Jv_intClass to i8*), i32 200), !dbg !175
+  br label %"16", !dbg !176
 
-return:                                           ; preds = %"12"
-  ret void, !dbg !160
+"13":                                             ; preds = %"16"
+  %50 = bitcast i8* %49 to %struct.java.lang.Object*, !dbg !177
+  %51 = bitcast %struct.java.lang.Object* %50 to i8*, !dbg !177
+  %52 = bitcast i8* %51 to %"struct.int[]"*, !dbg !177
+  %53 = getelementptr inbounds %"struct.int[]"* %52, i32 0, i32 2, !dbg !177
+  %54 = bitcast [4 x i8]* %53 to [0 x i32]*, !dbg !177
+  %55 = bitcast i8* %51 to %"struct.int[]"*, !dbg !177
+  %56 = getelementptr inbounds %"struct.int[]"* %55, i32 0, i32 1, !dbg !177
+  %57 = load i32* %56, align 8, !dbg !177
+  %58 = icmp uge i32 %65, %57, !dbg !177
+  br i1 %58, label %"14", label %"15", !dbg !177
+
+"14":                                             ; preds = %"13"
+  call void (i32, ...)* @_Jv_ThrowBadArrayIndex(i32 %65) noreturn, !dbg !177
+  unreachable, !dbg !177
+
+"15":                                             ; preds = %"13"
+  %59 = sext i32 %65 to i64, !dbg !177
+  %60 = mul i64 %59, 4, !dbg !177
+  %61 = bitcast [0 x i32]* %54 to i8*, !dbg !177
+  %62 = getelementptr i8* %61, i64 %60, !dbg !177
+  %63 = bitcast i8* %62 to i32*, !dbg !177
+  store i32 %65, i32* %63, align 4, !dbg !177
+  %64 = add i32 %65, 1, !dbg !176
+  br label %"16", !dbg !176
+
+"16":                                             ; preds = %"15", %"12"
+  %65 = phi i32 [ %64, %"15" ], [ 0, %"12" ], !dbg !176
+  %66 = icmp slt i32 %65, 200, !dbg !176
+  br i1 %66, label %"13", label %"17", !dbg !176
+
+"17":                                             ; preds = %"16"
+  %67 = bitcast i8* %15 to %struct.java.lang.Object*, !dbg !178
+  %68 = bitcast %struct.java.lang.Object* %67 to i8*, !dbg !178
+  %69 = bitcast i8* %49 to %struct.java.lang.Object*, !dbg !178
+  %70 = bitcast %struct.java.lang.Object* %69 to i8*, !dbg !178
+  %71 = icmp eq i8* %68, null, !dbg !178
+  br i1 %71, label %"18", label %"19", !dbg !178
+
+"18":                                             ; preds = %"17"
+  call void (...)* @_Jv_ThrowNullPointerException() noreturn, !dbg !178
+  unreachable, !dbg !178
+
+"19":                                             ; preds = %"17"
+  %72 = bitcast i8* %68 to %struct.HelloWorld*, !dbg !178
+  %73 = bitcast i8* %68 to %struct.HelloWorld*, !dbg !178
+  %74 = bitcast i8* %70 to %"struct.int[]"*, !dbg !178
+  %75 = call i32 @_ZN10HelloWorld12testArraySumEJiP6JArrayIiE(%struct.HelloWorld* %73, %"struct.int[]"* %74) uwtable, !dbg !178
+  br i1 false, label %"20", label %"21", !dbg !179
+
+"20":                                             ; preds = %"19"
+  call void (i8*, ...)* @_Jv_InitClass(i8* bitcast (%struct.java.lang.Class* @"_ZN4java4lang6System6class$E" to i8*)), !dbg !179
+  br label %"21", !dbg !179
+
+"21":                                             ; preds = %"20", %"19"
+  %76 = load %struct.java.io.PrintStream** @_ZN4java4lang6System3outE, align 8, !dbg !179
+  %77 = bitcast %struct.java.io.PrintStream* %76 to i8*, !dbg !179
+  %78 = call noalias i8* (%struct.java.lang.Class*, ...)* @_Jv_AllocObjectNoFinalizer(%struct.java.lang.Class* @"_ZN4java4lang13StringBuilder6class$E"), !dbg !179
+  %79 = load i8** getelementptr inbounds ([4 x i8*]* @_CD_HelloWorld, i64 0, i64 3), align 8, !dbg !179
+  %80 = bitcast i8* %78 to %struct.java.lang.StringBuilder*, !dbg !179
+  %81 = bitcast i8* %79 to %struct.java.lang.String*, !dbg !179
+  call void @_ZN4java4lang13StringBuilderC1EPNS0_6StringE(%struct.java.lang.StringBuilder* %80, %struct.java.lang.String* %81), !dbg !179
+  %82 = icmp eq i8* %78, null, !dbg !179
+  br i1 %82, label %"22", label %"23", !dbg !179
+
+"22":                                             ; preds = %"21"
+  call void (...)* @_Jv_ThrowNullPointerException() noreturn, !dbg !179
+  unreachable, !dbg !179
+
+"23":                                             ; preds = %"21"
+  %83 = bitcast i8* %78 to %struct.java.lang.StringBuilder*, !dbg !179
+  %84 = bitcast i8* %78 to %struct.java.lang.StringBuilder*, !dbg !179
+  %85 = call %struct.java.lang.StringBuilder* @_ZN4java4lang13StringBuilder6appendEJPS1_i(%struct.java.lang.StringBuilder* %84, i32 %75), !dbg !179
+  %86 = bitcast %struct.java.lang.StringBuilder* %85 to i8*, !dbg !179
+  %87 = icmp eq i8* %86, null, !dbg !179
+  br i1 %87, label %"24", label %"25", !dbg !179
+
+"24":                                             ; preds = %"23"
+  call void (...)* @_Jv_ThrowNullPointerException() noreturn, !dbg !179
+  unreachable, !dbg !179
+
+"25":                                             ; preds = %"23"
+  %88 = bitcast i8* %86 to %struct.java.lang.StringBuilder*, !dbg !179
+  %89 = bitcast i8* %86 to %struct.java.lang.StringBuilder*, !dbg !179
+  %90 = call %struct.java.lang.String* @_ZN4java4lang13StringBuilder8toStringEJPNS0_6StringEv(%struct.java.lang.StringBuilder* %89), !dbg !179
+  %91 = bitcast %struct.java.lang.String* %90 to i8*, !dbg !179
+  %92 = bitcast i8* %77 to %struct.java.lang.Object*, !dbg !179
+  %93 = getelementptr inbounds %struct.java.lang.Object* %92, i32 0, i32 0, !dbg !179
+  %94 = load %0** %93, align 8, !dbg !179
+  %95 = bitcast %0* %94 to i8*, !dbg !179
+  %96 = getelementptr i8* %95, i64 248, !dbg !179
+  %97 = bitcast i8* %96 to i8**, !dbg !179
+  %98 = load i8** %97, align 8, !dbg !179
+  %99 = bitcast i8* %98 to void (%struct.java.io.PrintStream*, %struct.java.lang.String*)*, !dbg !179
+  %100 = bitcast i8* %77 to %struct.java.io.PrintStream*, !dbg !179
+  %101 = bitcast i8* %91 to %struct.java.lang.String*, !dbg !179
+  call void %99(%struct.java.io.PrintStream* %100, %struct.java.lang.String* %101), !dbg !179
+  br label %return, !dbg !180
+
+return:                                           ; preds = %"25"
+  ret void, !dbg !180
 }
 
 declare void @llvm.dbg.declare(metadata, metadata) nounwind readnone
 
 declare void @_ZN4java4lang6ObjectC1Ev(%struct.java.lang.Object*)
+
+declare void @_Jv_ThrowBadArrayIndex(i32, ...) noreturn
 
 declare void @_Jv_InitClass(i8*, ...)
 
@@ -276,13 +475,15 @@ declare %struct.java.lang.StringBuilder* @_ZN4java4lang13StringBuilder6appendEJP
 
 declare %struct.java.lang.String* @_ZN4java4lang13StringBuilder8toStringEJPNS0_6StringEv(%struct.java.lang.StringBuilder*)
 
+declare noalias i8* @_Jv_NewPrimArray(i8*, i32, ...)
+
 define internal void @_Jv_global_static_constructor() unnamed_addr uwtable {
 entry:
   %"ssa point" = bitcast i32 0 to i32
   br label %"2"
 
 "2":                                              ; preds = %entry
-  call void @_Jv_RegisterResource(i8* bitcast (%17* @"_ZGr8_$_dummy" to i8*))
+  call void @_Jv_RegisterResource(i8* bitcast (%20* @"_ZGr8_$_dummy" to i8*))
   br label %return
 
 return:                                           ; preds = %"2"
@@ -292,47 +493,47 @@ return:                                           ; preds = %"2"
 declare void @_Jv_RegisterResource(i8*)
 
 !llvm.dbg.gv = !{!0, !7}
-!llvm.dbg.sp = !{!10, !129, !132, !144}
+!llvm.dbg.sp = !{!10, !129, !132, !142, !153}
 
-!0 = metadata !{i32 655412, i32 0, metadata !1, metadata !"_CT_HelloWorld", metadata !"_CT_HelloWorld", metadata !"", metadata !1, i32 34, metadata !3, i1 true, i1 true, [3 x i8]* @_CT_HelloWorld}
-!1 = metadata !{i32 655401, metadata !"HelloWorld.java", metadata !"/home/danke/work/vm/test/java-to-asm/", metadata !2}
-!2 = metadata !{i32 655377, i32 0, i32 11, metadata !"HelloWorld.java", metadata !"/home/danke/work/vm/test/java-to-asm/", metadata !"4.6.3", i1 true, i1 false, metadata !"", i32 0}
-!3 = metadata !{i32 655361, metadata !1, metadata !"", metadata !1, i32 0, i64 24, i64 8, i64 0, i32 0, metadata !4, metadata !5, i32 0, null}
+!0 = metadata !{i32 655412, i32 0, metadata !1, metadata !"_CT_HelloWorld", metadata !"_CT_HelloWorld", metadata !"", metadata !1, i32 49, metadata !3, i1 true, i1 true, [4 x i8]* @_CT_HelloWorld}
+!1 = metadata !{i32 655401, metadata !"HelloWorld.java", metadata !"/home/danke/work/javasimd/test/class-to-jni/", metadata !2}
+!2 = metadata !{i32 655377, i32 0, i32 11, metadata !"HelloWorld.java", metadata !"/home/danke/work/javasimd/test/class-to-jni/", metadata !"4.6.3", i1 true, i1 false, metadata !"", i32 0}
+!3 = metadata !{i32 655361, metadata !1, metadata !"", metadata !1, i32 0, i64 32, i64 8, i64 0, i32 0, metadata !4, metadata !5, i32 0, null}
 !4 = metadata !{i32 655396, metadata !1, metadata !"unsigned byte", metadata !1, i32 0, i64 8, i64 8, i64 0, i32 0, i32 7}
 !5 = metadata !{metadata !6}
-!6 = metadata !{i32 655393, i64 0, i64 2}
-!7 = metadata !{i32 655412, i32 0, metadata !1, metadata !"_CD_HelloWorld", metadata !"_CD_HelloWorld", metadata !"", metadata !1, i32 30, metadata !8, i1 true, i1 true, [3 x i8*]* @_CD_HelloWorld}
-!8 = metadata !{i32 655361, metadata !1, metadata !"", metadata !1, i32 0, i64 192, i64 64, i64 0, i32 0, metadata !9, metadata !5, i32 0, null}
+!6 = metadata !{i32 655393, i64 0, i64 3}
+!7 = metadata !{i32 655412, i32 0, metadata !1, metadata !"_CD_HelloWorld", metadata !"_CD_HelloWorld", metadata !"", metadata !1, i32 36, metadata !8, i1 true, i1 true, [4 x i8*]* @_CD_HelloWorld}
+!8 = metadata !{i32 655361, metadata !1, metadata !"", metadata !1, i32 0, i64 256, i64 64, i64 0, i32 0, metadata !9, metadata !5, i32 0, null}
 !9 = metadata !{i32 655375, metadata !1, metadata !"", metadata !1, i32 0, i64 64, i64 64, i64 0, i32 0, null}
 !10 = metadata !{i32 655406, i32 0, metadata !11, metadata !"HelloWorld::HelloWorld", metadata !"HelloWorld::HelloWorld", metadata !"_ZN10HelloWorldC1Ev", metadata !1, i32 19, metadata !126, i1 false, i1 true, i32 0, i32 0, null, i32 0, i1 false, null}
 !11 = metadata !{i32 655379, metadata !1, metadata !"HelloWorld", metadata !1, i32 0, i64 64, i64 64, i64 0, i32 0, null, metadata !12, i32 0, metadata !14}
 !12 = metadata !{metadata !13}
 !13 = metadata !{i32 655388, metadata !1, metadata !"", null, i32 0, i64 0, i64 0, i64 0, i32 0, metadata !14}
 !14 = metadata !{i32 655379, metadata !1, metadata !"java.lang.Object", metadata !15, i32 0, i64 64, i64 64, i64 0, i32 0, null, metadata !16, i32 0, metadata !14}
-!15 = metadata !{i32 655401, metadata !"Object.java", metadata !"/home/danke/work/vm/test/java-to-asm/java/lang", metadata !2}
+!15 = metadata !{i32 655401, metadata !"Object.java", metadata !"/home/danke/work/javasimd/test/class-to-jni/java/lang", metadata !2}
 !16 = metadata !{metadata !17}
 !17 = metadata !{i32 655373, metadata !14, metadata !"vtable", metadata !18, i32 0, i64 64, i64 64, i64 0, i32 1, metadata !19}
-!18 = metadata !{i32 655401, metadata !"<built-in>", metadata !"/home/danke/work/vm/test/java-to-asm/", metadata !2}
+!18 = metadata !{i32 655401, metadata !"<built-in>", metadata !"/home/danke/work/javasimd/test/class-to-jni/", metadata !2}
 !19 = metadata !{i32 655375, metadata !1, metadata !"", metadata !1, i32 0, i64 64, i64 64, i64 0, i32 0, metadata !20}
 !20 = metadata !{i32 655379, metadata !1, metadata !"", metadata !1, i32 0, i64 192, i64 64, i64 0, i32 0, null, metadata !21, i32 0, null}
 !21 = metadata !{metadata !22, metadata !125}
 !22 = metadata !{i32 655373, metadata !20, metadata !"class", metadata !18, i32 0, i64 64, i64 64, i64 0, i32 0, metadata !23}
 !23 = metadata !{i32 655375, metadata !1, metadata !"", metadata !1, i32 0, i64 64, i64 64, i64 0, i32 0, metadata !24}
 !24 = metadata !{i32 655379, metadata !1, metadata !"java.lang.Class", metadata !25, i32 0, i64 2240, i64 64, i64 0, i32 0, null, metadata !26, i32 0, metadata !14}
-!25 = metadata !{i32 655401, metadata !"Class.java", metadata !"/home/danke/work/vm/test/java-to-asm/java/lang", metadata !2}
+!25 = metadata !{i32 655401, metadata !"Class.java", metadata !"/home/danke/work/javasimd/test/class-to-jni/java/lang", metadata !2}
 !26 = metadata !{metadata !13, metadata !27, metadata !30, metadata !33, metadata !36, metadata !39, metadata !40, metadata !47, metadata !48, metadata !49, metadata !56, metadata !66, metadata !68, metadata !69, metadata !83, metadata !84, metadata !85, metadata !86, metadata !87, metadata !92, metadata !100, metadata !103, metadata !104, metadata !105, metadata !106, metadata !107, metadata !109, metadata !110, metadata !111, metadata !113, metadata !114, metadata !115, metadata !116, metadata !117, metadata !118, metadata !119, metadata !120, metadata !121, metadata !122, metadata !123, metadata !124}
 !27 = metadata !{i32 655388, metadata !1, metadata !"", null, i32 0, i64 0, i64 0, i64 0, i32 32, metadata !28}
 !28 = metadata !{i32 655379, metadata !1, metadata !"java.lang.reflect.Type", metadata !29, i32 0, i64 64, i64 64, i64 0, i32 0, null, metadata !12, i32 0, metadata !14}
-!29 = metadata !{i32 655401, metadata !"Type.java", metadata !"/home/danke/work/vm/test/java-to-asm/java/lang/reflect", metadata !2}
+!29 = metadata !{i32 655401, metadata !"Type.java", metadata !"/home/danke/work/javasimd/test/class-to-jni/java/lang/reflect", metadata !2}
 !30 = metadata !{i32 655388, metadata !1, metadata !"", null, i32 0, i64 0, i64 0, i64 0, i32 32, metadata !31}
 !31 = metadata !{i32 655379, metadata !1, metadata !"java.lang.reflect.AnnotatedElement", metadata !32, i32 0, i64 64, i64 64, i64 0, i32 0, null, metadata !12, i32 0, metadata !14}
-!32 = metadata !{i32 655401, metadata !"AnnotatedElement.java", metadata !"/home/danke/work/vm/test/java-to-asm/java/lang/reflect", metadata !2}
+!32 = metadata !{i32 655401, metadata !"AnnotatedElement.java", metadata !"/home/danke/work/javasimd/test/class-to-jni/java/lang/reflect", metadata !2}
 !33 = metadata !{i32 655388, metadata !1, metadata !"", null, i32 0, i64 0, i64 0, i64 0, i32 32, metadata !34}
 !34 = metadata !{i32 655379, metadata !1, metadata !"java.lang.reflect.GenericDeclaration", metadata !35, i32 0, i64 64, i64 64, i64 0, i32 0, null, metadata !12, i32 0, metadata !14}
-!35 = metadata !{i32 655401, metadata !"GenericDeclaration.java", metadata !"/home/danke/work/vm/test/java-to-asm/java/lang/reflect", metadata !2}
+!35 = metadata !{i32 655401, metadata !"GenericDeclaration.java", metadata !"/home/danke/work/javasimd/test/class-to-jni/java/lang/reflect", metadata !2}
 !36 = metadata !{i32 655388, metadata !1, metadata !"", null, i32 0, i64 0, i64 0, i64 0, i32 32, metadata !37}
 !37 = metadata !{i32 655379, metadata !1, metadata !"java.io.Serializable", metadata !38, i32 0, i64 64, i64 64, i64 0, i32 0, null, metadata !12, i32 0, metadata !14}
-!38 = metadata !{i32 655401, metadata !"Serializable.java", metadata !"/home/danke/work/vm/test/java-to-asm/java/io", metadata !2}
+!38 = metadata !{i32 655401, metadata !"Serializable.java", metadata !"/home/danke/work/javasimd/test/class-to-jni/java/io", metadata !2}
 !39 = metadata !{i32 655373, metadata !24, metadata !"next_or_version", metadata !18, i32 0, i64 64, i64 64, i64 64, i32 1, metadata !23}
 !40 = metadata !{i32 655373, metadata !24, metadata !"name", metadata !18, i32 0, i64 64, i64 64, i64 128, i32 1, metadata !41}
 !41 = metadata !{i32 655375, metadata !1, metadata !"", metadata !1, i32 0, i64 64, i64 64, i64 0, i32 0, metadata !42}
@@ -423,35 +624,55 @@ declare void @_Jv_RegisterResource(i8*)
 !126 = metadata !{i32 655381, metadata !1, metadata !"", metadata !1, i32 0, i64 0, i64 0, i64 0, i32 0, null, metadata !127, i32 0, null}
 !127 = metadata !{null, metadata !128}
 !128 = metadata !{i32 655375, metadata !1, metadata !"", metadata !1, i32 0, i64 64, i64 64, i64 0, i32 64, metadata !11}
-!129 = metadata !{i32 655406, i32 0, metadata !11, metadata !"HelloWorld::testSum", metadata !"HelloWorld::testSum", metadata !"_ZN10HelloWorld7testSumEJii", metadata !1, i32 23, metadata !130, i1 false, i1 true, i32 0, i32 0, null, i32 0, i1 false, null}
+!129 = metadata !{i32 655406, i32 0, metadata !11, metadata !"HelloWorld::testSum", metadata !"HelloWorld::testSum", metadata !"_ZN10HelloWorld7testSumEJii", metadata !1, i32 22, metadata !130, i1 false, i1 true, i32 0, i32 0, null, i32 0, i1 false, null}
 !130 = metadata !{i32 655381, metadata !1, metadata !"", metadata !1, i32 0, i64 0, i64 0, i64 0, i32 0, null, metadata !131, i32 0, null}
 !131 = metadata !{metadata !81, metadata !128, metadata !81}
-!132 = metadata !{i32 655406, i32 0, metadata !11, metadata !"HelloWorld::main", metadata !"HelloWorld::main", metadata !"_ZN10HelloWorld4mainEJvP6JArrayIPN4java4lang6StringEE", metadata !1, i32 30, metadata !133, i1 false, i1 true, i32 0, i32 0, null, i32 0, i1 false, null}
+!132 = metadata !{i32 655406, i32 0, metadata !11, metadata !"HelloWorld::testArraySum", metadata !"HelloWorld::testArraySum", metadata !"_ZN10HelloWorld12testArraySumEJiP6JArrayIiE", metadata !1, i32 29, metadata !133, i1 false, i1 true, i32 0, i32 0, null, i32 0, i1 false, null}
 !133 = metadata !{i32 655381, metadata !1, metadata !"", metadata !1, i32 0, i64 0, i64 0, i64 0, i32 0, null, metadata !134, i32 0, null}
-!134 = metadata !{null, metadata !135}
+!134 = metadata !{metadata !81, metadata !128, metadata !135}
 !135 = metadata !{i32 655375, metadata !1, metadata !"", metadata !1, i32 0, i64 64, i64 64, i64 0, i32 0, metadata !136}
-!136 = metadata !{i32 655379, metadata !1, metadata !"java.lang.String[]", metadata !1, i32 0, i64 128, i64 64, i64 0, i32 0, null, metadata !137, i32 0, metadata !14}
+!136 = metadata !{i32 655379, metadata !1, metadata !"int[]", metadata !1, i32 0, i64 128, i64 64, i64 0, i32 0, null, metadata !137, i32 0, metadata !14}
 !137 = metadata !{metadata !13, metadata !138, metadata !139}
 !138 = metadata !{i32 655373, metadata !136, metadata !"length", metadata !1, i32 0, i64 32, i64 32, i64 64, i32 0, metadata !81}
-!139 = metadata !{i32 655373, metadata !136, metadata !"data", metadata !1, i32 0, i64 0, i64 64, i64 128, i32 0, metadata !140}
-!140 = metadata !{i32 655361, metadata !1, metadata !"", metadata !1, i32 0, i64 0, i64 64, i64 0, i32 0, metadata !141, metadata !143, i32 0, null}
-!141 = metadata !{i32 655375, metadata !1, metadata !"", metadata !1, i32 0, i64 64, i64 64, i64 0, i32 0, metadata !142}
-!142 = metadata !{i32 655379, metadata !1, metadata !"java.lang.String", metadata !18, i32 0, i64 0, i64 0, i64 0, i32 4, null, null, i32 0, null}
-!143 = metadata !{i32 0}
-!144 = metadata !{i32 655406, i32 0, metadata !1, metadata !"_Jv_global_static_constructor", metadata !"_Jv_global_static_constructor", metadata !"_Jv_global_static_constructor", metadata !1, i32 0, metadata !145, i1 true, i1 true, i32 0, i32 0, null, i32 1, i1 false, null}
-!145 = metadata !{i32 655381, metadata !1, metadata !"", metadata !1, i32 0, i64 0, i64 0, i64 0, i32 0, null, metadata !146, i32 0, null}
-!146 = metadata !{null}
-!147 = metadata !{i32 655617, metadata !10, metadata !"unnamed_arg", metadata !1, i32 19, metadata !128, i32 0, i32 0}
-!148 = metadata !{i32 19, i32 0, metadata !10, null}
-!149 = metadata !{i32 655617, metadata !129, metadata !"unnamed_arg", metadata !1, i32 23, metadata !128, i32 0, i32 0}
-!150 = metadata !{i32 23, i32 0, metadata !129, null}
-!151 = metadata !{i32 655617, metadata !129, metadata !"unnamed_arg", metadata !1, i32 23, metadata !81, i32 0, i32 0}
-!152 = metadata !{i32 24, i32 0, metadata !129, null}
-!153 = metadata !{i32 25, i32 0, metadata !129, null}
-!154 = metadata !{i32 26, i32 0, metadata !129, null}
-!155 = metadata !{i32 655617, metadata !132, metadata !"unnamed_arg", metadata !1, i32 30, metadata !135, i32 0, i32 0}
-!156 = metadata !{i32 30, i32 0, metadata !132, null}
-!157 = metadata !{i32 31, i32 0, metadata !132, null}
-!158 = metadata !{i32 32, i32 0, metadata !132, null}
-!159 = metadata !{i32 33, i32 0, metadata !132, null}
-!160 = metadata !{i32 34, i32 0, metadata !132, null}
+!139 = metadata !{i32 655373, metadata !136, metadata !"data", metadata !1, i32 0, i64 0, i64 32, i64 96, i32 0, metadata !140}
+!140 = metadata !{i32 655361, metadata !1, metadata !"", metadata !1, i32 0, i64 0, i64 32, i64 0, i32 0, metadata !81, metadata !141, i32 0, null}
+!141 = metadata !{i32 0}
+!142 = metadata !{i32 655406, i32 0, metadata !11, metadata !"HelloWorld::main", metadata !"HelloWorld::main", metadata !"_ZN10HelloWorld4mainEJvP6JArrayIPN4java4lang6StringEE", metadata !1, i32 36, metadata !143, i1 false, i1 true, i32 0, i32 0, null, i32 0, i1 false, null}
+!143 = metadata !{i32 655381, metadata !1, metadata !"", metadata !1, i32 0, i64 0, i64 0, i64 0, i32 0, null, metadata !144, i32 0, null}
+!144 = metadata !{null, metadata !145}
+!145 = metadata !{i32 655375, metadata !1, metadata !"", metadata !1, i32 0, i64 64, i64 64, i64 0, i32 0, metadata !146}
+!146 = metadata !{i32 655379, metadata !1, metadata !"java.lang.String[]", metadata !1, i32 0, i64 128, i64 64, i64 0, i32 0, null, metadata !147, i32 0, metadata !14}
+!147 = metadata !{metadata !13, metadata !148, metadata !149}
+!148 = metadata !{i32 655373, metadata !146, metadata !"length", metadata !1, i32 0, i64 32, i64 32, i64 64, i32 0, metadata !81}
+!149 = metadata !{i32 655373, metadata !146, metadata !"data", metadata !1, i32 0, i64 0, i64 64, i64 128, i32 0, metadata !150}
+!150 = metadata !{i32 655361, metadata !1, metadata !"", metadata !1, i32 0, i64 0, i64 64, i64 0, i32 0, metadata !151, metadata !141, i32 0, null}
+!151 = metadata !{i32 655375, metadata !1, metadata !"", metadata !1, i32 0, i64 64, i64 64, i64 0, i32 0, metadata !152}
+!152 = metadata !{i32 655379, metadata !1, metadata !"java.lang.String", metadata !18, i32 0, i64 0, i64 0, i64 0, i32 4, null, null, i32 0, null}
+!153 = metadata !{i32 655406, i32 0, metadata !1, metadata !"_Jv_global_static_constructor", metadata !"_Jv_global_static_constructor", metadata !"_Jv_global_static_constructor", metadata !1, i32 0, metadata !154, i1 true, i1 true, i32 0, i32 0, null, i32 1, i1 false, null}
+!154 = metadata !{i32 655381, metadata !1, metadata !"", metadata !1, i32 0, i64 0, i64 0, i64 0, i32 0, null, metadata !155, i32 0, null}
+!155 = metadata !{null}
+!156 = metadata !{i32 655617, metadata !10, metadata !"unnamed_arg", metadata !1, i32 19, metadata !128, i32 0, i32 0}
+!157 = metadata !{i32 19, i32 0, metadata !10, null}
+!158 = metadata !{i32 655617, metadata !129, metadata !"unnamed_arg", metadata !1, i32 22, metadata !128, i32 0, i32 0}
+!159 = metadata !{i32 22, i32 0, metadata !129, null}
+!160 = metadata !{i32 655617, metadata !129, metadata !"unnamed_arg", metadata !1, i32 22, metadata !81, i32 0, i32 0}
+!161 = metadata !{i32 23, i32 0, metadata !129, null}
+!162 = metadata !{i32 24, i32 0, metadata !129, null}
+!163 = metadata !{i32 25, i32 0, metadata !129, null}
+!164 = metadata !{i32 655617, metadata !132, metadata !"unnamed_arg", metadata !1, i32 29, metadata !128, i32 0, i32 0}
+!165 = metadata !{i32 29, i32 0, metadata !132, null}
+!166 = metadata !{i32 655617, metadata !132, metadata !"unnamed_arg", metadata !1, i32 29, metadata !135, i32 0, i32 0}
+!167 = metadata !{i32 30, i32 0, metadata !132, null}
+!168 = metadata !{i32 31, i32 0, metadata !132, null}
+!169 = metadata !{i32 32, i32 0, metadata !132, null}
+!170 = metadata !{i32 655617, metadata !142, metadata !"unnamed_arg", metadata !1, i32 36, metadata !145, i32 0, i32 0}
+!171 = metadata !{i32 36, i32 0, metadata !142, null}
+!172 = metadata !{i32 37, i32 0, metadata !142, null}
+!173 = metadata !{i32 40, i32 0, metadata !142, null}
+!174 = metadata !{i32 41, i32 0, metadata !142, null}
+!175 = metadata !{i32 44, i32 0, metadata !142, null}
+!176 = metadata !{i32 45, i32 0, metadata !142, null}
+!177 = metadata !{i32 46, i32 0, metadata !142, null}
+!178 = metadata !{i32 47, i32 0, metadata !142, null}
+!179 = metadata !{i32 48, i32 0, metadata !142, null}
+!180 = metadata !{i32 49, i32 0, metadata !142, null}

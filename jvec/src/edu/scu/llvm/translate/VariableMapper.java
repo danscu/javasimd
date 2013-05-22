@@ -12,6 +12,8 @@ import cn.edu.sjtu.jllvm.VMCore.Constants.Constant;
 import cn.edu.sjtu.jllvm.VMCore.Instructions.Instruction;
 import cn.edu.sjtu.jllvm.VMCore.Types.Type;
 import cn.edu.sjtu.jllvm.VMCore.Types.TypeFactory;
+import edu.scu.jjni.aotc.recgen.OpGenerator;
+import edu.scu.jjni.aotc.recgen.OpRecognizer;
 
 public class VariableMapper {
 	/**
@@ -19,11 +21,13 @@ public class VariableMapper {
 	 * Java type to JNI type mapping.
 	 */
 	
-	public enum Opcode {
-		READ,	// javaType -> jniType
-		WRITE,	// jniType -> javaType
-		DESTRUCT, // clear up jniType
-		
+	/**
+	 * Recognizable variable operations (semantics). These operations can be mapped
+	 * from Java type to JNI type with a pair of code recognizer and generator.
+	 * 
+	 * @author danke
+	 */
+	public enum Semcode {
 		// For struct
 		GET_STRUCT_ELEM,
 		
@@ -32,12 +36,10 @@ public class VariableMapper {
 		GET_ARRAY_LENGTH,
 	};
 	
-
-	
 	public static abstract class Operator {
-		private Opcode op;		
-		public Operator(Opcode op) { this.op = op; }
-		public Opcode getOpcode() { return op; }
+		private Semcode op;		
+		public Operator(Semcode op) { this.op = op; }
+		public Semcode getOpcode() { return op; }
 		public abstract List<Instruction> exec(Object... args);
 	}
 	
@@ -45,7 +47,7 @@ public class VariableMapper {
 		public Type javaType;
 		public Type jniType;
 		
-		private Map<Opcode, Operator> ops;
+		private Map<Semcode, Operator> ops;
 		
 		/**
 		 * Constructor.
@@ -57,14 +59,14 @@ public class VariableMapper {
 			javaType = _srcType;
 			jniType = _dstType;
 			
-			ops = new HashMap<Opcode, Operator>();
+			ops = new HashMap<Semcode, Operator>();
 		}
 		
 		public void addOp(Operator op) {
 			ops.put(op.getOpcode(), op);
 		}
 		
-		public List<Instruction> translateOp(Opcode opcode, Object... args) {
+		public List<Instruction> translateOp(Semcode opcode, Object... args) {
 			Operator op = ops.get(opcode);
 			if (op == null)
 				return null;
@@ -90,7 +92,7 @@ public class VariableMapper {
 	/**
 	 * Recognizer
 	 */
-	protected List<InstMatcher.OpRecognizer> recognizers;
+	protected List<Pair<OpRecognizer,OpGenerator>> translators;	
 	
 	/**
 	 * Matcher
@@ -105,7 +107,7 @@ public class VariableMapper {
 		globalTypeMap = new ArrayList<TypeMap>();
 		localTypeMap = new ArrayList<TypeMap>();
 		varMap = new HashMap<String, Constant>();
-		recognizers = new ArrayList<InstMatcher.OpRecognizer>();
+		translators = new ArrayList<Pair<OpRecognizer,OpGenerator>>();
 		matcher = new InstMatcher();
 	}
 	
@@ -135,8 +137,8 @@ public class VariableMapper {
 		return tmap;
 	}
 	
-	public void addRecognizer(InstMatcher.OpRecognizer opr) {
-		recognizers.add(opr);
+	public void addTranslator(OpRecognizer opr, OpGenerator opg) {
+		translators.add(new Pair<OpRecognizer, OpGenerator>(opr, opg));
 	}
 	
 	/**
@@ -164,7 +166,7 @@ public class VariableMapper {
 	 */
 	public Type mapType(Type javaArg)
 	{		
-		// 1. Search local type map	
+		// 1. Search local type map
 		for (TypeMap tm : localTypeMap)
 			if (tm.javaType.equals(javaArg))
 				return tm.jniType;
@@ -174,11 +176,19 @@ public class VariableMapper {
 			if (tm.javaType.equals(javaArg))
 				return tm.jniType;											
 		
-		// 3. Types without conversion
+		// 3. Search recognizer-generator map
+		for (Pair<OpRecognizer,OpGenerator> pair: translators) {
+			OpRecognizer opr = pair.a;
+			OpGenerator opg = pair.b;
+			if (opr.getTypeIn().equals(javaArg))
+				return opg.getTypeIn();						
+		}
+		
+		// 4. Types without conversion
 		if (javaArg.isPrimType())
 			return javaArg;
 		
-		// 4. Resolve pointer type recursively		
+		// 5. Resolve pointer type recursively		
 		if (javaArg.isPointerType()) {
 			Type mappedSubtype = mapType(javaArg.getSubType());
 			if (mappedSubtype != null) {
@@ -264,9 +274,13 @@ public class VariableMapper {
 	 * Recognizes operation patterns and convert to new instructions
 	 * @param bs BasicBlock to search
 	 */
-	public void mapOperations(BasicBlock bs) {
-		for (InstMatcher.OpRecognizer opr : recognizers) {
-			List<Instruction> insList = bs.getInstructions();			
+	public void mapOperations(List<Instruction> insList) {
+		for (Pair<OpRecognizer,OpGenerator> pair: translators) {
+			OpRecognizer opr = pair.a;
+			OpGenerator opg = pair.b;			
+			if (matcher.matchAndModify(opr, opg, insList)) {
+				System.out.println("Modified"); // TODO
+			}
 		}
 	}
 }

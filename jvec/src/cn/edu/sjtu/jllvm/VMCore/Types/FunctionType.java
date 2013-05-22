@@ -40,8 +40,10 @@ public class FunctionType extends DerivedType {
 			}
 			
 			typeString+=")";
-		}
-		
-		
+		}				
+	}
+	
+	public Type getRetType() {
+		return subTypes.get(0);
 	}
 }

@@ -121,7 +121,7 @@ public class FunctionConverter {
 		List<String> pAttributes = fn.pAttributes;
 		List<String> fAttributes = fn.fAttributes;
 		int align = fn.align;
-		List<BasicBlock> basicBlocks = new LinkedList<BasicBlock>();
+		List<BasicBlock> basicBlocksPass1 = new LinkedList<BasicBlock>();
 		List<BasicBlock> basicBlocksPass2 = new LinkedList<BasicBlock>();
 		
 		mapper.clear();
@@ -177,8 +177,18 @@ public class FunctionConverter {
 			}
 		}
 
-		// Convert code - Pass 1 (simple type mapping)
+		// Convert code - Pass 1 (Semantic recognizer)
 		for (BasicBlock bs : fn.getBasicBlocks()) {
+			List<Instruction> list = new LinkedList<Instruction>();
+			list.addAll(bs.getInstructions());
+			
+			mapper.mapOperations(list);
+			
+			basicBlocksPass1.add(bs);
+		}
+				
+		// Convert code - Pass 2 (simple type mapping)
+		for (BasicBlock bs : basicBlocksPass1) {
 			List<Instruction> list = new LinkedList<Instruction>();
 
 			for (Instruction ins : bs.getInstructions()) {
@@ -236,17 +246,9 @@ public class FunctionConverter {
 				list.add(ins);
 			}
 
-			basicBlocks.add(new BasicBlock(bs.getBlockID(), list));
+			basicBlocksPass2.add(new BasicBlock(bs.getBlockID(), list));
 		}		
-		
-		// Pass 2 - Semantic recognizer
-		for (BasicBlock bs : basicBlocks) {
-			mapper.mapOperations(bs);
-			
-			basicBlocksPass2.add(bs);
-		}
-		
-		
+				
 		// Function attributes
 		if (ignoreFAttr != null) {
 			fAttributes = new ArrayList<String>();
@@ -258,7 +260,7 @@ public class FunctionConverter {
 		
 		return new FunctionWriter(linkage, visibility, cconv, pAttributes,
 				returnType, name, arguments, isVarargFunction, fAttributes,
-				align, basicBlocks);
+				align, basicBlocksPass2);
 	}
 
 	/**

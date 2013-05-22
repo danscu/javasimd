@@ -71,7 +71,8 @@ public class LLVMJniUtil {
 		try {
 			system = new LLVM2Jni(module, methodNames);
 		} catch (Exception e) {
-			return new Pair<Boolean,String>(false, e.getMessage());
+			e.printStackTrace();
+			return new Pair<Boolean,String>(false, e.getLocalizedMessage());
 		}
 		
 		boolean state = system.process();
