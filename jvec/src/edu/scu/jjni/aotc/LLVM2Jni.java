@@ -19,7 +19,6 @@ import cn.edu.sjtu.jllvm.VMCore.Types.Type;
 import cn.edu.sjtu.jllvm.VMCore.Types.TypeFactory;
 import edu.scu.jjni.aotc.recgen.ArrayAccessGen;
 import edu.scu.jjni.aotc.recgen.JniEnvCallGen;
-import edu.scu.jjni.aotc.recgen.MatchVariable;
 import edu.scu.jjni.aotc.recgen.OpRecognizer;
 import edu.scu.jjni.aotc.recgen.Translator;
 import edu.scu.llvm.asm.InstFactory;
@@ -73,34 +72,36 @@ public class LLVM2Jni extends FunctionConverter {
 
 		int wildNo = 0;
 		
-		Type anyType = new WildcardType(OpRecognizer.getArgMatchName(wildNo++));
+		Type anyType = new WildcardType(OpRecognizer.getMatchName(wildNo++));
 		Type anyTypePtr = TypeFactory.getPointerType(anyType);
 		
 		// store i32 %unnamed_arg2, i32* %unnamed_arg_addr1, align 1
-		Constant pArg = new WildcardConstant(OpRecognizer.getArgMatchName(wildNo++)); /* match argument only */
+		Constant pArg = new WildcardConstant(OpRecognizer.getPublicVar("argName"));
 		Constant pArgAddr = new WildcardConstant(OpRecognizer.getMatchName("argAddr"));
-		Instruction ins = fac.createLoadStoreInst(pArgAddr /* dest */, InstType.storeInst,
+		Instruction ins = fac.createLoadStoreInst(null /* dest */, InstType.storeInst,
 				// env_addr will be provided by associated recognizer
-				Arrays.asList(new Constant[] { pArg, pArgAddr}),
-				Arrays.asList(new Type[] { anyType, anyTypePtr}),
+				Arrays.asList(new Constant[] { pArg, pArgAddr }),
+				Arrays.asList(new Type[] { anyType, anyTypePtr }),
 				false /* volatile */);
 		argStoreRec.addInstruction(ins);
-	
+		argStoreRec.addPublicVar(pArgAddr.getValue());
+		
 		// 2nd recognizer
-		argStoreRec = new OpRecognizer(VariableMapper.Semcode.STORE_ARGUMENT,
+		OpRecognizer argLoadRec = new OpRecognizer(VariableMapper.Semcode.LOAD_ARGUMENT,
 				null, null);
-		trn = new Translator(argStoreRec, null);
+		trn = new Translator(argLoadRec, null);
 		mapper.addTranslator(trn);
 		
 		// %0 = load i32* %unnamed_arg_addr1, align 4
-		pArgAddr = new WildcardConstant(OpRecognizer.getMatchName("argAddr"));
+		pArgAddr = new WildcardConstant(OpRecognizer.getPublicVar("argAddr"));
 		Constant pArgLocal = new WildcardConstant(OpRecognizer.getMatchName("argLocal"));
 		ins = fac.createLoadStoreInst(pArgLocal /* dest */, InstType.loadInst,
 				// env_addr will be provided by associated recognizer
 				Arrays.asList(new Constant[] { pArgAddr }),
 				Arrays.asList(new Type[] { anyTypePtr }),
 				false /* volatile */);
-		argStoreRec.addInstruction(ins);
+		argLoadRec.addInstruction(ins);
+		argLoadRec.addPublicVar(pArgLocal.getValue());
 	}
 
 	protected static void addStructElemTranslator(VariableMapper mapper) {
@@ -134,7 +135,7 @@ public class LLVM2Jni extends FunctionConverter {
 		// %1 = bitcast %"struct.int[]"* %0 to %struct.java.lang.Object*
 		Constant pObject = new LocalVariable(OpRecognizer.getMatchName(destNo++));		
 		Instruction ins = fac.createOperationInst(pObject, InstType.converInst,
-				Arrays.asList(new Constant[] { new WildcardConstant(OpRecognizer.getMatchName("argLocal")) }),
+				Arrays.asList(new Constant[] { new WildcardConstant(OpRecognizer.getPublicVar("argLocal")) }),
 				Arrays.asList(new Type[] { javaStructPtr, javaObjectPtr}),
 				"bitcast");
 		elemOpRec.addInstruction(ins);

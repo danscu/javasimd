@@ -7,6 +7,7 @@ import java.util.ListIterator;
 
 import cn.edu.sjtu.jllvm.VMCore.Instructions.Instruction;
 import cn.edu.sjtu.jllvm.VMCore.Types.Type;
+import edu.scu.jjni.aotc.Debug;
 import edu.scu.llvm.translate.VariableMapper.Semcode;
 
 /**
@@ -15,20 +16,17 @@ import edu.scu.llvm.translate.VariableMapper.Semcode;
  * @author danke
  */
 public class OpGenerator {
-	protected Semcode op;
+	protected Semcode semc;
 	protected Type typeIn;
 	protected Type typeOut;
-	List<Instruction> seq;
-	List<Instruction> destructor;
 	OpRecognizer opr;
 
 	public OpGenerator(Semcode semc, OpRecognizer opr, Type typeIn,
 			Type typeOut) {
-		this.op = semc;
+		this.semc = semc;
 		this.opr = opr;
 		this.typeIn = typeIn;
 		this.typeOut = typeOut;
-		seq = new ArrayList<Instruction>();
 	}
 
 	/**
@@ -44,8 +42,10 @@ public class OpGenerator {
 		return String.format("%%R.%d", n);
 	}
 
-	public void addInstruction(Instruction inst) {
-		seq.add(inst);
+	public void addInstruction(ListIterator<Instruction> it, Instruction inst) {
+		it.add(inst);
+		if (Debug.level >= 2)
+			System.out.println("Inserting: " + inst);
 	}
 
 	public Type getTypeIn() {
@@ -57,28 +57,13 @@ public class OpGenerator {
 	}
 
 	/**
-	 * Use this to define operations to release resources
-	 * 
-	 * @param inst
-	 */
-	public void addDestuctorInst(Instruction inst) {
-		if (destructor == null)
-			destructor = new ArrayList<Instruction>();
-		destructor.add(inst);
-	}
-
-	/**
 	 * Modify code.
 	 * @param insList
 	 * @param start
 	 * @return modified code.
 	 */
 	public List<Instruction> insert(List<Instruction> insList,
-			ListIterator<Instruction> start) {
-		// Insert code
-		for (Instruction ins : seq) {
-			start.add(ins);
-		}		
+			ListIterator<Instruction> start) {		
 		return insList;
 	}
 }

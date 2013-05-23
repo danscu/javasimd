@@ -45,8 +45,8 @@ public class Translator {
 		return opg.insert(insList, start);
 	}
 
-	public Constant getVar(String var) {
-		return mapper.mapVariable(var);
+	public Constant getVar(String var, boolean strict) {
+		return mapper.mapVariable(var, strict);
 	}
 	
 	public void setVar(String name, String matchContent) {		

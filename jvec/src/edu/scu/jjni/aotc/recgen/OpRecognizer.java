@@ -7,6 +7,7 @@ import java.util.Map;
 
 import cn.edu.sjtu.jllvm.VMCore.Instructions.Instruction;
 import cn.edu.sjtu.jllvm.VMCore.Types.Type;
+import edu.scu.jjni.aotc.Debug;
 import edu.scu.llvm.translate.VariableMapper.Semcode;
 
 /**
@@ -20,7 +21,7 @@ import edu.scu.llvm.translate.VariableMapper.Semcode;
  * @author danke
  */
 public class OpRecognizer {
-	protected Semcode op;
+	protected Semcode semc;
 	protected Type typeIn;
 	protected Type typeOut;
 	protected List<Instruction> seq;
@@ -28,7 +29,7 @@ public class OpRecognizer {
 	protected List<String> publicNames; 
 	
 	public OpRecognizer(Semcode op, Type typeIn, Type typeOut) {
-		this.op = op;
+		this.semc = op;
 		this.typeIn = typeIn;
 		this.typeOut = typeOut;
 		seq = new ArrayList<Instruction>();
@@ -72,6 +73,18 @@ public class OpRecognizer {
 		return name;
 	}
 
+	/**
+	 * Use this function to generate variable names to match specific
+	 * operands in the instructions
+	 * 
+	 * @param m
+	 * @return the matching variable name
+	 */
+	public static String getPublicVar(String id) {
+		String name = String.format("@%%Ms.%s", id);
+		return name;
+	}	
+	
 	public void addInstruction(Instruction inst) {
 		seq.add(inst);
 	}
@@ -86,16 +99,25 @@ public class OpRecognizer {
 	 * function. Public names can be accessed by Translator.getVar().
 	 */
 	public void addPublicVar(String var) {
-		if (publicNames.contains(var))
+		if (!publicNames.contains(var))
 			publicNames.add(var);		
 	}
 	
-	public String getMatchContent(String id) {
-		return matchMap.get(getMatchName(id));
+	/**
+	 * Get matched name.
+	 * @param varName Full name (including prefix).
+	 * @return the value.
+	 */
+	public String getMatchContent(String varName) {
+		return matchMap.get(varName);
 	}
 
 	public Map<String, String> getMatchMap() {
 		return matchMap;
+	}
+
+	public Semcode getSemc() {
+		return semc;
 	}
 
 	public Type getTypeIn() {
@@ -107,7 +129,10 @@ public class OpRecognizer {
 	}
 
 	public void publishVars(Translator trn) {
-		for (String name : publicNames)
-			trn.setVar(name, this.getMatchContent(name));
+		for (String name : publicNames) {
+			trn.setVar("@" + name, getMatchContent(name));
+			if (Debug.level >= 2)
+				System.out.println("Publish var: " + name + " val: " + getMatchContent(name));
+		}
 	}
 }

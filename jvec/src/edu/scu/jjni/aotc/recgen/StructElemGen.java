@@ -17,7 +17,7 @@ public abstract class StructElemGen extends OpGenerator {
 	@Override
 	public List<Instruction> insert(List<Instruction> insList,
 			ListIterator<Instruction> start) {
-		String elemNo = opr.getMatchContent("elem_no");
+		String elemNo = opr.getMatchContent(OpRecognizer.getMatchName("elem_no"));
 		int elemNumber = Integer.parseInt(elemNo);
 		return modifyGetElem(insList, start, elemNumber);
 	}

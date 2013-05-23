@@ -15,6 +15,7 @@ import cn.edu.sjtu.jllvm.VMCore.Operators.InstType;
 import cn.edu.sjtu.jllvm.VMCore.Types.Type;
 import cn.edu.sjtu.jllvm.VMCore.Types.TypeFactory;
 import edu.scu.jjni.aotc.Debug;
+import edu.scu.jjni.aotc.recgen.OpRecognizer;
 
 public class FunctionConverter {
 	/**
@@ -122,7 +123,10 @@ public class FunctionConverter {
 		List<String> fAttributes = fn.fAttributes;
 		int align = fn.align;
 		List<BasicBlock> basicBlocksPass1 = new LinkedList<BasicBlock>();
-		List<BasicBlock> basicBlocksPass2 = new LinkedList<BasicBlock>();
+		List<BasicBlock> basicBlocksPass2;
+		
+		if (Debug.level >= 1)
+			System.out.println("Processing function: " + fn.functionName);
 		
 		mapper.clear();
 
@@ -182,15 +186,28 @@ public class FunctionConverter {
 			}
 		}
 
-		// Convert code - Pass 1 (Semantic recognizer)
-		for (BasicBlock bs : fn.getBasicBlocks()) {
-			List<Instruction> list = new LinkedList<Instruction>();
-			list.addAll(bs.getInstructions());
+		// Code conversion for each argument
+		basicBlocksPass1 = fn.getBasicBlocks();
+		basicBlocksPass2 = new LinkedList<BasicBlock>();
+		for (String arg : mapper.getFuncArg()) {
+			if (Debug.level >= 1)
+				System.out.println("Processing argument: " + arg);
+			mapper.addVarMap(OpRecognizer.getPublicVar("argName"), arg);
 			
-			mapper.mapOperations(list);
-			
-			basicBlocksPass1.add(bs);
+			// Convert code - Pass 1 (Semantic recognizer)
+			for (BasicBlock bs : basicBlocksPass1) {
+				List<Instruction> list = new LinkedList<Instruction>();
+				list.addAll(bs.getInstructions());		
+				mapper.mapOperations(list);								
+				
+				// Add modified block
+				basicBlocksPass2.add(new BasicBlock(bs.getBlockID(), list));
+			}
 		}
+		
+		// Move pass2 to pass1, and clear pass2
+		basicBlocksPass1 = basicBlocksPass2;
+		basicBlocksPass2 = new LinkedList<BasicBlock>();
 		
 		// Convert code - Pass 2 (simple type mapping)
 		for (BasicBlock bs : basicBlocksPass1) {

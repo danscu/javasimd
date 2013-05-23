@@ -43,7 +43,7 @@ public class StoreInst extends cn.edu.sjtu.jllvm.VMCore.Instructions.StoreInst {
 		sb.append(operands.get(1));		
 		
 		// The remaining op is alignment
-		if (operands.size() >= 2) {
+		if (operands.size() > 2) {
 			sb.append(", ");
 			sb.append("align ");
 			sb.append(operands.get(2));

@@ -9,6 +9,7 @@ import org.antlr.v4.parse.ANTLRParser.throwsSpec_return;
 
 import cn.edu.sjtu.jllvm.VMCore.Instructions.Instruction;
 import cn.edu.sjtu.jllvm.VMCore.Types.Type;
+import edu.scu.jjni.aotc.Debug;
 import edu.scu.llvm.translate.VariableMapper.Semcode;
 
 public class ArrayAccessGen extends StructElemGen {
@@ -25,10 +26,13 @@ public class ArrayAccessGen extends StructElemGen {
 			ListIterator<Instruction> start, int elemNo) {
 		
 		OpGenerator opg = genMap.get(elemNo);
-		
+
 		if (opg == null) {
 			throw new RuntimeException("Cannot generate code for elem " + elemNo);
 		}
+		
+		if (Debug.level >= 1)
+			System.out.println("Modify code for " + opg.semc);				
 		
 		return opg.insert(insList, start);
 	}

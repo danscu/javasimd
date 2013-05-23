@@ -34,6 +34,7 @@ public class VariableMapper {
 	public enum Semcode {
 		// For argument
 		STORE_ARGUMENT,
+		LOAD_ARGUMENT,
 		
 		// For struct
 		GET_STRUCT_ELEM,
@@ -93,9 +94,9 @@ public class VariableMapper {
 	
 	
 	/**
-	 * Function argument set
+	 * Function argument list
 	 */
-	protected Set<String> localArgumentSet;
+	protected List<String> localArgumentList;
 	
 	/**
 	 * Variable map of the current function.
@@ -119,7 +120,7 @@ public class VariableMapper {
 	{
 		globalTypeMap = new ArrayList<TypeMap>();
 		localTypeMap = new ArrayList<TypeMap>();
-		localArgumentSet = new HashSet<String>();
+		localArgumentList = new ArrayList<String>();
 		varMap = new HashMap<String, Constant>();
 		translators = new ArrayList<Translator>();
 		matcher = new InstMatcher();
@@ -181,7 +182,7 @@ public class VariableMapper {
 	 */
 	public void addVarMap(String refName, String localVarName)
 	{
-		varMap.put("$" + refName, new LocalVariable(localVarName));
+		varMap.put(refName, new LocalVariable(localVarName));
 	}
 	
 	/**
@@ -189,7 +190,7 @@ public class VariableMapper {
 	 * @param javaType
 	 */
 	public Type mapType(Type javaArg)
-	{		
+	{
 		// 1. Search local type map
 		for (TypeMap tm : localTypeMap)
 			if (tm.javaType.equals(javaArg))
@@ -235,19 +236,21 @@ public class VariableMapper {
 			return mapped;
 		else
 			return javaArg;
-	}
+	}	
 	
 	/**
-	 * Convert a value.
+	 * Convert a value. If  <code>strict</code> is true, then throw an error
+	 * if refName is not found.
 	 */
-	public Constant mapVariable(String refName)
+	public Constant mapVariable(String refName, boolean strict)
 	{
 		Constant mapped = varMap.get(refName);
 		if (mapped != null)
 			return mapped;
-		else {
+		else if (strict)
 			throw new RuntimeException("Unknown refname for local variable");
-		}
+		else
+			return null;
 	}
 	
 	/**
@@ -312,22 +315,26 @@ public class VariableMapper {
 	 * @param bs BasicBlock to search
 	 */
 	public void mapOperations(List<Instruction> insList) {
-		for (Translator trn: translators) {
+		for (Translator trn: translators) {						
 			if (matcher.matchAndModify(trn, insList)) {
 				System.out.println("Modified"); // TODO
 			}
 		}
 	}
 	
+	public List<String> getFuncArg() {
+		return localArgumentList;
+	}
+	
 	public void clearFuncArg() {
-		localArgumentSet.clear();
+		localArgumentList.clear();
 	}
 	
 	public void addFuncArg(String string) {
-		localArgumentSet.add(string);
+		localArgumentList.add(string);
 	}
 
 	public boolean isFuncArg(String string) {
-		return localArgumentSet.contains(string);
+		return localArgumentList.contains(string);
 	}
 }
