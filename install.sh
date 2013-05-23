@@ -1,4 +1,4 @@
-LLVM_PKG=clang+llvm-3.2-x86_64-linux-ubuntu-12.04
+LLVM_PKG=clang+llvm-3.2-x86-linux-ubuntu-12.04
 DRAGONEGG_PKG=dragonegg-3.2.src
 
 PKG_SUFFIX=.tar.gz
