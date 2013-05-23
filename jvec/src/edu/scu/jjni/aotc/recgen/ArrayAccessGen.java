@@ -30,7 +30,7 @@ public class ArrayAccessGen extends StructElemGen {
 			throw new RuntimeException("Cannot generate code for elem " + elemNo);
 		}
 		
-		return opg.modify(insList, start);
+		return opg.insert(insList, start);
 	}
 	
 	public void addGenerator(int elemNo, OpGenerator opg) {

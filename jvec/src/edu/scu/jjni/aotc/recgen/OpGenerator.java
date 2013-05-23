@@ -1,6 +1,7 @@
 package edu.scu.jjni.aotc.recgen;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 
@@ -72,8 +73,12 @@ public class OpGenerator {
 	 * @param start
 	 * @return modified code.
 	 */
-	public List<Instruction> modify(List<Instruction> insList,
+	public List<Instruction> insert(List<Instruction> insList,
 			ListIterator<Instruction> start) {
-		return null;
+		// Insert code
+		for (Instruction ins : seq) {
+			start.add(ins);
+		}		
+		return insList;
 	}
 }

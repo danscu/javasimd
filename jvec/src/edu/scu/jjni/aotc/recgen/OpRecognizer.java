@@ -25,13 +25,15 @@ public class OpRecognizer {
 	protected Type typeOut;
 	protected List<Instruction> seq;
 	protected Map<String, String> matchMap;
-
+	protected List<String> publicNames; 
+	
 	public OpRecognizer(Semcode op, Type typeIn, Type typeOut) {
 		this.op = op;
 		this.typeIn = typeIn;
 		this.typeOut = typeOut;
 		seq = new ArrayList<Instruction>();
 		matchMap = new HashMap<String, String>();
+		publicNames = new ArrayList<String>();
 	}
 
 	/**
@@ -47,6 +49,18 @@ public class OpRecognizer {
 	}
 
 	/**
+	 * Use this function to generate temporary variable names for the
+	 * destination of the instructions.
+	 * 
+	 * @param n
+	 *            The sequential
+	 * @return the destination variable name
+	 */
+	public static String getArgMatchName(int n) {
+		return String.format("%%MA.%d", n);
+	}
+	
+	/**
 	 * Use this function to generate variable names to match specific
 	 * operands in the instructions
 	 * 
@@ -54,7 +68,8 @@ public class OpRecognizer {
 	 * @return the matching variable name
 	 */
 	public static String getMatchName(String id) {
-		return String.format("%%Ms.%s", id);
+		String name = String.format("%%Ms.%s", id);
+		return name;
 	}
 
 	public void addInstruction(Instruction inst) {
@@ -65,6 +80,16 @@ public class OpRecognizer {
 		return seq;
 	}
 
+	/**
+	 * Matched variables can be published for other generator to use.
+	 * Publish the variable name returned by getMatchName by this
+	 * function. Public names can be accessed by Translator.getVar().
+	 */
+	public void addPublicVar(String var) {
+		if (publicNames.contains(var))
+			publicNames.add(var);		
+	}
+	
 	public String getMatchContent(String id) {
 		return matchMap.get(getMatchName(id));
 	}
@@ -81,4 +106,8 @@ public class OpRecognizer {
 		return typeOut;
 	}
 
+	public void publishVars(Translator trn) {
+		for (String name : publicNames)
+			trn.setVar(name, this.getMatchContent(name));
+	}
 }

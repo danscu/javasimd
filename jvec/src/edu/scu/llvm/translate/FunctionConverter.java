@@ -138,9 +138,14 @@ public class FunctionConverter {
 		Argument env = new Argument(envType,
 				new ArrayList<String>() /* attributes */, 0 /* align */, envVal);
 		arguments.add(env);
-
+		
+		mapper.clearFuncArg();
+		
 		// Create arguments maps
 		for (Argument arg : fn.arguments) {
+			// Maintain function arguments in code recognition/generation context
+			mapper.addFuncArg(arg.getExpr().toString());
+			
 			// Convert the first from class to i8*
 			if (arg == fn.arguments.get(0)) {
 				assert (arg.getType().isPointerType());
@@ -186,7 +191,7 @@ public class FunctionConverter {
 			
 			basicBlocksPass1.add(bs);
 		}
-				
+		
 		// Convert code - Pass 2 (simple type mapping)
 		for (BasicBlock bs : basicBlocksPass1) {
 			List<Instruction> list = new LinkedList<Instruction>();

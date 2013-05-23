@@ -19,11 +19,15 @@ import cn.edu.sjtu.jllvm.VMCore.Types.Type;
 import cn.edu.sjtu.jllvm.VMCore.Types.TypeFactory;
 import edu.scu.jjni.aotc.recgen.ArrayAccessGen;
 import edu.scu.jjni.aotc.recgen.JniEnvCallGen;
+import edu.scu.jjni.aotc.recgen.MatchVariable;
 import edu.scu.jjni.aotc.recgen.OpRecognizer;
+import edu.scu.jjni.aotc.recgen.Translator;
 import edu.scu.llvm.asm.InstFactory;
 import edu.scu.llvm.translate.FunctionConverter;
 import edu.scu.llvm.translate.VariableMapper;
 import edu.scu.llvm.translate.VariableMapper.Semcode;
+import edu.scu.llvm.translate.WildcardConstant;
+import edu.scu.llvm.translate.WildcardType;
 
 public class LLVM2Jni extends FunctionConverter {
 
@@ -50,6 +54,9 @@ public class LLVM2Jni extends FunctionConverter {
 		return content;
 	}
 	
+	static InstFactory fac = new InstFactory();
+	static ValueFactory vfac = new ValueFactory();	
+	
 	static public Type envType;
 	static public Type envTypePtr;
 	static public Type envTypePtrPtr;
@@ -57,10 +64,46 @@ public class LLVM2Jni extends FunctionConverter {
 	static public Type typeNullStructPtr;
 	static public Type typeNullStructPtrPtr;
 	
-	protected static void addStructElemTranslator(VariableMapper mapper) {
-		InstFactory fac = new InstFactory();
-		ValueFactory vfac = new ValueFactory();
+	protected static void addArgStoreRecognizer(VariableMapper mapper) {		
+		// 1st recognizer
+		OpRecognizer argStoreRec = new OpRecognizer(VariableMapper.Semcode.STORE_ARGUMENT,
+				null, null);
+		Translator trn = new Translator(argStoreRec, null);
+		mapper.addTranslator(trn);
+
+		int wildNo = 0;
 		
+		Type anyType = new WildcardType(OpRecognizer.getArgMatchName(wildNo++));
+		Type anyTypePtr = TypeFactory.getPointerType(anyType);
+		
+		// store i32 %unnamed_arg2, i32* %unnamed_arg_addr1, align 1
+		Constant pArg = new WildcardConstant(OpRecognizer.getArgMatchName(wildNo++)); /* match argument only */
+		Constant pArgAddr = new WildcardConstant(OpRecognizer.getMatchName("argAddr"));
+		Instruction ins = fac.createLoadStoreInst(pArgAddr /* dest */, InstType.storeInst,
+				// env_addr will be provided by associated recognizer
+				Arrays.asList(new Constant[] { pArg, pArgAddr}),
+				Arrays.asList(new Type[] { anyType, anyTypePtr}),
+				false /* volatile */);
+		argStoreRec.addInstruction(ins);
+	
+		// 2nd recognizer
+		argStoreRec = new OpRecognizer(VariableMapper.Semcode.STORE_ARGUMENT,
+				null, null);
+		trn = new Translator(argStoreRec, null);
+		mapper.addTranslator(trn);
+		
+		// %0 = load i32* %unnamed_arg_addr1, align 4
+		pArgAddr = new WildcardConstant(OpRecognizer.getMatchName("argAddr"));
+		Constant pArgLocal = new WildcardConstant(OpRecognizer.getMatchName("argLocal"));
+		ins = fac.createLoadStoreInst(pArgLocal /* dest */, InstType.loadInst,
+				// env_addr will be provided by associated recognizer
+				Arrays.asList(new Constant[] { pArgAddr }),
+				Arrays.asList(new Type[] { anyTypePtr }),
+				false /* volatile */);
+		argStoreRec.addInstruction(ins);
+	}
+
+	protected static void addStructElemTranslator(VariableMapper mapper) {
 		// Initialize the mapper with rich type support
 		Type javaStructBase = new Type(Type.StructTyID, "%\"struct.int[]\""); // TODO handle the wild card by the matcher
 		Type javaStructPtr = TypeFactory.getPointerType(javaStructBase);
@@ -83,14 +126,15 @@ public class LLVM2Jni extends FunctionConverter {
 				javaStructPtr, type0xi32Ptr);
 		ArrayAccessGen elemOpGen = new ArrayAccessGen(VariableMapper.Semcode.GET_STRUCT_ELEM, elemOpRec,
 				pi8_t, type0xi32Ptr);
-		mapper.addTranslator(elemOpRec, elemOpGen);
+		Translator trn = new Translator(elemOpRec, elemOpGen);
+		mapper.addTranslator(trn);
 		
 		int destNo = 0;
 		
 		// %1 = bitcast %"struct.int[]"* %0 to %struct.java.lang.Object*
 		Constant pObject = new LocalVariable(OpRecognizer.getMatchName(destNo++));		
 		Instruction ins = fac.createOperationInst(pObject, InstType.converInst,
-				Arrays.asList(new Constant[] { new LocalVariable(OpRecognizer.getMatchName("array_addr")) }),
+				Arrays.asList(new Constant[] { new WildcardConstant(OpRecognizer.getMatchName("argLocal")) }),
 				Arrays.asList(new Type[] { javaStructPtr, javaObjectPtr}),
 				"bitcast");
 		elemOpRec.addInstruction(ins);
@@ -128,42 +172,34 @@ public class LLVM2Jni extends FunctionConverter {
 				"bitcast");
 		
 		// Array access generators
-		FunctionType arrayBaseFType = (FunctionType) TypeFactory.getFunctionType(Arrays.asList(new Type[] {
-				i32_t, typeNullStructPtr, pi8_t
+		FunctionType arrayBaseFType = (FunctionType) TypeFactory.getFunctionType(
+				Arrays.asList(new Type[] {
+						i32_t, typeNullStructPtr, pi8_t, pi8_t
 		}));
+	
+		Constant env_addr = new WildcardConstant(OpRecognizer.getMatchName("env_addr"));
+		Constant iscopy = new WildcardConstant(OpRecognizer.getMatchName("is_copy"));
 		
 		JniEnvCallGen arrayBaseGen = new JniEnvCallGen(Semcode.GET_ARRAY_BASE,
-				elemOpRec, null, pi8_t, "array_length" /* todo */, JNIFunc_GetIntArrayElements,
-				arrayBaseFType /* funcType */, null /* list types */, null /* list args */);
+				elemOpRec, null, pi8_t, env_addr, JNIFunc_GetIntArrayElements,
+				arrayBaseFType /* funcType */,
+				Arrays.asList(new Type[] {envTypePtrPtr})/* list types */,
+				Arrays.asList(new Constant[] {env_addr})/* list args */);
 		elemOpGen.addGenerator(1 /* elem 1 */, arrayBaseGen);
 		
+		FunctionType arrayLenFType = (FunctionType) TypeFactory.getFunctionType(
+				Arrays.asList(new Type[] {
+						i32_t, typeNullStructPtr, pi8_t, 
+		}));
+
+		// call i32 %6(%struct.JNINativeInterface_** %0, i8* %1) nounwind		
 		JniEnvCallGen arrayLenGen = new JniEnvCallGen(Semcode.GET_ARRAY_LENGTH,
-				elemOpRec, null, pi8_t, "array_addr" /* todo */, JNIFunc_GetIntArrayLength,
-				arrayBaseFType /* funcType */, null /* list types */, null /* list args */);
+				elemOpRec, null, pi8_t, env_addr, JNIFunc_GetIntArrayLength,
+				arrayBaseFType /* funcType */,
+				Arrays.asList(new Type[] {envTypePtrPtr, pi8_t})/* list types */,
+				Arrays.asList(new Constant[] { env_addr, iscopy })/* list args */);
 		elemOpGen.addGenerator(2 /* elem 2 */, arrayLenGen);
 	}
-
-	/*
-	protected static void addArrayTransform(VariableMapper mapper) {		
-		// Initialize the mapper with rich type support
-		Type javaArrayIntBase = new Type(Type.StructTyID, "%\"struct.int[]\"");
-		Type javaArrayInt = TypeFactory.getPointerType(javaArrayIntBase);
-		
-		Type jniArrayIntBase = TypeFactory.getInt8Type();
-		Type jniArrayInt = TypeFactory.getPointerType(jniArrayIntBase);			
-		
-		VariableMapper.TypeMap tmArrayInt = mapper.addGlobalTypeMap(javaArrayInt, jniArrayInt);		
-		
-		tmArrayInt.addOp(
-				new VariableMapper.Operator(VariableMapper.Opcode.READ) {
-					@Override
-					public List<Instruction> exec(Object... args) {
-						return null;
-					}
-				}
-				);
-	}
-	*/
 	
 	private static VariableMapper getJNIMapper() {
 		VariableMapper mapper = new VariableMapper();
@@ -176,6 +212,7 @@ public class LLVM2Jni extends FunctionConverter {
 		typeNullStructPtr = TypeFactory.getPointerType(typeNullStruct);
 		typeNullStructPtrPtr = TypeFactory.getPointerType(typeNullStructPtr);
 		
+		addArgStoreRecognizer(mapper);
 		addStructElemTranslator(mapper);
 		
 		return mapper;

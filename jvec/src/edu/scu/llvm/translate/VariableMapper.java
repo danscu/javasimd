@@ -2,18 +2,22 @@ package edu.scu.llvm.translate;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.antlr.v4.runtime.misc.Pair;
 
 import cn.edu.sjtu.jllvm.VMCore.BasicBlock;
 import cn.edu.sjtu.jllvm.VMCore.Constants.Constant;
+import cn.edu.sjtu.jllvm.VMCore.Constants.LocalVariable;
 import cn.edu.sjtu.jllvm.VMCore.Instructions.Instruction;
 import cn.edu.sjtu.jllvm.VMCore.Types.Type;
 import cn.edu.sjtu.jllvm.VMCore.Types.TypeFactory;
 import edu.scu.jjni.aotc.recgen.OpGenerator;
 import edu.scu.jjni.aotc.recgen.OpRecognizer;
+import edu.scu.jjni.aotc.recgen.Translator;
 
 public class VariableMapper {
 	/**
@@ -28,6 +32,9 @@ public class VariableMapper {
 	 * @author danke
 	 */
 	public enum Semcode {
+		// For argument
+		STORE_ARGUMENT,
+		
 		// For struct
 		GET_STRUCT_ELEM,
 		
@@ -84,6 +91,12 @@ public class VariableMapper {
 	 */	
 	protected List<TypeMap> localTypeMap;
 	
+	
+	/**
+	 * Function argument set
+	 */
+	protected Set<String> localArgumentSet;
+	
 	/**
 	 * Variable map of the current function.
 	 */
@@ -92,7 +105,7 @@ public class VariableMapper {
 	/**
 	 * Recognizer
 	 */
-	protected List<Pair<OpRecognizer,OpGenerator>> translators;	
+	protected List<Translator> translators;	
 	
 	/**
 	 * Matcher
@@ -106,8 +119,9 @@ public class VariableMapper {
 	{
 		globalTypeMap = new ArrayList<TypeMap>();
 		localTypeMap = new ArrayList<TypeMap>();
+		localArgumentSet = new HashSet<String>();
 		varMap = new HashMap<String, Constant>();
-		translators = new ArrayList<Pair<OpRecognizer,OpGenerator>>();
+		translators = new ArrayList<Translator>();
 		matcher = new InstMatcher();
 	}
 	
@@ -137,8 +151,9 @@ public class VariableMapper {
 		return tmap;
 	}
 	
-	public void addTranslator(OpRecognizer opr, OpGenerator opg) {
-		translators.add(new Pair<OpRecognizer, OpGenerator>(opr, opg));
+	public void addTranslator(Translator trn) {
+		translators.add(trn);
+		trn.setMapper(this);
 	}
 	
 	/**
@@ -161,6 +176,15 @@ public class VariableMapper {
 	}
 	
 	/**
+	 * Add a local variable mapping by string. Internally, prefix the string
+	 * by '$'
+	 */
+	public void addVarMap(String refName, String localVarName)
+	{
+		varMap.put("$" + refName, new LocalVariable(localVarName));
+	}
+	
+	/**
 	 * Find a mapping for a Java type from the templates.
 	 * @param javaType
 	 */
@@ -174,14 +198,14 @@ public class VariableMapper {
 		// 2. Search global type map
 		for (TypeMap tm : globalTypeMap)
 			if (tm.javaType.equals(javaArg))
-				return tm.jniType;											
+				return tm.jniType;								
 		
 		// 3. Search recognizer-generator map
-		for (Pair<OpRecognizer,OpGenerator> pair: translators) {
-			OpRecognizer opr = pair.a;
-			OpGenerator opg = pair.b;
-			if (opr.getTypeIn().equals(javaArg))
-				return opg.getTypeIn();						
+		for (Translator trn: translators) {
+			OpRecognizer opr = trn.getOpr();
+			OpGenerator opg = trn.getOpg();
+			if (opr.getTypeIn() != null && opr.getTypeIn().equals(javaArg))
+				return opg.getTypeIn();
 		}
 		
 		// 4. Types without conversion
@@ -211,6 +235,19 @@ public class VariableMapper {
 			return mapped;
 		else
 			return javaArg;
+	}
+	
+	/**
+	 * Convert a value.
+	 */
+	public Constant mapVariable(String refName)
+	{
+		Constant mapped = varMap.get(refName);
+		if (mapped != null)
+			return mapped;
+		else {
+			throw new RuntimeException("Unknown refname for local variable");
+		}
 	}
 	
 	/**
@@ -275,12 +312,22 @@ public class VariableMapper {
 	 * @param bs BasicBlock to search
 	 */
 	public void mapOperations(List<Instruction> insList) {
-		for (Pair<OpRecognizer,OpGenerator> pair: translators) {
-			OpRecognizer opr = pair.a;
-			OpGenerator opg = pair.b;			
-			if (matcher.matchAndModify(opr, opg, insList)) {
+		for (Translator trn: translators) {
+			if (matcher.matchAndModify(trn, insList)) {
 				System.out.println("Modified"); // TODO
 			}
 		}
+	}
+	
+	public void clearFuncArg() {
+		localArgumentSet.clear();
+	}
+	
+	public void addFuncArg(String string) {
+		localArgumentSet.add(string);
+	}
+
+	public boolean isFuncArg(String string) {
+		return localArgumentSet.contains(string);
 	}
 }
