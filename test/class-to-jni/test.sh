@@ -2,6 +2,10 @@ DRAGONEGG=../../dragonegg.so
 GCJ=gcj
 FILE=$1
 
+if [[ ! `uname -a` =~ .*_64.* ]]; then
+  LLC_ARCH="-march=x86"
+fi
+
 FUNC="testSum testArraySum"
 
 if [ "$1" == "" ]; then
@@ -25,7 +29,7 @@ echo 4. Compile modified LLVM IR
 llvm-as vdir/$FILE.opt.s -o $FILE.ll.bc
 
 echo 5. Compiling LLVM bitcode to assembly
-llc $FILE.ll.bc
+llc ${LLC_ARCH} $FILE.ll.bc
 
 echo 6. Link assembly
 gcc -o $FILE.o -c -fPIC $FILE.ll.s
