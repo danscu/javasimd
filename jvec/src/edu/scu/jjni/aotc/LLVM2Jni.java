@@ -212,7 +212,7 @@ public class LLVM2Jni extends FunctionConverter {
 		typeNullStruct = TypeFactory.getStructType(null);
 		typeNullStructPtr = TypeFactory.getPointerType(typeNullStruct);
 		typeNullStructPtrPtr = TypeFactory.getPointerType(typeNullStructPtr);
-		
+
 		addArgStoreRecognizer(mapper);
 		addStructElemTranslator(mapper);
 		

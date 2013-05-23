@@ -122,8 +122,8 @@ public class FunctionConverter {
 		List<String> pAttributes = fn.pAttributes;
 		List<String> fAttributes = fn.fAttributes;
 		int align = fn.align;
-		List<BasicBlock> basicBlocksPass1 = new LinkedList<BasicBlock>();
-		List<BasicBlock> basicBlocksPass2;
+		List<BasicBlock> basicBlocks;
+		List<BasicBlock> basicBlocksLast;
 		
 		if (Debug.level >= 1)
 			System.out.println("Processing function: " + fn.functionName);
@@ -187,30 +187,32 @@ public class FunctionConverter {
 		}
 
 		// Code conversion for each argument
-		basicBlocksPass1 = fn.getBasicBlocks();
-		basicBlocksPass2 = new LinkedList<BasicBlock>();
+		basicBlocksLast = fn.getBasicBlocks();
 		for (String arg : mapper.getFuncArg()) {
 			if (Debug.level >= 1)
 				System.out.println("Processing argument: " + arg);
+			
 			mapper.addVarMap(OpRecognizer.getPublicVar("argName"), arg);
 			
+			basicBlocks = basicBlocksLast;
+			basicBlocksLast = new LinkedList<BasicBlock>();
+			
 			// Convert code - Pass 1 (Semantic recognizer)
-			for (BasicBlock bs : basicBlocksPass1) {
+			for (BasicBlock bs : basicBlocks) {
 				List<Instruction> list = new LinkedList<Instruction>();
 				list.addAll(bs.getInstructions());		
 				mapper.mapOperations(list);								
 				
 				// Add modified block
-				basicBlocksPass2.add(new BasicBlock(bs.getBlockID(), list));
+				basicBlocksLast.add(new BasicBlock(bs.getBlockID(), list));
 			}
 		}
 		
-		// Move pass2 to pass1, and clear pass2
-		basicBlocksPass1 = basicBlocksPass2;
-		basicBlocksPass2 = new LinkedList<BasicBlock>();
+		basicBlocks = basicBlocksLast;
+		basicBlocksLast = new LinkedList<BasicBlock>();
 		
 		// Convert code - Pass 2 (simple type mapping)
-		for (BasicBlock bs : basicBlocksPass1) {
+		for (BasicBlock bs : basicBlocks) {
 			List<Instruction> list = new LinkedList<Instruction>();
 
 			for (Instruction ins : bs.getInstructions()) {
@@ -268,7 +270,7 @@ public class FunctionConverter {
 				list.add(ins);
 			}
 
-			basicBlocksPass2.add(new BasicBlock(bs.getBlockID(), list));
+			basicBlocksLast.add(new BasicBlock(bs.getBlockID(), list));
 		}		
 				
 		// Function attributes
@@ -282,7 +284,7 @@ public class FunctionConverter {
 		
 		return new FunctionWriter(linkage, visibility, cconv, pAttributes,
 				returnType, name, arguments, isVarargFunction, fAttributes,
-				align, basicBlocksPass2);
+				align, basicBlocksLast);
 	}
 
 	/**
