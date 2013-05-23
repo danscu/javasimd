@@ -29,6 +29,7 @@ CLASSES := $(addprefix $(BINDIR)/,$(CLASSES))
 all: $(CLASSES)
 
 $(BINDIR)/%.class: $(SRCDIR)/%.java
+	@mkdir -p bin
 	$(JC) $(JFLAGS) $<
 
 clean:
