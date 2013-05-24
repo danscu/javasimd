@@ -177,33 +177,50 @@ public class LLVM2Jni extends FunctionConverter {
 				Arrays.asList(new Constant[] { objBase }),
 				Arrays.asList(new Type[] { pi8_t, arrayPtrType }),
 				"bitcast");
-		elemOpRec.addInstruction(ins);				
+		elemOpRec.addInstruction(ins);
 		
 		// %4 = getelementptr inbounds %"struct.int[]"* %3, i32 0, i32 2
-		Constant pElem = new LocalVariable(trn.getRecTmpName());
+		Constant pElem = new WildcardConstant(Translator.getPublicVar("objElemPtr")); // publishable
 		ins = fac.createGetElePtrInst(pElem, InstType.getElePtrInst,
 				Arrays.asList(new Constant[] { pStruct, vfac.createConstantValue(SimpleConstantValue.intConst, "0"),
 						new LocalVariable(OpRecognizer.getMatchName("elem_no")) }),
 				Arrays.asList(new Type[] { arrayPtrType, i32_t, i32_t}),
 				true /* inbounds */);
 		elemOpRec.addInstruction(ins);
+		elemOpRec.addPublicVar(pElem.getValue());
 		
-		// %5 = bitcast [4 x i8]* %4 to [0 x i32]*
-		Constant pBaseAddr = new LocalVariable(trn.getRecTmpName());
-		ins = fac.createOperationInst(pBaseAddr, InstType.converInst,
-				Arrays.asList(new Constant[] { pElem }),
-				Arrays.asList(new Type[] { type4xi8Ptr, type0xi32Ptr}),
-				"bitcast");
-//		elemOpRec.addInstruction(ins);
+		/*
+		 *  Array element access recognizer
+		 */
+		if (false) {
+			OpRecognizer arrayBaseRec = new OpRecognizer(VariableMapper.Semcode.GET_STRUCT_ELEM,
+					javaStructPtr, type0xi32Ptr);
+			trn = new Translator(arrayBaseRec, null); // TODO eraser
+			mapper.addTranslator(trn);
+
+			// %5 = bitcast [4 x i8]* %4 to [0 x i32]*
+			pElem = new WildcardConstant(Translator.getPublicVar("objElemPtr")); // published
+			Constant pArrayBaseAddr = new WildcardConstant(OpRecognizer.getMatchName("arrayBasePtr")); // publishable
+			ins = fac.createOperationInst(pArrayBaseAddr, InstType.converInst,
+					Arrays.asList(new Constant[] { pElem }),
+					Arrays.asList(new Type[] { type4xi8Ptr, type0xi32Ptr}),
+					"bitcast");
+			arrayBaseRec.addInstruction(ins);
+			arrayBaseRec.addPublicVar(pArrayBaseAddr.getValue());
+		}
+		
+		/*
+		 *  Array element access generator		
+		 */		
+		// Get existing public vars
+		Constant env_addr = new WildcardConstant(Translator.getPublicVar("localEnv"));
+		Constant iscopy = new WildcardConstant(Translator.getPublicVar("isCopy"));
 		
 		// Array access generators
 		FunctionType arrayBaseFType = (FunctionType) TypeFactory.getFunctionType(
 				Arrays.asList(new Type[] {
 						i32_t, typeNullStructPtr, pi8_t, pi8_t
-		}));
-	
-		Constant env_addr = new WildcardConstant(Translator.getPublicVar("localEnv"));
-		Constant iscopy = new WildcardConstant(Translator.getPublicVar("isCopy"));
+		}));			
 		
 		JniEnvCallGen arrayLenGen = new JniEnvCallGen(Semcode.GET_ARRAY_LENGTH,
 				elemOpRec, null, pi8_t, env_addr, JNIFunc_GetIntArrayLength,
