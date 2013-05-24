@@ -40,8 +40,8 @@ public class JniEnvSetupGen extends OpGenerator {
 		Constant env_addr = new LocalVariable("%env_addr");
 		ins = fac.createSimpleInst(env_addr, InstType.allocaInst,
 				/* align 8 */
-				Arrays.asList(new Constant[] { vfac.createConstantValue(SimpleConstantValue.intConst, "0") }),
-				Arrays.asList(new Type[] { LLVM2Jni.envTypePtrPtr }));		
+				Arrays.asList(new Constant[] { vfac.createConstantValue(SimpleConstantValue.intConst, "8") }),
+				Arrays.asList(new Type[] { LLVM2Jni.envTypePtrPtr }));
 		addInstruction(start, ins);
 		
 		// store %struct.JNINativeInterface_** %env, %struct.JNINativeInterface_*** %env_addr, align 1
