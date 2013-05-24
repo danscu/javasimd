@@ -1,4 +1,8 @@
-LLVM_PKG=clang+llvm-3.2-x86-linux-ubuntu-12.04
+if [[ ! `uname -a` =~ .*_64.* ]]; then
+  LLV="_64"
+fi
+
+LLVM_PKG=clang+llvm-3.2-x86${LLV}-linux-ubuntu-12.04
 DRAGONEGG_PKG=dragonegg-3.2.src
 
 PKG_SUFFIX=.tar.gz
