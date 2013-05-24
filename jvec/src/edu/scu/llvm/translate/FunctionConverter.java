@@ -238,7 +238,8 @@ public class FunctionConverter {
 
 		// Add cleanup code for conditional generators
 		mapper.addCleanupCode(cleanupBlock.getInstructions());
-		basicBlocksLast.add(basicBlocksLast.size(), cleanupBlock);		
+		if (cleanupBlock.getNumInst() != 0)
+			basicBlocksLast.add(basicBlocksLast.size(), cleanupBlock);
 		
 		// Convert code - Pass 2 (simple type mapping)
 		basicBlocks = basicBlocksLast;
