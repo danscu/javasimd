@@ -21,9 +21,9 @@ public class HelloWorld {
     private int testSum(int n) {
 	int i;
 	int sum = 0;
-	for (i = 0; i < 2*n; i++)
+	for (i = 0; i < n; i++)
 		sum += i;
-	return i;
+	return sum;
     }
 
     private int testArraySum(int array[]) {
