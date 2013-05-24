@@ -6,7 +6,7 @@ import cn.edu.sjtu.jllvm.VMCore.Constants.Constant;
 import cn.edu.sjtu.jllvm.VMCore.Types.Type;
 
 public class GetElePtrInst extends Instruction {
-	private boolean inbounds;
+	protected boolean inbounds;
 	
 	public GetElePtrInst(Constant dest, int opcode, List<Constant> operands, List<Type> types, boolean inbounds){
 		super(dest, opcode, operands, types);
@@ -17,5 +17,5 @@ public class GetElePtrInst extends Instruction {
 	
 	public static GetElePtrInst create(Constant dest, int opcode, List<Constant> operands, List<Type> types, boolean inbounds){
 		return new GetElePtrInst(dest, opcode, operands, types, inbounds);
-	}
+	}	
 }

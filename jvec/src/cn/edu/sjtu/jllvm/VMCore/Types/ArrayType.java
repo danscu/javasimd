@@ -16,4 +16,8 @@ public class ArrayType extends DerivedType {
 	public static ArrayType create(int length, Type eleType){
 		return new ArrayType(length, eleType);
 	}
+
+	public int getLength() {
+		return length;
+	}
 }

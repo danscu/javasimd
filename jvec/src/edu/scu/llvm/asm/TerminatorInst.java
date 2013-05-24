@@ -53,8 +53,10 @@ public class TerminatorInst extends
                 sb.append("label ");
                 sb.append(operands.get(2));
             }
+        } else if (opcode == InstType.unreachableInst) {
+        	// nothing
         } else
-            return super.toString();
+        	return super.toString();
         
         return sb.toString();
     }

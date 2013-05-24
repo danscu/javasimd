@@ -41,10 +41,11 @@ public class CallInst extends cn.edu.sjtu.jllvm.VMCore.Instructions.CallInst {
             sb.append(' ');
         }
         
-        for (String s : getpAttributes()) {
-            sb.append(s);
-            sb.append(' ');
-        }
+        if (getpAttributes() != null)
+	        for (String s : getpAttributes()) {
+	            sb.append(s);
+	            sb.append(' ');
+	        }
         
         sb.append(types.get(0));
         sb.append(" ");
@@ -67,10 +68,11 @@ public class CallInst extends cn.edu.sjtu.jllvm.VMCore.Instructions.CallInst {
         
         sb.append(')');
 
-        for (String s : getfAttributes()) {
-            sb.append(' ');
-            sb.append(s);
-        }
+        if (getfAttributes() != null)
+	        for (String s : getfAttributes()) {
+	            sb.append(' ');
+	            sb.append(s);
+	        }
         
         return sb.toString();
     }	

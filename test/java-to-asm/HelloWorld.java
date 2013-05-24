@@ -21,15 +21,15 @@ public class HelloWorld {
     private int testSum(int n) {
 	int i;
 	int sum = 0;
-	for (i = 0; i < n; i++)
+	for (i = 0; i < 2*n; i++)
 		sum += i;
 	return i;
     }
 
-    private int testArraySum(int[] array) {
+    private int testArraySum(int array[]) {
 	int sum = 0;
 	for (int i = 0; i < array.length; i++)
-	    sum += i;
+	    sum += array[i];
 	return sum;
     }
 

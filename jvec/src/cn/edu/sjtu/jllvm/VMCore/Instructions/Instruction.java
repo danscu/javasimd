@@ -203,10 +203,15 @@ public class Instruction extends User {
 	public List<Constant> getOperands() {
 		return operands;
 	}
+	
 	public List<Type> getTypes() {
 		return types;
 	}
 
+	public void setTypes(List<Type> newTypes) {
+		types = newTypes;
+	}
+	
 	@Override
 	public String toString() {
 		return super.toString() + "; ****** NEED CODEGEN ******";

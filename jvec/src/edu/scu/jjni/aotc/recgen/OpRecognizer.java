@@ -72,18 +72,6 @@ public class OpRecognizer {
 		String name = String.format("%%Ms.%s", id);
 		return name;
 	}
-
-	/**
-	 * Use this function to generate variable names to match specific
-	 * operands in the instructions
-	 * 
-	 * @param m
-	 * @return the matching variable name
-	 */
-	public static String getPublicVar(String id) {
-		String name = String.format("@%%Ms.%s", id);
-		return name;
-	}	
 	
 	public void addInstruction(Instruction inst) {
 		seq.add(inst);

@@ -22,13 +22,14 @@ public class InstrName {
 		table[InstType.retInst] = "ret";
 		table[InstType.brInst] = "br";
 		table[InstType.phiInst] = "phi";
+		table[InstType.getElePtrInst] = "getelementptr";
+		table[InstType.unreachableInst] = "unreachable";
 	}
 	
 	public static String op(int opcode) {
 	    String res = table[opcode];
 	    if (res == null) {
-	        System.err.println("Error: opcode is not yet implemented " + opcode);
-	        return "****FIXME****";
+	        throw new RuntimeException("Error: opcode is not yet implemented " + opcode);
 	    }
 	    return res;
 	}

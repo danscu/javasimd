@@ -15,7 +15,9 @@ import cn.edu.sjtu.jllvm.VMCore.Operators.InstType;
 import cn.edu.sjtu.jllvm.VMCore.Types.Type;
 import cn.edu.sjtu.jllvm.VMCore.Types.TypeFactory;
 import edu.scu.jjni.aotc.Debug;
+import edu.scu.jjni.aotc.LLVM2Jni;
 import edu.scu.jjni.aotc.recgen.OpRecognizer;
+import edu.scu.jjni.aotc.recgen.Translator;
 
 public class FunctionConverter {
 	/**
@@ -134,8 +136,7 @@ public class FunctionConverter {
 		name = mapper.convertFuncName(fn.functionName, null);
 
 		// JNI env
-		Type envType = new Type(Type.StructTyID,
-				"%struct.JNINativeInterface_**");
+		Type envType = LLVM2Jni.envTypePtrPtr;
 		Constant envVal = new Constant();
 		envVal.setType(envType);
 		envVal.setValue("%env");
@@ -143,7 +144,17 @@ public class FunctionConverter {
 				new ArrayList<String>() /* attributes */, 0 /* align */, envVal);
 		arguments.add(env);
 		
+		// Add common JNI types
+		mapper.addGlobalTypeMap(LLVM2Jni.envType, LLVM2Jni.envType); // allows new type
+		mapper.addGlobalTypeMap(LLVM2Jni.typeNullStruct, LLVM2Jni.typeNullStruct); // allows new type
+		mapper.addGlobalTypeMap(LLVM2Jni.typeJavaObject, LLVM2Jni.typeNullStruct); // remove Object
+		
+		// For function argument matching (not used currently) because argument name
+		// is passed to one at a time.
 		mapper.clearFuncArg();
+		
+		// Publish the %env variable name
+		mapper.addVarMap(Translator.getPublicVar("envArg"), envVal.toString());		
 		
 		// Create arguments maps
 		for (Argument arg : fn.arguments) {
@@ -186,32 +197,53 @@ public class FunctionConverter {
 			}
 		}
 
+		// Add unconditional init code to the first BasicBlock
+		mapper.addInitCode(fn.getBasicBlocks().get(0).getInstructions());		
+		
 		// Code conversion for each argument
 		basicBlocksLast = fn.getBasicBlocks();
+		BasicBlock cleanupBlock = new BasicBlock("JJNIcleanup", new LinkedList<Instruction>());
+		
 		for (String arg : mapper.getFuncArg()) {
 			if (Debug.level >= 1)
 				System.out.println("Processing argument: " + arg);
 			
-			mapper.addVarMap(OpRecognizer.getPublicVar("argName"), arg);
+			mapper.addVarMap(Translator.getPublicVar("argName"), arg);
 			
 			basicBlocks = basicBlocksLast;
 			basicBlocksLast = new LinkedList<BasicBlock>();
 			
+			boolean first = true;
+			BasicBlock firstBlock = null;			
+			
 			// Convert code - Pass 1 (Semantic recognizer)
 			for (BasicBlock bs : basicBlocks) {
 				List<Instruction> list = new LinkedList<Instruction>();
-				list.addAll(bs.getInstructions());		
-				mapper.mapOperations(list);								
+				list.addAll(bs.getInstructions());
+
+				if (bs.getBlockID().equals("\"3\""))
+					System.out.println("Hit");		
+				
+				mapper.mapOperations(list, firstBlock, cleanupBlock);
 				
 				// Add modified block
-				basicBlocksLast.add(new BasicBlock(bs.getBlockID(), list));
+				BasicBlock newBB = new BasicBlock(bs.getBlockID(), list);
+				basicBlocksLast.add(newBB);
+				if (first) {
+					first = false;
+					firstBlock = newBB;
+				}
 			}
 		}
+
+		// Add cleanup code for conditional generators
+		mapper.addCleanupCode(cleanupBlock.getInstructions());
+		basicBlocksLast.add(basicBlocksLast.size(), cleanupBlock);		
 		
+		// Convert code - Pass 2 (simple type mapping)
 		basicBlocks = basicBlocksLast;
 		basicBlocksLast = new LinkedList<BasicBlock>();
 		
-		// Convert code - Pass 2 (simple type mapping)
 		for (BasicBlock bs : basicBlocks) {
 			List<Instruction> list = new LinkedList<Instruction>();
 
@@ -236,7 +268,6 @@ public class FunctionConverter {
 						continue;
 				}
 
-				Constant dest = ins.getDest();
 				List<Type> types = new ArrayList<Type>();
 
 				// Map types
@@ -247,17 +278,20 @@ public class FunctionConverter {
 					if (dst == null) {
 						System.out.println("Skipping function "
 								+ fn.getFunctionName()
+								+ ", instruction " + ins
 								+ ", cannot convert local variable type: "
 								+ t.getTypeString());
 						return null;
+					} else {
+						if (!t.equals(dst) && Debug.level >= 2)
+							System.out.println("Type " + t + " mapped to " + dst);
 					}
 
 					types.add(dst);
 				}
 
 				// Modify types
-				ins.getTypes().clear();
-				ins.getTypes().addAll(types);
+				ins.setTypes(types);
 
 				// Modify operands
 				for (Constant c : ins.getOperands()) {
@@ -271,8 +305,8 @@ public class FunctionConverter {
 			}
 
 			basicBlocksLast.add(new BasicBlock(bs.getBlockID(), list));
-		}		
-				
+		}
+		
 		// Function attributes
 		if (ignoreFAttr != null) {
 			fAttributes = new ArrayList<String>();

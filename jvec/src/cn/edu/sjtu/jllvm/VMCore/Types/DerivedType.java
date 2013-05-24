@@ -18,4 +18,8 @@ public abstract class DerivedType extends Type {
 	public Type getSubType(){
 		return subType;
 	}
+	
+	public List<Type> getSubTypes() {
+		return subTypes;
+	}	
 }

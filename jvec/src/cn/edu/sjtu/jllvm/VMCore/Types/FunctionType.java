@@ -45,5 +45,5 @@ public class FunctionType extends DerivedType {
 	
 	public Type getRetType() {
 		return subTypes.get(0);
-	}
+	}	
 }

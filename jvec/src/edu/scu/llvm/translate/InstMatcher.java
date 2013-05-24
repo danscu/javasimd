@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 
+import cn.edu.sjtu.jllvm.VMCore.BasicBlock;
 import cn.edu.sjtu.jllvm.VMCore.Constants.Constant;
 import cn.edu.sjtu.jllvm.VMCore.Constants.LocalVariable;
 import cn.edu.sjtu.jllvm.VMCore.Instructions.Instruction;
@@ -15,6 +16,10 @@ import edu.scu.jjni.aotc.recgen.OpGenerator;
 import edu.scu.jjni.aotc.recgen.OpRecognizer;
 import edu.scu.jjni.aotc.recgen.Translator;
 
+/**
+ * This class matches instructions against defined patterns 
+ * @author danke
+ */
 public class InstMatcher {
 	/**
 	 * Matched variables
@@ -29,25 +34,41 @@ public class InstMatcher {
 	public InstMatcher() {
 	}
 
-	protected boolean isGlobalVar(Constant constant) {
+	public static boolean isGlobalVar(Constant constant) {
 		if (constant == null)
 			return false;
 		return constant.getValue().startsWith("@");
 	}
-	
-	protected boolean isWildcard(Constant constant) {
+
+	/**
+	 * Checks if a variable is a wildcard
+	 * @param constant The variable.
+	 * @return true if the variable is a wildcard.
+	 */
+	public static boolean isWildcard(Constant constant) {
 		if (constant == null)
 			return false;
 		return constant.getValue().startsWith("%M") ||
 				constant.getValue().startsWith("@%M");
 	}
-
-	protected boolean isArgWildcard(Constant constant) {
+	
+	/**
+	 * Checks if a variable is a wildcard that matches only
+	 * function arguments.
+	 * @param constant
+	 * @return true if it is wildcard and matches only function arguments.
+	 */
+	public static boolean isArgWildcard(Constant constant) {
 		return constant.getValue().startsWith("%MA") ||
 				constant.getValue().startsWith("@%MA");
 	}
 	
-	private boolean isWildcard(Type insType) {
+	/**
+	 * Checks if a type is a wildcard.
+	 * @param insType
+	 * @return true if wildcard.
+	 */
+	public boolean isWildcard(Type insType) {
 		return insType instanceof WildcardType;
 	}
 	
@@ -262,7 +283,8 @@ public class InstMatcher {
 		return MatchResult.MATCH;
 	}
 
-	public boolean matchAndModify(Translator trn, List<Instruction> insList) {
+	public boolean matchAndModify(Translator trn, List<Instruction> insList, BasicBlock initBlock,
+			BasicBlock cleanupBlock) {
 		OpRecognizer opr = trn.getOpr();
 		OpGenerator opg = trn.getOpg();
 		
@@ -291,10 +313,13 @@ public class InstMatcher {
 					
 					if (opg != null) {
 						changed = true;
-						insList = modifyCode(insList, iit, trn);						
+						insList = modifyCode(trn, insList, iit, initBlock, cleanupBlock);
+
+						// rewind to find other matches
+						iit = insList.listIterator();
+						unbindAll();
+						continue;
 					}
-					
-					break;
 				}
 				iit.next();
 			}
@@ -309,12 +334,14 @@ public class InstMatcher {
 	 * 
 	 * @param start
 	 *            Start iterator of the section to be modified.
+	 * @param initBlock 
+	 * @param cleanupBlock 
 	 * @param opg
 	 *            Code generator.
 	 * @return The modified instructions.
 	 */
-	private List<Instruction> modifyCode(List<Instruction> insList,
-			ListIterator<Instruction> start, Translator trn) {		
-		return trn.modify(insList, start);
+	private List<Instruction> modifyCode(Translator trn, List<Instruction> insList,
+			ListIterator<Instruction> start, BasicBlock initBlock, BasicBlock cleanupBlock) {
+		return trn.modify(trn, insList, start, initBlock, cleanupBlock);
 	}
 }

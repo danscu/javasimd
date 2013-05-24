@@ -1,7 +1,5 @@
 package edu.scu.jjni.aotc.recgen;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 
@@ -20,7 +18,7 @@ public class OpGenerator {
 	protected Type typeIn;
 	protected Type typeOut;
 	OpRecognizer opr;
-
+	
 	public OpGenerator(Semcode semc, OpRecognizer opr, Type typeIn,
 			Type typeOut) {
 		this.semc = semc;
@@ -39,7 +37,7 @@ public class OpGenerator {
 	 * @return the variable name
 	 */
 	public static String getTmpName(int n) {
-		return String.format("%%R.%d", n);
+		return String.format("%%Gen.%d", n);
 	}
 
 	public void addInstruction(ListIterator<Instruction> it, Instruction inst) {
@@ -57,13 +55,42 @@ public class OpGenerator {
 	}
 
 	/**
-	 * Modify code.
+	 * Insert initialization code at the beginning of a function
+	 * @param trn
+	 * @param insList
+	 * @param start
+	 * @return
+	 */
+	public List<Instruction> insertInit(Translator trn, List<Instruction> insList,
+			ListIterator<Instruction> start) {
+		return insList;
+	}
+	
+	/**
+	 * Modify code at a point where other code is recognized.
+	 * @param trn The translator context.
 	 * @param insList
 	 * @param start
 	 * @return modified code.
 	 */
-	public List<Instruction> insert(List<Instruction> insList,
+	public List<Instruction> insert(Translator trn, List<Instruction> insList,
 			ListIterator<Instruction> start) {		
 		return insList;
+	}
+	
+	/**
+	 * Insert cleanup code at the end of a function
+	 * @param trn
+	 * @param insList
+	 * @param start
+	 * @return
+	 */
+	public List<Instruction> insertCleanup(Translator trn, List<Instruction> insList,
+			ListIterator<Instruction> start) {
+		return insList;
+	}
+	
+	protected void publishVar(Translator trn, String publicVar, String value) {	
+		trn.setVar(Translator.getPublicVar(publicVar), value);
 	}
 }

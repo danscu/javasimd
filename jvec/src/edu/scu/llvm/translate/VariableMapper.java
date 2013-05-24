@@ -13,8 +13,11 @@ import cn.edu.sjtu.jllvm.VMCore.BasicBlock;
 import cn.edu.sjtu.jllvm.VMCore.Constants.Constant;
 import cn.edu.sjtu.jllvm.VMCore.Constants.LocalVariable;
 import cn.edu.sjtu.jllvm.VMCore.Instructions.Instruction;
+import cn.edu.sjtu.jllvm.VMCore.Types.ArrayType;
+import cn.edu.sjtu.jllvm.VMCore.Types.FunctionType;
 import cn.edu.sjtu.jllvm.VMCore.Types.Type;
 import cn.edu.sjtu.jllvm.VMCore.Types.TypeFactory;
+import cn.edu.sjtu.jllvm.VMCore.Types.VectorType;
 import edu.scu.jjni.aotc.recgen.OpGenerator;
 import edu.scu.jjni.aotc.recgen.OpRecognizer;
 import edu.scu.jjni.aotc.recgen.Translator;
@@ -32,11 +35,13 @@ public class VariableMapper {
 	 * @author danke
 	 */
 	public enum Semcode {
-		// For argument
+		// For argument		
 		STORE_ARGUMENT,
 		LOAD_ARGUMENT,
-		
+		SETUP_JNI_ENV,
+				
 		// For struct
+		GET_STRUCT_BASE, /* convert struct to i8* */		
 		GET_STRUCT_ELEM,
 		
 		// For arrays
@@ -92,7 +97,6 @@ public class VariableMapper {
 	 */	
 	protected List<TypeMap> localTypeMap;
 	
-	
 	/**
 	 * Function argument list
 	 */
@@ -112,6 +116,16 @@ public class VariableMapper {
 	 * Matcher
 	 */
 	protected InstMatcher matcher;	
+	
+	/**
+	 * Local generator variable ID
+	 */
+	protected int genVarId;
+	
+	/**
+	 * Local recognizer variable ID
+	 */
+	protected int recVarId;
 	
 	/**
 	 * Constructor.
@@ -164,6 +178,7 @@ public class VariableMapper {
 	{
 		localTypeMap.clear();
 		varMap.clear();
+		genVarId = recVarId = 0;
 	}
 	
 	/**
@@ -199,13 +214,14 @@ public class VariableMapper {
 		// 2. Search global type map
 		for (TypeMap tm : globalTypeMap)
 			if (tm.javaType.equals(javaArg))
-				return tm.jniType;								
+				return tm.jniType;
 		
 		// 3. Search recognizer-generator map
 		for (Translator trn: translators) {
 			OpRecognizer opr = trn.getOpr();
 			OpGenerator opg = trn.getOpg();
-			if (opr.getTypeIn() != null && opr.getTypeIn().equals(javaArg))
+			if (opr != null && opg != null &&
+					opr.getTypeIn() != null && opr.getTypeIn().equals(javaArg))
 				return opg.getTypeIn();
 		}
 		
@@ -213,13 +229,35 @@ public class VariableMapper {
 		if (javaArg.isPrimType())
 			return javaArg;
 		
-		// 5. Resolve pointer type recursively		
+		// 5.1 Recursively solve Array type
+		if (javaArg.getTypeID() == Type.ArrayTyID) {
+			ArrayType vType = (ArrayType)javaArg;
+			Type mappedSubtype = mapType(vType.getSubTypes().get(0));			
+			if (mappedSubtype != null) {
+				Type newPointerType = TypeFactory.getArrayType(vType.getLength(), mappedSubtype);
+				return newPointerType;
+			}
+		}
+		
+		// 5.2 Resolve pointer type recursively
 		if (javaArg.isPointerType()) {
 			Type mappedSubtype = mapType(javaArg.getSubType());
 			if (mappedSubtype != null) {
 				Type newPointerType = TypeFactory.getPointerType(mappedSubtype);
 				return newPointerType;
 			}
+		}
+		
+		// 5.3 Resolve function type recursively. It does not yet do functionType
+		// mapping, just checking all the subtypes are valid
+		if (javaArg.isFunctionType()) {
+			FunctionType fType = (FunctionType)javaArg;
+			for (Type subtype : fType.getSubTypes()) {
+				Type mappedSubtype = mapType(subtype);
+				if (mappedSubtype == null)
+					return null;
+			}
+			return fType;
 		}
 		
 		// Cannot convert the type -- fatal error
@@ -312,13 +350,31 @@ public class VariableMapper {
 
 	/**
 	 * Recognizes operation patterns and convert to new instructions
+	 * @param cleanupBlock 
 	 * @param bs BasicBlock to search
 	 */
-	public void mapOperations(List<Instruction> insList) {
-		for (Translator trn: translators) {						
-			if (matcher.matchAndModify(trn, insList)) {
+	public void mapOperations(List<Instruction> insList, BasicBlock initBlock,
+			BasicBlock cleanupBlock) {
+		for (Translator trn: translators) {
+			if (trn.getOpr() != null && matcher.matchAndModify(trn, insList,
+					initBlock, cleanupBlock)) {
 				System.out.println("Modified"); // TODO
 			}
+		}
+	}
+	
+	public void addInitCode(List<Instruction> insList) {
+		for (Translator trn: translators) {
+			if (trn.getOpr() == null) // unconditional generator
+				trn.getOpg().insertInit(trn, insList, insList.listIterator());
+		}
+	}
+	
+	public void addCleanupCode(List<Instruction> insList) {
+		for (Translator trn: translators) {
+			if (trn.getOpr() == null && trn.getOpg() != null) // unconditional generator
+				trn.getOpg().insertCleanup(trn, insList,
+						insList.listIterator(insList.size()));
 		}
 	}
 	
@@ -336,5 +392,13 @@ public class VariableMapper {
 
 	public boolean isFuncArg(String string) {
 		return localArgumentList.contains(string);
+	}
+
+	public String getGenTmpName() {		
+		return OpGenerator.getTmpName(genVarId++);
+	}
+
+	public String getRecTmpName() {
+		return OpRecognizer.getMatchName(recVarId++);
 	}
 }

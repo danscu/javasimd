@@ -17,35 +17,33 @@
  *************************************************************************/
 
 public class HelloWorld {
+
     private int testSum(int n) {
 	int i;
 	int sum = 0;
-	for (i = 0; i < n; i++)
+	for (i = 0; i < 2*n; i++)
 		sum += i;
-	return sum;
+	return i;
     }
 
-    private int testArraySum(int[] ia) {
-      int sum = 0;
-      for (int i = 0; i < ia.length; i++)
-         sum += ia[i];
-      return sum;
+    private int testArraySum(int array[]) {
+	int sum = 0;
+	for (int i = 0; i < array.length; i++)
+	    sum += array[i];
+	return sum;
     }
 
     public static void main(String[] args) {
         System.out.println("Hello, World");
 	HelloWorld inst = new HelloWorld();
-
-	// Test 1	
 	int res = inst.testSum(100);
-	System.out.println("Sum = " + res); 
+	System.out.println("Sum = " + res);
 
-	// Test 2
-	int[] ia = new int[200];
-	for (int i = 0; i < 200; i++)
-		ia[i] = i;
-	res = inst.testArraySum(ia);
-	System.out.println("Array sum = " + res); 
+	int a[] = new int[20];
+	for (int i = 0; i < 20; i++)
+	    a[i] = i * 10;
+	res = inst.testArraySum(a);
+	System.out.println("Sum = " + res);
     }
 }
 

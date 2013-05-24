@@ -1,7 +1,7 @@
 package cn.edu.sjtu.jllvm.VMCore.Types;
 
 public class VectorType extends DerivedType {
-	private int length;
+	protected int length;
 	
 	public VectorType(int l, Type eleTy){
 		typeID = Type.VectorTyID;
@@ -13,4 +13,8 @@ public class VectorType extends DerivedType {
 	public static VectorType create(int length, Type eleType){
 		return new VectorType(length, eleType);
 	}
+
+	public int getLength() {
+		return length;
+	}		
 }
