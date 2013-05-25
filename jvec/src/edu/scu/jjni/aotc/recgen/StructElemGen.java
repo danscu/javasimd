@@ -18,7 +18,7 @@ public abstract class StructElemGen extends OpGenerator {
 	public List<Instruction> insertInit(Translator trn,
 			List<Instruction> insList, ListIterator<Instruction> start) {
 		String elemNo = opr.getMatchContent(OpRecognizer
-				.getMatchName("elem_no"));
+				.newWildcard("elem_no"));
 		int elemNumber = Integer.parseInt(elemNo);
 		return initGetElem(trn, insList, start, elemNumber);
 	}
@@ -27,7 +27,7 @@ public abstract class StructElemGen extends OpGenerator {
 	public List<Instruction> insertCleanup(Translator trn,
 			List<Instruction> insList, ListIterator<Instruction> start) {
 		String elemNo = opr.getMatchContent(OpRecognizer
-				.getMatchName("elem_no"));
+				.newWildcard("elem_no"));
 		int elemNumber = Integer.parseInt(elemNo);
 		return cleanupGetElem(trn, insList, start, elemNumber);
 	}
@@ -36,7 +36,7 @@ public abstract class StructElemGen extends OpGenerator {
 	public List<Instruction> insert(Translator trn, List<Instruction> insList,
 			ListIterator<Instruction> start) {
 		String elemNo = opr.getMatchContent(OpRecognizer
-				.getMatchName("elem_no"));
+				.newWildcard("elem_no"));
 		int elemNumber = Integer.parseInt(elemNo);
 		return modifyGetElem(trn, insList, start, elemNumber);
 	}

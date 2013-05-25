@@ -15,6 +15,7 @@ import edu.scu.jjni.aotc.Debug;
 import edu.scu.jjni.aotc.recgen.OpGenerator;
 import edu.scu.jjni.aotc.recgen.OpRecognizer;
 import edu.scu.jjni.aotc.recgen.Translator;
+import edu.scu.llvm.translate.VariableMapper.Semcode;
 
 /**
  * This class matches instructions against defined patterns 
@@ -271,6 +272,7 @@ public class InstMatcher {
 
 	protected MatchResult _match(Translator trn, ListIterator<Instruction> start,
 			OpRecognizer opr) {
+		
 		for (Instruction patIns : opr.getInstructions()) {
 			if (!start.hasNext())
 				return MatchResult.TOO_SHORT;
@@ -283,6 +285,9 @@ public class InstMatcher {
 		return MatchResult.MATCH;
 	}
 
+	/*
+	 * Returns true if modified
+	 */
 	public boolean matchAndModify(Translator trn, List<Instruction> insList, BasicBlock initBlock,
 			BasicBlock cleanupBlock) {
 		OpRecognizer opr = trn.getOpr();
@@ -314,7 +319,14 @@ public class InstMatcher {
 					if (opg != null) {
 						changed = true;
 						insList = modifyCode(trn, insList, iit, initBlock, cleanupBlock);
-
+					}
+					
+					// Call translator children recursively
+					for (Translator subTrn : trn.getChildren())
+						if (subTrn.getOpr() != null)
+							matchAndModify(subTrn, insList, initBlock, cleanupBlock);
+					
+					if (changed) {
 						// rewind to find other matches
 						iit = insList.listIterator();
 						unbindAll();
@@ -325,7 +337,7 @@ public class InstMatcher {
 			}
 		} while (changed);
 
-		return false;
+		return changed;
 	}
 
 	/**

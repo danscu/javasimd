@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import cn.edu.sjtu.jllvm.VMCore.Constants.Constant;
 import cn.edu.sjtu.jllvm.VMCore.Instructions.Instruction;
 import cn.edu.sjtu.jllvm.VMCore.Types.Type;
 import edu.scu.jjni.aotc.Debug;
@@ -68,7 +69,7 @@ public class OpRecognizer {
 	 * @param m
 	 * @return the matching variable name
 	 */
-	public static String getMatchName(String id) {
+	public static String newWildcard(String id) {
 		String name = String.format("%%Ms.%s", id);
 		return name;
 	}
@@ -86,9 +87,9 @@ public class OpRecognizer {
 	 * Publish the variable name returned by getMatchName by this
 	 * function. Public names can be accessed by Translator.getVar().
 	 */
-	public void addPublicVar(String var) {
-		if (!publicNames.contains(var))
-			publicNames.add(var);		
+	public void addPublicVar(Constant var) {
+		if (!publicNames.contains(var.getValue()))
+			publicNames.add(var.getValue());		
 	}
 	
 	/**

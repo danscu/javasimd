@@ -200,6 +200,9 @@ public class Instruction extends User {
 	public Constant getDest() {
 		return dest;
 	}
+	public void setDest(Constant dst) {
+		dest = dst;
+	}
 	public List<Constant> getOperands() {
 		return operands;
 	}

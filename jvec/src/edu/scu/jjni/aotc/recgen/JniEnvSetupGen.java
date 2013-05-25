@@ -34,7 +34,7 @@ public class JniEnvSetupGen extends OpGenerator {
 		Instruction ins;
 		
 		// The argument %env
-		Constant envArg = trn.getVar(Translator.getPublicVar("envArg"), true);
+		Constant envArg = trn.getVar(Translator.publicVarName("envArg"), true);
 		
 		// %env_addr = alloca %struct.JNINativeInterface_**, align 8
 		Constant env_addr = new LocalVariable("%env_addr");

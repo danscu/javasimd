@@ -90,7 +90,7 @@ public class OpGenerator {
 		return insList;
 	}
 	
-	protected void publishVar(Translator trn, String publicVar, String value) {	
-		trn.setVar(Translator.getPublicVar(publicVar), value);
+	protected void publishVar(Translator trn, String publicVar, String value) {		
+		trn.setVar(Translator.publicVarName(publicVar), value);
 	}
 }

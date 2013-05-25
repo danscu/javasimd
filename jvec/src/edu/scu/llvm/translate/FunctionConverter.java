@@ -4,12 +4,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import cn.edu.sjtu.jllvm.VMCore.Argument;
 import cn.edu.sjtu.jllvm.VMCore.BasicBlock;
 import cn.edu.sjtu.jllvm.VMCore.Module;
 import cn.edu.sjtu.jllvm.VMCore.Constants.Constant;
 import cn.edu.sjtu.jllvm.VMCore.Constants.Function;
+import cn.edu.sjtu.jllvm.VMCore.Constants.LocalVariable;
 import cn.edu.sjtu.jllvm.VMCore.Instructions.Instruction;
 import cn.edu.sjtu.jllvm.VMCore.Operators.InstType;
 import cn.edu.sjtu.jllvm.VMCore.Types.Type;
@@ -154,7 +157,7 @@ public class FunctionConverter {
 		mapper.clearFuncArg();
 		
 		// Publish the %env variable name
-		mapper.addVarMap(Translator.getPublicVar("envArg"), envVal.toString());		
+		mapper.addVarMap(Translator.publicVarName("envArg"), envVal.toString());		
 		
 		// Create arguments maps
 		for (Argument arg : fn.arguments) {
@@ -208,7 +211,7 @@ public class FunctionConverter {
 			if (Debug.level >= 1)
 				System.out.println("Processing argument: " + arg);
 			
-			mapper.addVarMap(Translator.getPublicVar("argName"), arg);
+			mapper.addVarMap(Translator.publicVarName("argName"), arg);
 			
 			basicBlocks = basicBlocksLast;
 			basicBlocksLast = new LinkedList<BasicBlock>();
@@ -307,6 +310,45 @@ public class FunctionConverter {
 
 			basicBlocksLast.add(new BasicBlock(bs.getBlockID(), list));
 		}
+
+		// Last pass: renumber the local variables
+		basicBlocks = basicBlocksLast;
+		int localVar = 0;
+		Map<String,String> renumMap = new TreeMap<String,String>();
+		
+		for (BasicBlock bs : basicBlocks) {
+			for (Instruction ins : bs.getInstructions()) {
+				Constant dest = ins.getDest();
+				
+				if (dest == null)
+					continue;
+				
+				// If dest is numeritcal and not yet mapped
+				if (dest.getValue().matches("%[0-9]+") && renumMap.get(dest.toString()) == null) {
+					String newVar = String.format("%%%d", localVar++);					
+					renumMap.put(dest.toString(), newVar);
+				}
+			}			
+		}
+		
+		for (BasicBlock bs : basicBlocks) {
+			for (Instruction ins : bs.getInstructions()) {
+				Constant dest = ins.getDest();
+				if (dest != null) {
+					String newVar = renumMap.get(dest.getValue());
+					if (newVar != null)
+						dest.setValue(newVar);
+				}
+				
+				// Modify operands
+				for (Constant c : ins.getOperands()) {
+					String newOperand = renumMap.get(c.getValue());
+					if (newOperand != null) {
+						c.setValue(newOperand);
+					}
+				}
+			}
+		}
 		
 		// Function attributes
 		if (ignoreFAttr != null) {
@@ -319,7 +361,7 @@ public class FunctionConverter {
 		
 		return new FunctionWriter(linkage, visibility, cconv, pAttributes,
 				returnType, name, arguments, isVarargFunction, fAttributes,
-				align, basicBlocksLast);
+				align, basicBlocks);
 	}
 
 	/**

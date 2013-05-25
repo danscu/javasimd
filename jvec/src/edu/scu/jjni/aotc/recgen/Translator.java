@@ -1,5 +1,6 @@
 package edu.scu.jjni.aotc.recgen;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
 
@@ -30,10 +31,13 @@ public class Translator {
 	
 	protected VariableMapper mapper;
 	
+	protected List<Translator> children;
+	
 	public Translator(OpRecognizer opr, OpGenerator opg) {
 		super();
 		this.opr = opr;
-		this.opg = opg;		
+		this.opg = opg;
+		children = new ArrayList<Translator>();
 	}
 
 	public OpRecognizer getOpr() {
@@ -51,10 +55,14 @@ public class Translator {
 	 * @param m The variable ID without prefix
 	 * @return the matching variable name
 	 */
-	public static String getPublicVar(String id) {
+	public static String publicVarName(String id) {
 		String name = String.format("@%%Ms.%s", id);
 		return name;
 	}		
+	
+	public static boolean isPublicVar(Constant var) {
+		return var.getValue().startsWith("@%Ms.");
+	}
 	
 	public void setMapper(VariableMapper mapper) {
 		this.mapper = mapper;
@@ -87,7 +95,9 @@ public class Translator {
 		// insert cleanup code to cleanup block
 		opg.insertCleanup(trn, cleanupBlock.getInstructions(), cleanupBlock.getInstructions().listIterator());
 		
-		return opg.insert(trn, insList, start);		
+		List<Instruction> modIns = opg.insert(trn, insList, start);
+		
+		return modIns;
 	}
 
 	/**
@@ -98,10 +108,17 @@ public class Translator {
 	 * @return The constant.
 	 */
 	public Constant getVar(String var, boolean strict) {
-		return mapper.mapVariable(var, strict);
+		Constant c = mapper.mapVariable(var, strict);
+		if (c == null)
+			return c;
+		
+		if (!isPublicVar(c))
+			return c;
+		else
+			return getVar(c.getValue(), strict);
 	}
 	
-	public void setVar(String name, String matchContent) {		
+	public void setVar(String name, String matchContent) {
 		mapper.addVarMap(name, matchContent);
 	}
 
@@ -115,5 +132,14 @@ public class Translator {
 	
 	public String getGenTmpName() {		
 		return mapper.getGenTmpName();
+	}
+	
+	public void addTranslator(Translator trn) {
+		children.add(trn);
+		trn.setMapper(mapper);
+	}
+	
+	public List<Translator> getChildren() {
+		return children;
 	}
 }

@@ -2,7 +2,6 @@ package edu.scu.jjni.aotc.recgen;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
@@ -16,10 +15,9 @@ import cn.edu.sjtu.jllvm.VMCore.Operators.InstType;
 import cn.edu.sjtu.jllvm.VMCore.Types.FunctionType;
 import cn.edu.sjtu.jllvm.VMCore.Types.Type;
 import cn.edu.sjtu.jllvm.VMCore.Types.TypeFactory;
-import edu.scu.llvm.asm.InstFactory;
 import edu.scu.jjni.aotc.LLVM2Jni;
+import edu.scu.llvm.asm.InstFactory;
 import edu.scu.llvm.translate.InstMatcher;
-import edu.scu.llvm.translate.WildcardConstant;
 import edu.scu.llvm.translate.VariableMapper.Semcode;
 
 public class JniEnvCallGen extends OpGenerator {
@@ -61,9 +59,9 @@ public class JniEnvCallGen extends OpGenerator {
 	public List<Instruction> insertInit(Translator trn,
 			List<Instruction> insList, ListIterator<Instruction> start) {				
 
-		Constant alreadySetupArray = trn.getVar(Translator.getPublicVar("arraySetupDone"), false);
+		Constant alreadySetupArray = trn.getVar(Translator.publicVarName("arraySetupDone"), false);
 		if (alreadySetupArray == null) {
-			trn.setVar(Translator.getPublicVar("arraySetupDone"), "1");
+			trn.setVar(Translator.publicVarName("arraySetupDone"), "1");
 			setupArgments(trn, insList, start);
 		}
 		
@@ -81,7 +79,7 @@ public class JniEnvCallGen extends OpGenerator {
 		Instruction ins;
 
 		// The argument %env
-		Constant isCopy = new LocalVariable(trn.getVar(Translator.getPublicVar("argName"), true) + "_iscopy");
+		Constant isCopy = new LocalVariable(trn.getVar(Translator.publicVarName("argName"), true) + "_iscopy");
 		this.publishVar(trn, "isCopy", isCopy.toString());
 
 		// %env_addr = alloca %struct.JNINativeInterface_**, align 8
@@ -91,7 +89,7 @@ public class JniEnvCallGen extends OpGenerator {
 		addInstruction(start, ins);
 
 		// %tab = alloca i32*
-		Constant arrayTab = new LocalVariable(trn.getVar(Translator.getPublicVar("argName"), true) + "_tab");
+		Constant arrayTab = new LocalVariable(trn.getVar(Translator.publicVarName("argName"), true) + "_tab");
 		this.publishVar(trn, "arrayTab", isCopy.toString());
 		ins = fac.createSimpleInst(arrayTab, InstType.allocaInst,
 				Arrays.asList(new Constant[] {}),
@@ -106,7 +104,7 @@ public class JniEnvCallGen extends OpGenerator {
 		ValueFactory vfac = new ValueFactory();
 
 		Type i32_t = TypeFactory.getInt32Type();
-			
+		
 		Instruction ins;
 		
 		// %2 = load %struct.JNINativeInterface_** %0, align 8
@@ -128,19 +126,20 @@ public class JniEnvCallGen extends OpGenerator {
 				true /* inbounds */);
 		addInstruction(start, ins);
 		
-		// %4 = bitcast {}** %3 to modified funcType**
+		// %4 = bitcast {}** %3 to temp funcType**
 		Constant ppFunc = new LocalVariable(trn.getGenTmpName());
-		List<Type> tempFSubTypes = new ArrayList<Type>();		
+		List<Type> tempFSubTypes = new ArrayList<Type>();
 		tempFSubTypes.addAll(funcType.getSubTypes());
 		tempFSubTypes.remove(1);
 		tempFSubTypes.add(1, LLVM2Jni.typeNullStructPtr);
 		
-		Type tempFType = TypeFactory.getFunctionType(tempFSubTypes);		
-		Type ppFuncType = TypeFactory.getPointerType(TypeFactory.getPointerType(funcType));		
+		Type tempFType = TypeFactory.getFunctionType(tempFSubTypes);
+		Type ptempFType = TypeFactory.getPointerType(tempFType);
+		Type ppTempFuncType = TypeFactory.getPointerType(ptempFType);		
 		
 		ins = fac.createOperationInst(ppFunc /* dest */, InstType.converInst,
 				Arrays.asList(new Constant[] { funcAddr }),
-				Arrays.asList(new Type[] { LLVM2Jni.typeNullStructPtrPtr, ppFuncType }),
+				Arrays.asList(new Type[] { LLVM2Jni.typeNullStructPtrPtr, ppTempFuncType }),
 				"bitcast");
 		addInstruction(start, ins);
 		
@@ -149,28 +148,30 @@ public class JniEnvCallGen extends OpGenerator {
 		ins = fac.createLoadStoreInst(pFunc /* dest */, InstType.loadInst,			
 				Arrays.asList(new Constant[] { ppFunc,
 						vfac.createConstantValue(SimpleConstantValue.intConst, "8")} /* align 8 */),
-				Arrays.asList(new Type[] { ppFuncType }),
+				Arrays.asList(new Type[] { ppTempFuncType }),
 				false /* volatile */);
 		addInstruction(start, ins);
 		
 		// %6 bitcast i32 ({}*, i8*)* %5 to i32 (%struct.JNINativeInterface_**, i8*)*
 		Constant pGoodFunc = new LocalVariable(trn.getGenTmpName());
-		Type ppGoodFuncType = TypeFactory.getPointerType(TypeFactory.getPointerType(funcType));
-		ins = fac.createOperationInst(ppFunc /* dest */, InstType.converInst,
-				Arrays.asList(new Constant[] { funcAddr }),
-				Arrays.asList(new Type[] { LLVM2Jni.typeNullStructPtrPtr, ppFuncType }),
+		Type pGoodFuncType = TypeFactory.getPointerType(funcType);
+		ins = fac.createOperationInst(pGoodFunc /* dest */, InstType.converInst,
+				Arrays.asList(new Constant[] { pFunc }),
+				Arrays.asList(new Type[] { ptempFType, pGoodFuncType }),
 				"bitcast");
+		addInstruction(start, ins);
 		
 		// %7 = call i32 %6(%struct.JNINativeInterface_** %0, i8* %1) nounwind
 		Constant pRes = new LocalVariable(trn.getGenTmpName());
 		
 		List<Constant> operands = new LinkedList<Constant>();
-		operands.addAll(Arrays.asList(new Constant[] { pGoodFunc, resolve(trn, env_addr) }));
+		Constant arrayArgName = trn.getVar(Translator.publicVarName("argName"), true);
+		operands.addAll(Arrays.asList(new Constant[] { pGoodFunc, resolve(trn, env_addr), arrayArgName }));
 		if (args != null)
 			operands.addAll(resolveAll(trn, args));
 		
 		List<Type> types = new LinkedList<Type>();
-		types.addAll(Arrays.asList(new Type[] { funcType.getRetType(), LLVM2Jni.envTypePtrPtr }));
+		types.addAll(Arrays.asList(new Type[] { funcType.getRetType(), LLVM2Jni.envTypePtrPtr, LLVM2Jni.pi8_t }));
 		if (argTypes != null)
 			types.addAll(argTypes);
 		

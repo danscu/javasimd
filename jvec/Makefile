@@ -19,7 +19,7 @@ edu/scu/llvm/parser \
 edu/scu/llvm/asm \
 edu/scu/jjni/app \
 edu/scu/jjni/aotc \
-edu/scu/jjni/atoc/recgen \
+edu/scu/jjni/aotc/recgen \
 
 SRCS := $(foreach dir,$(SRCDIRS),$(wildcard $(SRCDIR)/$(dir)/*.java))
 SRCS := $(patsubst $(SRCDIR)/%,%,$(SRCS))

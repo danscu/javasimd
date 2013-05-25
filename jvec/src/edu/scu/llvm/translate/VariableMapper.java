@@ -46,7 +46,9 @@ public class VariableMapper {
 		
 		// For arrays
 		GET_ARRAY_BASE,
+		GET_ARRAY_BASE_POST,
 		GET_ARRAY_LENGTH,
+		GET_ARRAY_LENGTH_POST,
 	};
 	
 	public static abstract class Operator {
@@ -356,10 +358,11 @@ public class VariableMapper {
 	public void mapOperations(List<Instruction> insList, BasicBlock initBlock,
 			BasicBlock cleanupBlock) {
 		for (Translator trn: translators) {
-			if (trn.getOpr() != null && matcher.matchAndModify(trn, insList,
-					initBlock, cleanupBlock)) {
-				System.out.println("Modified"); // TODO
-			}
+			if (trn.getOpr() != null && trn.getOpr().getSemc() == Semcode.GET_ARRAY_BASE_POST)
+				System.out.println("Testing arraybase post");
+			
+			if (trn.getOpr() != null)
+				matcher.matchAndModify(trn, insList, initBlock, cleanupBlock);
 		}
 	}
 	
