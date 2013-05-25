@@ -281,19 +281,19 @@ public class LLVM2Jni extends FunctionConverter {
 		trn = new Translator(arrayBaseRec, arrayBaseGen);
 		trnStructElem.addTranslator(trn);
 		
-		OpRecognizer arrayBaseRefRec = new OpRecognizer(VariableMapper.Semcode.GET_ARRAY_LENGTH_POST,
+		OpRecognizer arrayLenRefRec = new OpRecognizer(VariableMapper.Semcode.GET_ARRAY_LENGTH_POST,
 				javaStructPtr, type0xi32Ptr);		
 		// %8 = load i32* %7, align 8
-		pArrayBaseAddr = new WildcardConstant(Translator.publicVarName("arrayBasePtr")); // published
-		Constant arrayAddr = new WildcardConstant(OpRecognizer.newWildcard("arrayAddr")); // publishable
-		ins = fac.createOperationInst(arrayAddr, InstType.converInst,
-				Arrays.asList(new Constant[] { pArrayBaseAddr }),
-				Arrays.asList(new Type[] { type0xi32Ptr, pi8_t }),
-				"bitcast");
-		arrayBaseRefRec.addInstruction(ins);
-		arrayBaseRefRec.addPublicVar(arrayAddr);
+		pElem = new WildcardConstant(Translator.publicVarName("objElemPtr")); // published
+		Constant arrayLen = new WildcardConstant(OpRecognizer.newWildcard("arrayLen")); // publishable
+		ins = fac.createLoadStoreInst(arrayLen, InstType.loadInst,
+				Arrays.asList(new Constant[] { pElem }),
+				Arrays.asList(new Type[] { pi32_t }),
+				false /* volatile */ );
+		arrayLenRefRec.addInstruction(ins);
+		arrayLenRefRec.addPublicVar(arrayLen);
 		
-		OpGenerator arrayBaseRefGen = new OpGenerator(VariableMapper.Semcode.GET_ARRAY_LENGTH_POST, arrayBaseRec,
+		OpGenerator arrayLenRefGen = new OpGenerator(VariableMapper.Semcode.GET_ARRAY_LENGTH_POST, arrayBaseRec,
 				null, null) {
 				@Override
 				public List<Instruction> insert(Translator trn,
@@ -303,19 +303,19 @@ public class LLVM2Jni extends FunctionConverter {
 					Instruction ins = null;
 					Constant pRes = trn.getVar(Translator.publicVarName("jniCallRes"), true);
 					
-					// bitcast
-					Constant arrayAddr = trn.getVar(Translator.publicVarName("arrayAddr"), true);
-					ins = fac.createOperationInst(arrayAddr, InstType.converInst,
+					// load
+					Constant arrayAddr = trn.getVar(Translator.publicVarName("arrayLen"), true);
+					ins = fac.createLoadStoreInst(arrayAddr, InstType.loadInst,
 							Arrays.asList(new Constant[] { pRes }),
-							Arrays.asList(new Type[] { i32_t, type0xi32Ptr }),
-							"bitcast");
+							Arrays.asList(new Type[] { pi32_t }),
+							false /* volatile */ );							
 					addInstruction(start, ins);
 					
 					return insList;
 				}
 		};
 		
-		trn = new Translator(arrayBaseRefRec, arrayBaseRefGen);
+		trn = new Translator(arrayLenRefRec, arrayLenRefGen);
 		trnStructElem.addTranslator(trn);
 	}
 	
@@ -343,6 +343,7 @@ public class LLVM2Jni extends FunctionConverter {
 	private static List<String> getIgnoreCalls() {
 		List<String> ignoreCalls = new ArrayList<String>();
 		ignoreCalls.add("@llvm.dbg.declare");
+		ignoreCalls.add("@_Jv_ThrowBadArrayIndex");
 		return ignoreCalls;
 	}
 	

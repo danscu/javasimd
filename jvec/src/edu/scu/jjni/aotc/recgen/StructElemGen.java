@@ -5,6 +5,7 @@ import java.util.ListIterator;
 
 import cn.edu.sjtu.jllvm.VMCore.Instructions.Instruction;
 import cn.edu.sjtu.jllvm.VMCore.Types.Type;
+import edu.scu.jjni.aotc.Debug;
 import edu.scu.llvm.translate.VariableMapper.Semcode;
 
 public abstract class StructElemGen extends OpGenerator {
@@ -37,6 +38,8 @@ public abstract class StructElemGen extends OpGenerator {
 			ListIterator<Instruction> start) {
 		String elemNo = opr.getMatchContent(OpRecognizer
 				.newWildcard("elem_no"));
+		if (Debug.level >= 2)
+			System.out.println("Struct Elem Access: " + elemNo);
 		int elemNumber = Integer.parseInt(elemNo);
 		return modifyGetElem(trn, insList, start, elemNumber);
 	}

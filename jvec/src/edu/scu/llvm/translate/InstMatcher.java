@@ -23,11 +23,6 @@ import edu.scu.llvm.translate.VariableMapper.Semcode;
  */
 public class InstMatcher {
 	/**
-	 * Matched variables
-	 */
-	Map<String, String> matchPat;
-	
-	/**
 	 * Matched types
 	 */	
 	Map<String, Type> matchType;
@@ -73,16 +68,16 @@ public class InstMatcher {
 		return insType instanceof WildcardType;
 	}
 	
-	protected boolean isUnbound(Constant constant) {
-		return matchPat.get(constant.getValue()) == null;
+	protected boolean isUnbound(OpRecognizer opr, Constant constant) {
+		return opr.getMatchMap().get(constant.getValue()) == null;
 	}
 
-	protected boolean isUnbound(Type insType) {
-		return matchType.get(insType.getTypeString()) == null;
+	protected boolean isUnbound(OpRecognizer opr, Type insType) {
+		return opr.getMatchMap().get(insType.getTypeString()) == null;
 	}
 	
-	protected String getWildcardVal(Constant constant) {
-		return matchPat.get(constant.getValue());
+	protected String getWildcardVal(OpRecognizer opr, Constant constant) {
+		return opr.getMatchMap().get(constant.getValue());
 	}
 	
 	protected Type getWildcardVal(Type insType) {
@@ -90,24 +85,24 @@ public class InstMatcher {
 		return t;
 	}
 
-	protected void bind(Constant wildcard, Constant var) {
-		matchPat.put(wildcard.getValue(), var.getValue());
+	protected void bind(OpRecognizer opr, Constant wildcard, Constant var) {
+		opr.getMatchMap().put(wildcard.getValue(), var.getValue());
 	}
 	
 	protected void bind(Type wildcard, Type insType) {
 		matchType.put(wildcard.getTypeString(), insType);
 	}
 
-	protected void unbind(Constant wildcard) {
-		matchPat.remove(wildcard.getValue());
+	protected void unbind(OpRecognizer opr, Constant wildcard) {
+		opr.getMatchMap().remove(wildcard.getValue());
 	}
 
 	protected void unbind(Type wildcard) {
 		matchType.put(wildcard.getTypeString(), null);
 	}
 	
-	protected void unbindAll() {
-		matchPat.clear();
+	protected void unbindAll(OpRecognizer opr) {
+		opr.getMatchMap().clear();
 		matchType.clear();
 	}
 
@@ -135,6 +130,8 @@ public class InstMatcher {
 		List<Type> boundTypes = new ArrayList<Type>();
 		boolean success = false;
 		
+		OpRecognizer opr = trn.getOpr(); 
+		
 		do {
 			boolean typeMatchSuccess = true;
 			for (int i = 0; i < ins.getNumTypes(); i++) {
@@ -152,9 +149,9 @@ public class InstMatcher {
 				
 				// wildcard
 				if (isWildcard(patType) &&
-						( isUnbound(patType) || getWildcardVal(patType).equals(insType))) {
+						( isUnbound(opr, patType) || getWildcardVal(patType).equals(insType))) {
 					// bind
-					if (isUnbound(patType)) {
+					if (isUnbound(opr, patType)) {
 						boundTypes.add(patType); // for backtrack
 						bind(patType, insType);
 					}
@@ -185,7 +182,7 @@ public class InstMatcher {
 				if (isGlobalVar(patOp)) {
 					Constant varVal = trn.getVar(patOp.toString(), false);
 					if (varVal != null)
-						bind(patOp, varVal);
+						bind(opr, patOp, varVal);
 					else {
 						operandSucc = false;
 						break;
@@ -194,7 +191,7 @@ public class InstMatcher {
 				
 				// wildcard
 				if (isWildcard(patOp)
-						&& (isUnbound(patOp) || getWildcardVal(patOp).equals(
+						&& (isUnbound(opr, patOp) || getWildcardVal(opr, patOp).equals(
 								insOp.getValue())))
 					continue;
 	
@@ -221,9 +218,9 @@ public class InstMatcher {
 			}
 	
 			// If pat is not wildcard or unbound, and the value mismatches, then fail
-			if (patIns.getDest() != null && !isUnbound(patIns.getDest())
+			if (patIns.getDest() != null && !isUnbound(opr, patIns.getDest())
 					&& !ins.getDest().getValue()
-							.equals(getWildcardVal(patIns.getDest())))
+							.equals(getWildcardVal(opr, patIns.getDest())))
 				break;
 	
 			// check argument binds
@@ -242,16 +239,16 @@ public class InstMatcher {
 				break;
 			
 			// bind destination
-			if (isWildcard(patIns.getDest()) && isUnbound(patIns.getDest()))
-				bind(patIns.getDest(), ins.getDest());
+			if (isWildcard(patIns.getDest()) && isUnbound(opr, patIns.getDest()))
+				bind(opr, patIns.getDest(), ins.getDest());
 	
 			// bind operand wildcards
 			for (int i = 0; i < ins.getNumOperands(); i++) {
 				Constant insOp = ins.getOperand(i);
 				Constant patOp = patIns.getOperand(i);
 	
-				if (isWildcard(patOp) && isUnbound(patOp)) {
-					bind(patOp, insOp);
+				if (isWildcard(patOp) && isUnbound(opr, patOp)) {
+					bind(opr, patOp, insOp);
 				}
 			}
 			
@@ -293,8 +290,7 @@ public class InstMatcher {
 		OpRecognizer opr = trn.getOpr();
 		OpGenerator opg = trn.getOpg();
 		
-		matchPat = opr.getMatchMap();
-		matchPat.clear();
+		opr.getMatchMap().clear();
 		
 		matchType = new HashMap<String,Type>();
 
@@ -311,7 +307,7 @@ public class InstMatcher {
 				
 				if (res == MatchResult.MATCH) {
 					if (Debug.level >= 2)
-						System.out.println("Match " + opr.getSemc());
+						System.out.println("Match " + opr.getSemc() + " " + opr.getMatchMap().toString());
 					
 					/* Recognzier can publish matched vars to environment */
 					opr.publishVars(trn);
@@ -326,10 +322,11 @@ public class InstMatcher {
 						if (subTrn.getOpr() != null)
 							matchAndModify(subTrn, insList, initBlock, cleanupBlock);
 					
+					unbindAll(opr);
+					
 					if (changed) {
 						// rewind to find other matches
 						iit = insList.listIterator();
-						unbindAll();
 						continue;
 					}
 				}
