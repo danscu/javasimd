@@ -29,11 +29,11 @@ public class GetElePtrInst extends
             sb.append(dest); sb.append(" = ");
         }
         
-        if (inbounds)
-            sb.append("inbounds ");
-        
         sb.append(InstrName.op(opcode));
         sb.append(' ');
+        
+        if (inbounds)
+            sb.append("inbounds ");        
         
         sb.append(types.get(0));
         sb.append(" ");

@@ -10,7 +10,7 @@ public class ArrayType extends DerivedType {
 		this.length = length;
 		this.subTypes = new ArrayList<Type>();
 		this.subTypes.add(eleType);
-		typeString = "["+length+"x"+eleType.toString()+"]";
+		typeString = "["+length+" x "+eleType.toString()+"]";
 	}
 	
 	public static ArrayType create(int length, Type eleType){

@@ -19,6 +19,7 @@ import cn.edu.sjtu.jllvm.VMCore.Types.TypeFactory;
 import edu.scu.llvm.asm.InstFactory;
 import edu.scu.jjni.aotc.LLVM2Jni;
 import edu.scu.llvm.translate.InstMatcher;
+import edu.scu.llvm.translate.WildcardConstant;
 import edu.scu.llvm.translate.VariableMapper.Semcode;
 
 public class JniEnvCallGen extends OpGenerator {
@@ -27,15 +28,18 @@ public class JniEnvCallGen extends OpGenerator {
 	protected FunctionType funcType;
 	protected List<Type> argTypes;
 	protected List<Constant> args;
+	protected List<Instruction> extraInstr;
 	
 	public JniEnvCallGen(Semcode semc, OpRecognizer opr, Type typeIn, Type typeOut, Constant env_addr,
-			int jniEnvFuncNo, FunctionType funcType, List<Type> argTypes, List<Constant> args) {
+			int jniEnvFuncNo, FunctionType funcType, List<Type> argTypes, List<Constant> args,
+			List<Instruction> extraInstr) {
 		super(semc, opr, typeIn, typeOut);
 		this.env_addr = env_addr;
 		this.jniEnvFuncNo = jniEnvFuncNo;
 		this.funcType = funcType;
 		this.argTypes = argTypes;
 		this.args = args;
+		this.extraInstr = extraInstr;
 	}
 	
 	protected Constant resolve(Translator trn, Constant var) {
@@ -124,9 +128,16 @@ public class JniEnvCallGen extends OpGenerator {
 				true /* inbounds */);
 		addInstruction(start, ins);
 		
-		// %4 = bitcast {}** %3 to funcType**
+		// %4 = bitcast {}** %3 to modified funcType**
 		Constant ppFunc = new LocalVariable(trn.getGenTmpName());
-		Type ppFuncType = TypeFactory.getPointerType(TypeFactory.getPointerType(funcType));
+		List<Type> tempFSubTypes = new ArrayList<Type>();		
+		tempFSubTypes.addAll(funcType.getSubTypes());
+		tempFSubTypes.remove(1);
+		tempFSubTypes.add(1, LLVM2Jni.typeNullStructPtr);
+		
+		Type tempFType = TypeFactory.getFunctionType(tempFSubTypes);		
+		Type ppFuncType = TypeFactory.getPointerType(TypeFactory.getPointerType(funcType));		
+		
 		ins = fac.createOperationInst(ppFunc /* dest */, InstType.converInst,
 				Arrays.asList(new Constant[] { funcAddr }),
 				Arrays.asList(new Type[] { LLVM2Jni.typeNullStructPtrPtr, ppFuncType }),
@@ -142,11 +153,19 @@ public class JniEnvCallGen extends OpGenerator {
 				false /* volatile */);
 		addInstruction(start, ins);
 		
+		// %6 bitcast i32 ({}*, i8*)* %5 to i32 (%struct.JNINativeInterface_**, i8*)*
+		Constant pGoodFunc = new LocalVariable(trn.getGenTmpName());
+		Type ppGoodFuncType = TypeFactory.getPointerType(TypeFactory.getPointerType(funcType));
+		ins = fac.createOperationInst(ppFunc /* dest */, InstType.converInst,
+				Arrays.asList(new Constant[] { funcAddr }),
+				Arrays.asList(new Type[] { LLVM2Jni.typeNullStructPtrPtr, ppFuncType }),
+				"bitcast");
+		
 		// %7 = call i32 %6(%struct.JNINativeInterface_** %0, i8* %1) nounwind
 		Constant pRes = new LocalVariable(trn.getGenTmpName());
 		
 		List<Constant> operands = new LinkedList<Constant>();
-		operands.addAll(Arrays.asList(new Constant[] { ppFunc, resolve(trn, env_addr) }));
+		operands.addAll(Arrays.asList(new Constant[] { pGoodFunc, resolve(trn, env_addr) }));
 		if (args != null)
 			operands.addAll(resolveAll(trn, args));
 		
@@ -164,6 +183,13 @@ public class JniEnvCallGen extends OpGenerator {
 				Arrays.asList(new String[] { "nounwind" })/* fattr */
 				);
 		addInstruction(start, ins);
+		
+		// Publish the result
+		publishVar(trn, "jniCallRes", pRes.toString());
+		
+		/*
+		 * Generate specific code 
+		 */
 		
 		return insList;
 	}
