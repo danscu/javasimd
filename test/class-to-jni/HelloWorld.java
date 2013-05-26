@@ -16,6 +16,8 @@
  *
  *************************************************************************/
 
+import java.util.Random;
+
 public class HelloWorld {
     private int testSum(int n) {
 	int i;
@@ -32,6 +34,17 @@ public class HelloWorld {
       return sum;
     }
 
+    private void testSort(int a[]) {
+	int i, j, minp;
+	for (i = 0; i < a.length - 1; i++) {
+	    minp = i;
+	    for (j = i + 1; j < a.length; j++)
+		if (a[j] < a[minp])
+			minp = j;
+	    int tmp = a[i]; a[i] = a[minp]; a[minp] = tmp;
+	}
+    }
+
     public static void main(String[] args) {
         System.out.println("Hello, World");
 	HelloWorld inst = new HelloWorld();
@@ -46,6 +59,20 @@ public class HelloWorld {
 		ia[i] = i;
 	res = inst.testArraySum(ia);
 	System.out.println("Array sum = " + res); 
+
+	// Test 3
+	int N = 100000;
+	Random r = new Random();
+	ia = new int[N];
+	for (int i = 0; i < N; i++)
+		ia[i] = r.nextInt();
+	inst.testSort(ia);
+	if (false) {	
+	for (int i = 0; i < N; i++)
+		System.out.print(ia[i] + " ");
+	System.out.println();
+	}
+	System.out.println("Sorting done, N = " + N);
     }
 }
 
