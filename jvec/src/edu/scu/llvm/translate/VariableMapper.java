@@ -117,7 +117,7 @@ public class VariableMapper {
 	/**
 	 * Matcher
 	 */
-	protected InstMatcher matcher;	
+	protected InstMatcher matcher;
 	
 	/**
 	 * Local generator variable ID

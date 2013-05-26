@@ -205,7 +205,7 @@ public class LLVM2Jni extends FunctionConverter {
 		// Array access generators
 		FunctionType arrayLenFType = (FunctionType) TypeFactory.getFunctionType(
 				Arrays.asList(new Type[] {
-						pi32_t /* ret type */, envTypePtrPtr, pi8_t, 
+						i32_t /* ret type */, envTypePtrPtr, pi8_t,
 		}));
 		
 		List<Instruction> extraInstr = new LinkedList<Instruction>();
@@ -303,12 +303,12 @@ public class LLVM2Jni extends FunctionConverter {
 					Instruction ins = null;
 					Constant pRes = trn.getVar(Translator.publicVarName("jniCallRes"), true);
 					
-					// load
+					// no instruction needed, just add a dummy one
 					Constant arrayAddr = trn.getVar(Translator.publicVarName("arrayLen"), true);
-					ins = fac.createLoadStoreInst(arrayAddr, InstType.loadInst,
-							Arrays.asList(new Constant[] { pRes }),
-							Arrays.asList(new Type[] { pi32_t }),
-							false /* volatile */ );							
+					ins = fac.createBinaryInst(arrayAddr, InstType.binaryInst,
+							Arrays.asList(new Constant[] { pRes, vfac.createConstantValue(SimpleConstantValue.intConst, "0")}),
+							Arrays.asList(new Type[] { i32_t, i32_t }),
+							"add", "", "", "");
 					addInstruction(start, ins);
 					
 					return insList;

@@ -9,11 +9,11 @@ extern "C" {
 #endif
 /*
  * Class:     HelloWorld
- * Method:    testSum
- * Signature: (I)I
+ * Method:    testArraySum
+ * Signature: ([I)I
  */
-JNIEXPORT jint JNICALL Java_HelloWorld_testSum
-  (JNIEnv *, jobject, jint);
+JNIEXPORT jint JNICALL Java_HelloWorld_testArraySum
+  (JNIEnv *, jobject, jintArray);
 
 #ifdef __cplusplus
 }

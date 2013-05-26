@@ -224,9 +224,6 @@ public class FunctionConverter {
 				List<Instruction> list = new LinkedList<Instruction>();
 				list.addAll(bs.getInstructions());
 
-				if (bs.getBlockID().equals("\"3\""))
-					System.out.println("Hit");		
-				
 				mapper.mapOperations(list, firstBlock, cleanupBlock);
 				
 				// Add modified block
@@ -312,6 +309,9 @@ public class FunctionConverter {
 		}
 
 		// Last pass: renumber the local variables
+		if (Debug.level >= 2)
+			System.out.println("Renumbering local variables");
+		
 		basicBlocks = basicBlocksLast;
 		int localVar = 0;
 		Map<String,String> renumMap = new TreeMap<String,String>();
@@ -323,7 +323,7 @@ public class FunctionConverter {
 				if (dest == null)
 					continue;
 				
-				// If dest is numeritcal and not yet mapped
+				// If dest is numerical and not yet mapped
 				if (dest.getValue().matches("%[0-9]+") && renumMap.get(dest.toString()) == null) {
 					String newVar = String.format("%%%d", localVar++);					
 					renumMap.put(dest.toString(), newVar);

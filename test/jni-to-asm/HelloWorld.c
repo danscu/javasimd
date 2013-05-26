@@ -16,8 +16,8 @@ JNIEXPORT jint JNICALL Java_HelloWorld_testSum
 	return sum;
 }
 
-JNIEXPORT jint JNICALL Java_HelloWorld_testArraySum_
-       (JNIEnv* env, jclass obj, jintArray arr) {
+JNIEXPORT jint JNICALL Java_HelloWorld_testArraySum
+       (JNIEnv* env, jobject obj, jintArray arr) {
   int i;
   jint sum = 0;
   jsize len = (*env)->GetArrayLength(env, arr);

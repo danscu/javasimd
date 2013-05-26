@@ -33,6 +33,10 @@ public class HelloWorld {
 	return sum;
     }
 
+    private void testPrintln(int value) {
+	System.out.println("testPrintln: value = " + value);
+    }
+
     public static void main(String[] args) {
         System.out.println("Hello, World");
 	HelloWorld inst = new HelloWorld();
@@ -44,6 +48,8 @@ public class HelloWorld {
 	    a[i] = i * 10;
 	res = inst.testArraySum(a);
 	System.out.println("Sum = " + res);
+
+	inst.testPrintln(1024);
     }
 }
 

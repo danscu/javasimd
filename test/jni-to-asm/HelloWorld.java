@@ -24,12 +24,19 @@ public class HelloWorld {
     }
 
     private native int testSum(int n);
+    private native int testArraySum(int arr[]);
 
     public static void main(String[] args) {
         System.out.println("Hello, World");
 	HelloWorld inst = new HelloWorld();
 	int res = inst.testSum(100);
 	System.out.println("Sum = " + res); 
+
+	int arr[] = new int[40];
+	for (int i = 0; i < 40; i++)
+		arr[i] = i;
+	res = inst.testArraySum(arr);
+	System.out.println("Sum of array = " + res);
     }
 }
 
