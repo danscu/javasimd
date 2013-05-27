@@ -213,31 +213,12 @@ public class FunctionConverter {
 			
 			mapper.addVarMap(Translator.publicVarName("argName"), arg);
 			
-			basicBlocks = basicBlocksLast;
-			basicBlocksLast = new LinkedList<BasicBlock>();
-			
-			boolean first = true;
-			BasicBlock firstBlock = null;			
-			
-			// Convert code - Pass 1 (Semantic recognizer)
-			for (BasicBlock bs : basicBlocks) {
-				List<Instruction> list = new LinkedList<Instruction>();
-				list.addAll(bs.getInstructions());
-
-				mapper.mapOperations(list, firstBlock, cleanupBlock);
-				
-				// Add modified block
-				BasicBlock newBB = new BasicBlock(bs.getBlockID(), list);
-				basicBlocksLast.add(newBB);
-				if (first) {
-					first = false;
-					firstBlock = newBB;
-				}
-			}
+			mapper.mapOperations(basicBlocksLast, cleanupBlock);
 		}
 
 		// Add cleanup code for conditional generators
 		mapper.addCleanupCode(cleanupBlock.getInstructions());
+		
 		if (cleanupBlock.getNumInst() != 0)
 			basicBlocksLast.add(basicBlocksLast.size(), cleanupBlock);
 		

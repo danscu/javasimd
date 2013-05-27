@@ -56,7 +56,7 @@ public class JniEnvCallGen extends OpGenerator {
 	}		
 	
 	@Override
-	public List<Instruction> insertInit(Translator trn,
+	public void insertInit(Translator trn,
 			List<Instruction> insList, ListIterator<Instruction> start) {				
 
 		Constant alreadySetupArray = trn.getVar(Translator.publicVarName("arraySetupDone"), false);
@@ -64,8 +64,6 @@ public class JniEnvCallGen extends OpGenerator {
 			trn.setVar(Translator.publicVarName("arraySetupDone"), "1");
 			setupArgments(trn, insList, start);
 		}
-		
-		return insList;
 	}
 
 	private void setupArgments(Translator trn, List<Instruction> insList,
@@ -98,7 +96,7 @@ public class JniEnvCallGen extends OpGenerator {
 	}	
 	
 	@Override
-	public List<Instruction> insert(Translator trn, List<Instruction> insList,
+	public void insert(Translator trn, List<Instruction> insList,
 			ListIterator<Instruction> start) {
 		InstFactory fac = new InstFactory();
 		ValueFactory vfac = new ValueFactory();
@@ -190,8 +188,6 @@ public class JniEnvCallGen extends OpGenerator {
 		
 		/*
 		 * Generate specific code 
-		 */
-		
-		return insList;
+		 */		
 	}
 }

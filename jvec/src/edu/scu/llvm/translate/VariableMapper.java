@@ -3,9 +3,11 @@ package edu.scu.llvm.translate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.antlr.v4.runtime.misc.Pair;
 
@@ -18,6 +20,7 @@ import cn.edu.sjtu.jllvm.VMCore.Types.FunctionType;
 import cn.edu.sjtu.jllvm.VMCore.Types.Type;
 import cn.edu.sjtu.jllvm.VMCore.Types.TypeFactory;
 import cn.edu.sjtu.jllvm.VMCore.Types.VectorType;
+import edu.scu.jjni.aotc.Debug;
 import edu.scu.jjni.aotc.recgen.OpGenerator;
 import edu.scu.jjni.aotc.recgen.OpRecognizer;
 import edu.scu.jjni.aotc.recgen.Translator;
@@ -220,11 +223,9 @@ public class VariableMapper {
 		
 		// 3. Search recognizer-generator map
 		for (Translator trn: translators) {
-			OpRecognizer opr = trn.getOpr();
-			OpGenerator opg = trn.getOpg();
-			if (opr != null && opg != null &&
-					opr.getTypeIn() != null && opr.getTypeIn().equals(javaArg))
-				return opg.getTypeIn();
+			Type fromTrn = mapTypeTranslator(trn, javaArg);
+			if (fromTrn != null)
+				return fromTrn;
 		}
 		
 		// 4. Types without conversion
@@ -263,6 +264,22 @@ public class VariableMapper {
 		}
 		
 		// Cannot convert the type -- fatal error
+		return null;
+	}
+	
+	public Type mapTypeTranslator(Translator trn, Type typeIn) {
+		OpRecognizer opr = trn.getOpr();
+		OpGenerator opg = trn.getOpg();
+		if (opr != null && opg != null &&
+				opr.getTypeIn() != null && opr.getTypeIn().equals(typeIn))
+			return opr.getTypeOut();
+		
+		for (Translator subTrn : trn.getChildren()) {
+			Type childMap = mapTypeTranslator(subTrn, typeIn);
+			if (childMap != null)
+				return childMap;
+		}
+		
 		return null;
 	}
 	
@@ -354,15 +371,36 @@ public class VariableMapper {
 	 * Recognizes operation patterns and convert to new instructions
 	 * @param cleanupBlock 
 	 * @param bs BasicBlock to search
-	 */
-	public void mapOperations(List<Instruction> insList, BasicBlock initBlock,
-			BasicBlock cleanupBlock) {
-		for (Translator trn: translators) {
+	 */	
+	public void mapOperations(Translator trn, 
+			List<BasicBlock> basicBlocks, BasicBlock cleanupBlock) {
+		boolean first = true;
+		BasicBlock firstBlock = null;			
+				
+		// Debug
+		if (Debug.level >= 10) {
 			if (trn.getOpr() != null && trn.getOpr().getSemc() == Semcode.GET_ARRAY_BASE_POST)
 				System.out.println("Testing arraybase post");
+		}				
+		
+		// Convert code - Pass 1 (Semantic recognizer)
+		for (BasicBlock bs : basicBlocks) {
+			List<Instruction> list = bs.getInstructions();
 			
 			if (trn.getOpr() != null)
-				matcher.matchAndModify(trn, insList, initBlock, cleanupBlock);
+				matcher.matchAndModify(this, trn, list, firstBlock, basicBlocks, cleanupBlock);
+			
+			if (first) {
+				first = false;
+				firstBlock = bs;
+			}
+		}
+	}
+	
+	public void mapOperations(List<BasicBlock> basicBlocks, BasicBlock cleanupBlock) {
+		for (Translator trn: translators) {
+			if (trn.getOpr() != null)
+				mapOperations(trn, basicBlocks, cleanupBlock);
 		}
 	}
 	

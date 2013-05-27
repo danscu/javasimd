@@ -59,23 +59,19 @@ public class OpGenerator {
 	 * @param trn
 	 * @param insList
 	 * @param start
-	 * @return
 	 */
-	public List<Instruction> insertInit(Translator trn, List<Instruction> insList,
+	public void insertInit(Translator trn, List<Instruction> insList,
 			ListIterator<Instruction> start) {
-		return insList;
 	}
 	
 	/**
 	 * Modify code at a point where other code is recognized.
 	 * @param trn The translator context.
 	 * @param insList
-	 * @param start
-	 * @return modified code.
+	 * @param start	 * 
 	 */
-	public List<Instruction> insert(Translator trn, List<Instruction> insList,
-			ListIterator<Instruction> start) {		
-		return insList;
+	public void insert(Translator trn, List<Instruction> insList,
+			ListIterator<Instruction> start) {
 	}
 	
 	/**
@@ -83,11 +79,9 @@ public class OpGenerator {
 	 * @param trn
 	 * @param insList
 	 * @param start
-	 * @return
 	 */
-	public List<Instruction> insertCleanup(Translator trn, List<Instruction> insList,
+	public void insertCleanup(Translator trn, List<Instruction> insList,
 			ListIterator<Instruction> start) {
-		return insList;
 	}
 	
 	protected void publishVar(Translator trn, String publicVar, String value) {		

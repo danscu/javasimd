@@ -285,8 +285,9 @@ public class InstMatcher {
 	/*
 	 * Returns true if modified
 	 */
-	public boolean matchAndModify(Translator trn, List<Instruction> insList, BasicBlock initBlock,
-			BasicBlock cleanupBlock) {
+	public boolean matchAndModify(VariableMapper mapper, Translator trn, 
+			List<Instruction> insList, BasicBlock initBlock,
+			List<BasicBlock> bbs, BasicBlock cleanupBlock) {
 		OpRecognizer opr = trn.getOpr();
 		OpGenerator opg = trn.getOpg();
 		
@@ -295,6 +296,7 @@ public class InstMatcher {
 		matchType = new HashMap<String,Type>();
 
 		boolean changed;
+		int instructAfterMatch = 0;
 		do {
 			changed = false;
 			ListIterator<Instruction> iit = insList.listIterator();
@@ -303,7 +305,7 @@ public class InstMatcher {
 				MatchResult res = _match(trn, start, opr);
 				
 				if (res == MatchResult.TOO_SHORT)
-					break;				
+					break;
 				
 				if (res == MatchResult.MATCH) {
 					if (Debug.level >= 2)
@@ -312,22 +314,27 @@ public class InstMatcher {
 					/* Recognzier can publish matched vars to environment */
 					opr.publishVars(trn);
 					
+					instructAfterMatch = iit.nextIndex();
+					
 					if (opg != null) {
-						changed = true;
-						insList = modifyCode(trn, insList, iit, initBlock, cleanupBlock);
+						changed = true;						
+						modifyCode(trn, insList, iit, initBlock, cleanupBlock);						
+					} else {
+						instructAfterMatch += opr.getInstructions().size();						
 					}
 					
 					// Call translator children recursively
 					for (Translator subTrn : trn.getChildren())
-						if (subTrn.getOpr() != null)
-							matchAndModify(subTrn, insList, initBlock, cleanupBlock);
+						if (subTrn.getOpr() != null) {
+							mapper.mapOperations(subTrn, bbs, cleanupBlock);
+							changed = true;
+						}
 					
 					unbindAll(opr);
 					
 					if (changed) {
-						// rewind to find other matches
-						iit = insList.listIterator();
-						continue;
+						// set the iterator to find other matches
+						iit = insList.listIterator(instructAfterMatch);					
 					}
 				}
 				iit.next();
@@ -349,8 +356,8 @@ public class InstMatcher {
 	 *            Code generator.
 	 * @return The modified instructions.
 	 */
-	private List<Instruction> modifyCode(Translator trn, List<Instruction> insList,
+	private void modifyCode(Translator trn, List<Instruction> insList,
 			ListIterator<Instruction> start, BasicBlock initBlock, BasicBlock cleanupBlock) {
-		return trn.modify(trn, insList, start, initBlock, cleanupBlock);
+		trn.modify(trn, insList, start, initBlock, cleanupBlock);
 	}
 }

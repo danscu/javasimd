@@ -26,7 +26,7 @@ public class JniEnvSetupGen extends OpGenerator {
 	 * This generates allocation code for the jni env argument
 	 */
 	@Override
-	public List<Instruction> insertInit(Translator trn, List<Instruction> insList,
+	public void insertInit(Translator trn, List<Instruction> insList,
 			ListIterator<Instruction> start) {
 		InstFactory fac = new InstFactory();
 		ValueFactory vfac = new ValueFactory();
@@ -62,8 +62,6 @@ public class JniEnvSetupGen extends OpGenerator {
 		addInstruction(start, ins);
 		
 		// Publish the local env
-		publishVar(trn, "localEnv", local_env.toString());
-	
-		return insList;
+		publishVar(trn, "localEnv", local_env.toString());		
 	}
 }

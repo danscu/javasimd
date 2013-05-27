@@ -33,11 +33,11 @@ public class ArrayAccessGen extends StructElemGen {
 	}
 
 	@Override
-	public List<Instruction> modifyGetElem(Translator trn,
+	public void modifyGetElem(Translator trn,
 			List<Instruction> insList, ListIterator<Instruction> start,
 			int elemNo) {
 		OpGenerator opg = getOpg(elemNo);
-		return opg.insert(trn, insList, start);
+		opg.insert(trn, insList, start);
 	}
 
 	public void addGenerator(int elemNo, OpGenerator opg) {
@@ -45,18 +45,18 @@ public class ArrayAccessGen extends StructElemGen {
 	}
 
 	@Override
-	public List<Instruction> initGetElem(Translator trn,
+	public void initGetElem(Translator trn,
 			List<Instruction> insList, ListIterator<Instruction> start,
 			int elemNo) {
 		OpGenerator opg = getOpg(elemNo);
-		return opg.insertInit(trn, insList, start);
+		opg.insertInit(trn, insList, start);
 	}
 
 	@Override
-	public List<Instruction> cleanupGetElem(Translator trn,
+	public void cleanupGetElem(Translator trn,
 			List<Instruction> insList, ListIterator<Instruction> start,
 			int elemNo) {
 		OpGenerator opg = getOpg(elemNo);
-		return opg.insertCleanup(trn, insList, start);
+		opg.insertCleanup(trn, insList, start);
 	}
 }

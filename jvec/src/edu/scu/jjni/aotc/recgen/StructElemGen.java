@@ -16,43 +16,43 @@ public abstract class StructElemGen extends OpGenerator {
 	}
 
 	@Override
-	public List<Instruction> insertInit(Translator trn,
+	public void insertInit(Translator trn,
 			List<Instruction> insList, ListIterator<Instruction> start) {
 		String elemNo = opr.getMatchContent(OpRecognizer
 				.newWildcard("elem_no"));
 		int elemNumber = Integer.parseInt(elemNo);
-		return initGetElem(trn, insList, start, elemNumber);
+		initGetElem(trn, insList, start, elemNumber);
 	}
 
 	@Override
-	public List<Instruction> insertCleanup(Translator trn,
+	public void insertCleanup(Translator trn,
 			List<Instruction> insList, ListIterator<Instruction> start) {
 		String elemNo = opr.getMatchContent(OpRecognizer
 				.newWildcard("elem_no"));
 		int elemNumber = Integer.parseInt(elemNo);
-		return cleanupGetElem(trn, insList, start, elemNumber);
+		cleanupGetElem(trn, insList, start, elemNumber);
 	}
 
 	@Override
-	public List<Instruction> insert(Translator trn, List<Instruction> insList,
+	public void insert(Translator trn, List<Instruction> insList,
 			ListIterator<Instruction> start) {
 		String elemNo = opr.getMatchContent(OpRecognizer
 				.newWildcard("elem_no"));
 		if (Debug.level >= 2)
 			System.out.println("Struct Elem Access: " + elemNo);
 		int elemNumber = Integer.parseInt(elemNo);
-		return modifyGetElem(trn, insList, start, elemNumber);
+		modifyGetElem(trn, insList, start, elemNumber);
 	}
 
-	abstract public List<Instruction> modifyGetElem(Translator trn,
+	abstract public void modifyGetElem(Translator trn,
 			List<Instruction> insList, ListIterator<Instruction> start,
 			int elemNo);
 
-	abstract public List<Instruction> initGetElem(Translator trn,
+	abstract public void initGetElem(Translator trn,
 			List<Instruction> insList, ListIterator<Instruction> start,
 			int elemNo);
 
-	abstract public List<Instruction> cleanupGetElem(Translator trn,
+	abstract public void cleanupGetElem(Translator trn,
 			List<Instruction> insList, ListIterator<Instruction> start,
 			int elemNo);
 }

@@ -68,7 +68,7 @@ public class Translator {
 		this.mapper = mapper;
 	}
 
-	public List<Instruction> modify(Translator trn, List<Instruction> insList,
+	public void modify(Translator trn, List<Instruction> insList,
 			ListIterator<Instruction> start, BasicBlock initBlock, BasicBlock cleanupBlock) {
 		
 		if (Debug.level >= 1)
@@ -80,7 +80,9 @@ public class Translator {
 		} else {
 			// this is the init block, insert init code to front
 			Instruction startIns = start.next();
-			insList = opg.insertInit(trn, insList, start);
+			opg.insertInit(trn, insList, start);
+			
+			// insList modified, get the iterator again
 			start = insList.listIterator(insList.indexOf(startIns));
 		}
 		
@@ -95,9 +97,7 @@ public class Translator {
 		// insert cleanup code to cleanup block
 		opg.insertCleanup(trn, cleanupBlock.getInstructions(), cleanupBlock.getInstructions().listIterator());
 		
-		List<Instruction> modIns = opg.insert(trn, insList, start);
-		
-		return modIns;
+		opg.insert(trn, insList, start);	
 	}
 
 	/**
