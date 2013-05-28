@@ -260,6 +260,10 @@ public class BasicBlock extends Value{
 		return instructions;
 	}
 	
+	public void setInstructions(List<Instruction> newIns) {
+		instructions = newIns;
+	}
+	
 	public String getBlockID() {
 		return blockID;
 	}

@@ -3,6 +3,8 @@ package edu.scu.jjni.aotc.recgen;
 import java.util.List;
 import java.util.ListIterator;
 
+import cn.edu.sjtu.jllvm.VMCore.BasicBlock;
+import cn.edu.sjtu.jllvm.VMCore.Constants.Constant;
 import cn.edu.sjtu.jllvm.VMCore.Instructions.Instruction;
 import cn.edu.sjtu.jllvm.VMCore.Types.Type;
 import edu.scu.jjni.aotc.Debug;
@@ -26,11 +28,12 @@ public abstract class StructElemGen extends OpGenerator {
 
 	@Override
 	public void insertCleanup(Translator trn,
-			List<Instruction> insList, ListIterator<Instruction> start) {
+			List<Instruction> insList, ListIterator<Instruction> start,
+			List<BasicBlock> extraBlocks, Constant outLabel) {			
 		String elemNo = opr.getMatchContent(OpRecognizer
 				.newWildcard("elem_no"));
 		int elemNumber = Integer.parseInt(elemNo);
-		cleanupGetElem(trn, insList, start, elemNumber);
+		cleanupGetElem(trn, insList, start, extraBlocks, outLabel, elemNumber);
 	}
 
 	@Override
@@ -54,5 +57,6 @@ public abstract class StructElemGen extends OpGenerator {
 
 	abstract public void cleanupGetElem(Translator trn,
 			List<Instruction> insList, ListIterator<Instruction> start,
+			List<BasicBlock> extraBlocks, Constant outLabel,
 			int elemNo);
 }

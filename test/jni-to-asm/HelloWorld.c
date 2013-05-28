@@ -20,6 +20,8 @@ JNIEXPORT jint JNICALL Java_HelloWorld_testArraySum
        (JNIEnv* env, jobject obj, jintArray arr) {
   int i;
   jint sum = 0;
+  if (arr == 0)
+	return 0;
   jsize len = (*env)->GetArrayLength(env, arr);
   jboolean iscopy;
   jint* tab = (*env)->GetIntArrayElements(env, arr, &iscopy);

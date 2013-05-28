@@ -39,6 +39,7 @@ public class LLVM2Jni extends FunctionConverter {
 	/* Indices of functions in %struct.JNINativeInterface_ */
 	private static final int JNIFunc_GetIntArrayElements = 187;
 	private static final int JNIFunc_GetIntArrayLength = 171;
+	public static final int JNIFunc_ReleaseIntArrayElements = 195;
 	
 	public LLVM2Jni(Module _module, String[] _functionNames) throws Exception {
 		super(_module, _functionNames, getJNIPreamble(), getJNIMapper(), getIgnoreCalls(),
@@ -69,6 +70,7 @@ public class LLVM2Jni extends FunctionConverter {
 	static public Type typeJavaObject;
 	static public Type typeJavaObjectPtr;
 	
+	static public Type i1_t = TypeFactory.getIntNType(1);
 	static public Type i8_t = TypeFactory.getIntNType(8);
 	static public Type pi8_t = TypeFactory.getPointerType(i8_t);
 	static public Type i32_t = TypeFactory.getInt32Type();
@@ -225,10 +227,10 @@ public class LLVM2Jni extends FunctionConverter {
 		FunctionType arrayBaseFType = (FunctionType) TypeFactory.getFunctionType(
 				Arrays.asList(new Type[] {
 						pi32_t /* ret type */, envTypePtrPtr, pi8_t, pi8_t
-		}));			
+		}));
 
 		extraInstr = new LinkedList<Instruction>();
-		// call i32 %6(%struct.JNINativeInterface_** %0, i8* %1) nounwind		
+		// call i32 %6(%struct.JNINativeInterface_** %0, i8* %1) nounwind
 		JniEnvCallGen arrayBaseJniGen = new JniEnvCallGen(Semcode.GET_ARRAY_BASE,
 				elemOpRec, null, pi8_t, env_addr, JNIFunc_GetIntArrayElements,
 				arrayBaseFType /* funcType */,
@@ -274,7 +276,7 @@ public class LLVM2Jni extends FunctionConverter {
 							Arrays.asList(new Type[] { pi32_t, type0xi32Ptr }),
 							"bitcast");
 					addInstruction(start, ins);
-					publishVar(trn, "", arrayAddr.toString());
+					publishVar(trn, "arrayBasePtr", pRes.toString());
 				}
 		};
 		

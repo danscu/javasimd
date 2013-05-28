@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 
+import cn.edu.sjtu.jllvm.VMCore.BasicBlock;
 import cn.edu.sjtu.jllvm.VMCore.ValueFactory;
 import cn.edu.sjtu.jllvm.VMCore.Constants.Constant;
 import cn.edu.sjtu.jllvm.VMCore.Constants.LocalVariable;
@@ -93,11 +94,104 @@ public class JniEnvCallGen extends OpGenerator {
 				Arrays.asList(new Constant[] {}),
 				Arrays.asList(new Type[] { i32p_t }));
 		addInstruction(start, ins);
-	}	
+	}
 	
 	@Override
-	public void insert(Translator trn, List<Instruction> insList,
-			ListIterator<Instruction> start) {
+	public void insertCleanup(Translator trn, List<Instruction> insList,
+			ListIterator<Instruction> start, List<BasicBlock> extraBlocks, Constant outLabel) {
+		Constant alreadySetupArray = trn.getVar(Translator.publicVarName("arraySetupDone"), false);
+		if (alreadySetupArray != null)
+			clearupArgments(trn, insList, start, extraBlocks, outLabel);
+	}
+
+	private void clearupArgments(Translator trn, List<Instruction> insList,
+			ListIterator<Instruction> start, List<BasicBlock> extraBlocks, Constant outLabel) {
+		InstFactory fac = new InstFactory();
+		ValueFactory vfac = new ValueFactory();
+		Instruction ins;
+		
+		Constant pArrayBase = trn.getVar(Translator.publicVarName("arrayBasePtr"), false);
+		if (pArrayBase == null)
+			return;
+		
+		Constant pArrayIsCopy = trn.getVar(Translator.publicVarName("isCopy"), true);
+		
+		// %26 = load i8* %iscopy, align 1
+		Constant iscopy = new LocalVariable(trn.getGenTmpName());		
+		ins = fac.createLoadStoreInst(iscopy /* dest */, InstType.loadInst,
+				Arrays.asList(new Constant[] { pArrayIsCopy,
+						vfac.createConstantValue(SimpleConstantValue.intConst, "1")} /* align 1 */),
+				Arrays.asList(new Type[] { LLVM2Jni.pi8_t }),
+				false /* volatile */);
+		addInstruction(start, ins);
+		
+		// %27 = icmp eq i8 %26, 1
+		Constant iscopyTrue = new LocalVariable(trn.getGenTmpName());
+		ins = fac.createCmpInst
+				(iscopyTrue /* dest */, InstType.icmpInst,
+				Arrays.asList(new Constant[] { iscopy,
+						vfac.createConstantValue(SimpleConstantValue.intConst, "1")} /* align 1 */),
+				Arrays.asList(new Type[] { LLVM2Jni.i8_t }),
+				"eq");
+		addInstruction(start, ins);
+		
+		// br i1 %27, label %"8" /* iscopy */, label %"9" /* !iscopy */
+		Constant labelIsCopy = new LocalVariable(trn.getLabelTmpName());
+		ins = fac.createSimpleInst(null, 
+				InstType.brInst,
+				Arrays.asList(new Constant[] { iscopyTrue,
+						labelIsCopy,
+						outLabel}),
+				Arrays.asList(new Type[] { LLVM2Jni.i1_t }));
+		addInstruction(start, ins);
+		
+		// Add block 1
+		List<Instruction> iList = new ArrayList<Instruction>();
+		ListIterator<Instruction> it = iList.listIterator();
+		BasicBlock b1 = new BasicBlock(labelIsCopy.getValue(), iList);
+		
+		// jniEnvFuncNo for ReleaseIntArrayElements;		
+		int jniEnvFuncNo = LLVM2Jni.JNIFunc_ReleaseIntArrayElements;
+
+		FunctionType funcType = (FunctionType) TypeFactory.getFunctionType(
+				Arrays.asList(new Type[] {
+						TypeFactory.getVoidType() /* ret type */,
+						LLVM2Jni.envTypePtrPtr, LLVM2Jni.pi8_t,
+						LLVM2Jni.pi32_t, LLVM2Jni.i32_t }));				
+		
+		// Insert release elements jni call
+		insertJniCall(trn, iList, it, funcType, 
+				Arrays.asList(new Constant[] { pArrayBase, 
+						vfac.createConstantValue(SimpleConstantValue.intConst, "2") /* JNIABORT */		
+				}),
+				Arrays.asList(new Type[] { LLVM2Jni.pi32_t, LLVM2Jni.i32_t }),
+				jniEnvFuncNo, false/* has no retval */);
+
+		// Add branch
+		ins = fac.createSimpleInst(null,
+				InstType.brInst,
+				Arrays.asList(new Constant[] { outLabel }),
+				Arrays.asList(new Type[] { }));
+		addInstruction(it, ins);
+		
+		// Add to block list
+		extraBlocks.add(b1);
+	}
+
+	/**
+	 * Create JNI call functions
+	 * @param trn
+	 * @param insList
+	 * @param start
+	 * @param argTypes2 
+	 * @param args2 
+	 * @param hasRet
+	 * @return The return-value variable
+	 */
+	protected Constant insertJniCall(Translator trn, List<Instruction> insList,
+			ListIterator<Instruction> start, FunctionType funcType, List<Constant> args,
+			List<Type> argTypes, int funcNo, boolean hasRet) {
+		
 		InstFactory fac = new InstFactory();
 		ValueFactory vfac = new ValueFactory();
 
@@ -119,7 +213,7 @@ public class JniEnvCallGen extends OpGenerator {
 		Constant funcAddr = new LocalVariable(trn.getGenTmpName());
 		ins = fac.createGetElePtrInst(funcAddr /* dest */, InstType.getElePtrInst,
 				Arrays.asList(new Constant[] { pEnv, vfac.createConstantValue(SimpleConstantValue.intConst, "0"),
-						vfac.createConstantValue(SimpleConstantValue.intConst, Integer.toString(jniEnvFuncNo)) }),						
+						vfac.createConstantValue(SimpleConstantValue.intConst, Integer.toString(funcNo)) }),						
 				Arrays.asList(new Type[] { LLVM2Jni.envTypePtr, i32_t, i32_t }),
 				true /* inbounds */);
 		addInstruction(start, ins);
@@ -160,7 +254,9 @@ public class JniEnvCallGen extends OpGenerator {
 		addInstruction(start, ins);
 		
 		// %7 = call i32 %6(%struct.JNINativeInterface_** %0, i8* %1) nounwind
-		Constant pRes = new LocalVariable(trn.getGenTmpName());
+		Constant pRes = null;
+		if (hasRet)
+			pRes = new LocalVariable(trn.getGenTmpName());
 		
 		List<Constant> operands = new LinkedList<Constant>();
 		Constant arrayArgName = trn.getVar(Translator.publicVarName("argName"), true);
@@ -183,11 +279,21 @@ public class JniEnvCallGen extends OpGenerator {
 				);
 		addInstruction(start, ins);
 		
+		return pRes;
+	}
+	
+	@Override
+	public void insert(Translator trn, List<Instruction> insList,
+			ListIterator<Instruction> start) {				
+		
+		Constant pRes = insertJniCall(trn, insList, start, funcType, 
+				args, argTypes, jniEnvFuncNo, true /* has ret */);
+		
 		// Publish the result
 		publishVar(trn, "jniCallRes", pRes.toString());
 		
 		/*
-		 * Generate specific code 
-		 */		
+		 * Generate specific code
+		 */
 	}
 }

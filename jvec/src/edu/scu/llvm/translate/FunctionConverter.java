@@ -10,6 +10,7 @@ import java.util.TreeMap;
 import cn.edu.sjtu.jllvm.VMCore.Argument;
 import cn.edu.sjtu.jllvm.VMCore.BasicBlock;
 import cn.edu.sjtu.jllvm.VMCore.Module;
+import cn.edu.sjtu.jllvm.VMCore.ValueFactory;
 import cn.edu.sjtu.jllvm.VMCore.Constants.Constant;
 import cn.edu.sjtu.jllvm.VMCore.Constants.Function;
 import cn.edu.sjtu.jllvm.VMCore.Constants.LocalVariable;
@@ -21,6 +22,7 @@ import edu.scu.jjni.aotc.Debug;
 import edu.scu.jjni.aotc.LLVM2Jni;
 import edu.scu.jjni.aotc.recgen.OpRecognizer;
 import edu.scu.jjni.aotc.recgen.Translator;
+import edu.scu.llvm.asm.InstFactory;
 
 public class FunctionConverter {
 	/**
@@ -205,22 +207,47 @@ public class FunctionConverter {
 		
 		// Code conversion for each argument
 		basicBlocksLast = fn.getBasicBlocks();
+		List<BasicBlock> cleanupBlocks = new LinkedList<BasicBlock>();		
 		BasicBlock cleanupBlock = new BasicBlock("JJNIcleanup", new LinkedList<Instruction>());
 		
+		Constant outLabel = new LocalVariable(mapper.getLabelTmpName());
+		List<BasicBlock> cleanupExtra = new ArrayList<BasicBlock>();
+		int lastExtraSize = 0;
+				
 		for (String arg : mapper.getFuncArg()) {
 			if (Debug.level >= 1)
-				System.out.println("Processing argument: " + arg);
+				System.out.println("Processing argument: " + arg);						
 			
 			mapper.addVarMap(Translator.publicVarName("argName"), arg);
 			
-			mapper.mapOperations(basicBlocksLast, cleanupBlock);
+			mapper.mapOperations(basicBlocksLast, cleanupBlock, cleanupExtra, outLabel);
+			
+			if (cleanupExtra.size() != lastExtraSize) {
+				cleanupBlocks.add(cleanupBlock);
+				cleanupBlock = new BasicBlock(outLabel.getValue(), new LinkedList<Instruction>());
+				outLabel = new LocalVariable(mapper.getLabelTmpName());
+			}
 		}
 
-		// Add cleanup code for conditional generators
-		mapper.addCleanupCode(cleanupBlock.getInstructions());
+		// Add cleanup code for unconditional cleanup code (not specific to an argument)
+		mapper.addCleanupCode(cleanupBlock.getInstructions(), cleanupExtra, outLabel);
+		InstFactory fac = new InstFactory();		
+		Constant retLabel = new LocalVariable("%return");
+
+		Instruction retJump = fac.createSimpleInst(null, InstType.brInst,
+				Arrays.asList(new Constant[] { retLabel }),
+				new ArrayList<Type>());
+		cleanupBlock.getInstructions().add(retJump);
 		
-		if (cleanupBlock.getNumInst() != 0)
-			basicBlocksLast.add(basicBlocksLast.size(), cleanupBlock);
+		if (cleanupBlock.getNumInst() != 0) {
+			cleanupBlocks.add(cleanupBlock);			
+		}
+
+		for (BasicBlock cb : cleanupBlocks)
+			basicBlocksLast.add(cb);
+		
+		for (BasicBlock cb : cleanupExtra)
+			basicBlocksLast.add(cb);
 		
 		// Convert code - Pass 2 (simple type mapping)
 		basicBlocks = basicBlocksLast;

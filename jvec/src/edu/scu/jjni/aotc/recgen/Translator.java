@@ -69,7 +69,8 @@ public class Translator {
 	}
 
 	public void modify(Translator trn, List<Instruction> insList,
-			ListIterator<Instruction> start, BasicBlock initBlock, BasicBlock cleanupBlock) {
+			ListIterator<Instruction> start, BasicBlock initBlock, BasicBlock cleanupBlock,
+			List<BasicBlock> extraCleanupBlocks, Constant cleanupOutLabel) {
 		
 		if (Debug.level >= 1)
 			System.out.println("Modify code for " + trn.getOpg().semc);			
@@ -95,9 +96,11 @@ public class Translator {
 		}
 
 		// insert cleanup code to cleanup block
-		opg.insertCleanup(trn, cleanupBlock.getInstructions(), cleanupBlock.getInstructions().listIterator());
+		opg.insertCleanup(trn, cleanupBlock.getInstructions(),
+				cleanupBlock.getInstructions().listIterator(),
+				extraCleanupBlocks, cleanupOutLabel);
 		
-		opg.insert(trn, insList, start);	
+		opg.insert(trn, insList, start);
 	}
 
 	/**
@@ -132,6 +135,10 @@ public class Translator {
 	
 	public String getGenTmpName() {		
 		return mapper.getGenTmpName();
+	}
+	
+	public String getLabelTmpName() {		
+		return mapper.getLabelTmpName();
 	}
 	
 	public void addTranslator(Translator trn) {

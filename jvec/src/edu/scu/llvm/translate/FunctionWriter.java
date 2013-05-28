@@ -45,7 +45,10 @@ public class FunctionWriter extends Function {
 		sb.append("{\n");
 		
 		for (BasicBlock bb : blockList) {
-			sb.append(bb.getBlockID());
+			String id = bb.getBlockID();
+			if (id.charAt(0) == '%')
+				id = id.substring(1);
+			sb.append(id);
 			sb.append(":\n");
 			
 			for (Instruction ins : bb.getInstructions()) {

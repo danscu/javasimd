@@ -7,6 +7,8 @@ import java.util.Map;
 
 import org.antlr.v4.parse.ANTLRParser.throwsSpec_return;
 
+import cn.edu.sjtu.jllvm.VMCore.BasicBlock;
+import cn.edu.sjtu.jllvm.VMCore.Constants.Constant;
 import cn.edu.sjtu.jllvm.VMCore.Instructions.Instruction;
 import cn.edu.sjtu.jllvm.VMCore.Types.Type;
 import edu.scu.jjni.aotc.Debug;
@@ -55,8 +57,9 @@ public class ArrayAccessGen extends StructElemGen {
 	@Override
 	public void cleanupGetElem(Translator trn,
 			List<Instruction> insList, ListIterator<Instruction> start,
+			List<BasicBlock> extraBlocks, Constant outLabel,
 			int elemNo) {
 		OpGenerator opg = getOpg(elemNo);
-		opg.insertCleanup(trn, insList, start);
+		opg.insertCleanup(trn, insList, start, extraBlocks, outLabel);
 	}
 }

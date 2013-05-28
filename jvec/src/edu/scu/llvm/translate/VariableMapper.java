@@ -128,6 +128,11 @@ public class VariableMapper {
 	protected int genVarId;
 	
 	/**
+	 * Local label variable ID
+	 */
+	protected int genlabelId;
+	
+	/**
 	 * Local recognizer variable ID
 	 */
 	protected int recVarId;
@@ -184,6 +189,7 @@ public class VariableMapper {
 		localTypeMap.clear();
 		varMap.clear();
 		genVarId = recVarId = 0;
+		genlabelId = 0;
 	}
 	
 	/**
@@ -373,7 +379,9 @@ public class VariableMapper {
 	 * @param bs BasicBlock to search
 	 */	
 	public void mapOperations(Translator trn, 
-			List<BasicBlock> basicBlocks, BasicBlock cleanupBlock) {
+			List<BasicBlock> basicBlocks, BasicBlock cleanupBlock,
+			List<BasicBlock> cleanupExtra, Constant cleanupOutLabel
+			) {
 		boolean first = true;
 		BasicBlock firstBlock = null;			
 				
@@ -388,7 +396,8 @@ public class VariableMapper {
 			List<Instruction> list = bs.getInstructions();
 			
 			if (trn.getOpr() != null)
-				matcher.matchAndModify(this, trn, list, firstBlock, basicBlocks, cleanupBlock);
+				matcher.matchAndModify(this, trn, list, firstBlock, basicBlocks, cleanupBlock,
+						cleanupExtra, cleanupOutLabel);
 			
 			if (first) {
 				first = false;
@@ -397,10 +406,12 @@ public class VariableMapper {
 		}
 	}
 	
-	public void mapOperations(List<BasicBlock> basicBlocks, BasicBlock cleanupBlock) {
+	public void mapOperations(List<BasicBlock> basicBlocks, BasicBlock cleanupBlock,
+			List<BasicBlock> cleanupExtra, Constant cleanupOutLabel) {
 		for (Translator trn: translators) {
 			if (trn.getOpr() != null)
-				mapOperations(trn, basicBlocks, cleanupBlock);
+				mapOperations(trn, basicBlocks, cleanupBlock,
+						cleanupExtra, cleanupOutLabel);
 		}
 	}
 	
@@ -411,11 +422,12 @@ public class VariableMapper {
 		}
 	}
 	
-	public void addCleanupCode(List<Instruction> insList) {
+	public void addCleanupCode(List<Instruction> insList, List<BasicBlock> cleanupExtraBlocks,
+			Constant cleanupOutLabel) {
 		for (Translator trn: translators) {
 			if (trn.getOpr() == null && trn.getOpg() != null) // unconditional generator
 				trn.getOpg().insertCleanup(trn, insList,
-						insList.listIterator(insList.size()));
+						insList.listIterator(insList.size()), cleanupExtraBlocks, cleanupOutLabel);
 		}
 	}
 	
@@ -437,6 +449,10 @@ public class VariableMapper {
 
 	public String getGenTmpName() {		
 		return OpGenerator.getTmpName(genVarId++);
+	}
+
+	public String getLabelTmpName() {		
+		return OpGenerator.getLabelName(genlabelId++);
 	}
 
 	public String getRecTmpName() {

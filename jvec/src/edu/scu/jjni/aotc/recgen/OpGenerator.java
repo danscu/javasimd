@@ -3,6 +3,8 @@ package edu.scu.jjni.aotc.recgen;
 import java.util.List;
 import java.util.ListIterator;
 
+import cn.edu.sjtu.jllvm.VMCore.BasicBlock;
+import cn.edu.sjtu.jllvm.VMCore.Constants.Constant;
 import cn.edu.sjtu.jllvm.VMCore.Instructions.Instruction;
 import cn.edu.sjtu.jllvm.VMCore.Types.Type;
 import edu.scu.jjni.aotc.Debug;
@@ -38,6 +40,10 @@ public class OpGenerator {
 	 */
 	public static String getTmpName(int n) {
 		return String.format("%%Gen.%d", n);
+	}
+	
+	public static String getLabelName(int n) {
+		return String.format("%%\"L.%d\"", n);
 	}
 
 	public void addInstruction(ListIterator<Instruction> it, Instruction inst) {
@@ -81,7 +87,8 @@ public class OpGenerator {
 	 * @param start
 	 */
 	public void insertCleanup(Translator trn, List<Instruction> insList,
-			ListIterator<Instruction> start) {
+			ListIterator<Instruction> start,
+			List<BasicBlock> extraBlocks, Constant outLabel) {
 	}
 	
 	protected void publishVar(Translator trn, String publicVar, String value) {		

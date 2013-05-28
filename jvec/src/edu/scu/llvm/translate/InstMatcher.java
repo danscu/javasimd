@@ -287,7 +287,8 @@ public class InstMatcher {
 	 */
 	public boolean matchAndModify(VariableMapper mapper, Translator trn, 
 			List<Instruction> insList, BasicBlock initBlock,
-			List<BasicBlock> bbs, BasicBlock cleanupBlock) {
+			List<BasicBlock> bbs, BasicBlock cleanupBlock,
+			List<BasicBlock> cleanupExtra, Constant cleanupOutLabel) {
 		OpRecognizer opr = trn.getOpr();
 		OpGenerator opg = trn.getOpg();
 		
@@ -318,7 +319,7 @@ public class InstMatcher {
 					
 					if (opg != null) {
 						changed = true;						
-						modifyCode(trn, insList, iit, initBlock, cleanupBlock);						
+						modifyCode(trn, insList, iit, initBlock, cleanupBlock, cleanupExtra, cleanupOutLabel);						
 					} else {
 						instructAfterMatch += opr.getInstructions().size();						
 					}
@@ -326,7 +327,7 @@ public class InstMatcher {
 					// Call translator children recursively
 					for (Translator subTrn : trn.getChildren())
 						if (subTrn.getOpr() != null) {
-							mapper.mapOperations(subTrn, bbs, cleanupBlock);
+							mapper.mapOperations(subTrn, bbs, cleanupBlock, cleanupExtra, cleanupOutLabel);
 							changed = true;
 						}
 					
@@ -357,7 +358,8 @@ public class InstMatcher {
 	 * @return The modified instructions.
 	 */
 	private void modifyCode(Translator trn, List<Instruction> insList,
-			ListIterator<Instruction> start, BasicBlock initBlock, BasicBlock cleanupBlock) {
-		trn.modify(trn, insList, start, initBlock, cleanupBlock);
+			ListIterator<Instruction> start, BasicBlock initBlock, BasicBlock cleanupBlock,
+			List<BasicBlock> cleanupExtraBlocks, Constant cleanupOutLabel) {
+		trn.modify(trn, insList, start, initBlock, cleanupBlock, cleanupExtraBlocks, cleanupOutLabel);
 	}
 }
