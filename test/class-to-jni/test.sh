@@ -6,7 +6,7 @@ if [[ ! `uname -a` =~ .*_64.* ]]; then
   LLC_ARCH="-march=x86"
 fi
 
-FUNC="testSum testArray findMinPos"
+FUNC="testSum testArraySum findMinPos"
 
 if [ "$1" == "" ]; then
   echo Usage: test.sh ClassName

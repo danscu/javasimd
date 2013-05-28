@@ -225,10 +225,11 @@ public class FunctionConverter {
 			
 			mapper.mapOperations(basicBlocksLast, cleanupBlock, cleanupExtra, outLabel);
 			
-			if (cleanupExtra.size() != lastExtraSize) {				
+			if (cleanupExtra.size() != lastExtraSize) {
 				cleanupBlock = new BasicBlock(outLabel.getValue(), new LinkedList<Instruction>());
 				cleanupBlocks.add(cleanupBlock);
 				outLabel = new LocalVariable(mapper.getLabelTmpName());
+				lastExtraSize = cleanupExtra.size();
 			}
 		}
 
