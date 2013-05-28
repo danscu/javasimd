@@ -161,9 +161,19 @@ public class JniEnvCallGen extends OpGenerator {
 						LLVM2Jni.envTypePtrPtr, LLVM2Jni.pi8_t,
 						LLVM2Jni.pi32_t, LLVM2Jni.i32_t }));				
 		
+		// Dereference the pointer to array base
+		Constant arrayBase = new LocalVariable(trn.getGenTmpName());
+		Constant arrayTab = trn.getVar(Translator.publicVarName("arrayTab"), true);
+		ins = fac.createLoadStoreInst(arrayBase,
+				InstType.loadInst,
+				Arrays.asList(new Constant[] { arrayTab }),
+				Arrays.asList(new Type[] { TypeFactory.getPointerType(LLVM2Jni.pi32_t) }),
+				false /* volatile */);
+		addInstruction(it, ins);
+		
 		// Insert release elements jni call
 		insertJniCall(trn, iList, it, funcType, 
-				Arrays.asList(new Constant[] { pArrayBase, 
+				Arrays.asList(new Constant[] { arrayBase,
 						vfac.createConstantValue(SimpleConstantValue.intConst, "2") /* JNIABORT */		
 				}),
 				Arrays.asList(new Type[] { LLVM2Jni.pi32_t, LLVM2Jni.i32_t }),
