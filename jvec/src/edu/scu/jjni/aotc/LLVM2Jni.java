@@ -138,7 +138,7 @@ public class LLVM2Jni extends FunctionConverter {
 
 		Type javaObjectArrayBase = new Type(Type.StructTyID, "%\"struct.java.lang.Object[]\"");
 		Type javaObjectArrayPtr = TypeFactory.getPointerType(javaObjectArrayBase);
-				
+		
 		Instruction ins;
 		
 		//// Object operation recognizer

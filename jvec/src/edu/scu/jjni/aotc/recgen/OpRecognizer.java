@@ -27,6 +27,12 @@ public class OpRecognizer {
 	protected Type typeOut;
 	protected List<Instruction> seq;
 	protected Map<String, String> matchMap;
+
+	/**
+	 * Matched types
+	 */	
+	protected Map<String, Type> matchType;
+	
 	protected List<String> publicNames; 
 	
 	public OpRecognizer(Semcode op, Type typeIn, Type typeOut) {
@@ -35,6 +41,7 @@ public class OpRecognizer {
 		this.typeOut = typeOut;
 		seq = new ArrayList<Instruction>();
 		matchMap = new HashMap<String, String>();
+		matchType = new HashMap<String, Type>();
 		publicNames = new ArrayList<String>();
 	}
 
@@ -105,6 +112,10 @@ public class OpRecognizer {
 		return matchMap;
 	}
 
+	public Map<String, Type> getTypeMatchMap() {
+		return matchType;
+	}
+	
 	public Semcode getSemc() {
 		return semc;
 	}

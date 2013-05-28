@@ -2,14 +2,8 @@ package edu.scu.llvm.translate;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArrayList;
-
-import org.antlr.v4.runtime.misc.Pair;
 
 import cn.edu.sjtu.jllvm.VMCore.BasicBlock;
 import cn.edu.sjtu.jllvm.VMCore.Constants.Constant;
@@ -19,7 +13,6 @@ import cn.edu.sjtu.jllvm.VMCore.Types.ArrayType;
 import cn.edu.sjtu.jllvm.VMCore.Types.FunctionType;
 import cn.edu.sjtu.jllvm.VMCore.Types.Type;
 import cn.edu.sjtu.jllvm.VMCore.Types.TypeFactory;
-import cn.edu.sjtu.jllvm.VMCore.Types.VectorType;
 import edu.scu.jjni.aotc.Debug;
 import edu.scu.jjni.aotc.recgen.OpGenerator;
 import edu.scu.jjni.aotc.recgen.OpRecognizer;

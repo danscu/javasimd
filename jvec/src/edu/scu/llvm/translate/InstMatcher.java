@@ -22,11 +22,6 @@ import edu.scu.llvm.translate.VariableMapper.Semcode;
  * @author danke
  */
 public class InstMatcher {
-	/**
-	 * Matched types
-	 */	
-	Map<String, Type> matchType;
-
 	public InstMatcher() {
 	}
 
@@ -80,8 +75,8 @@ public class InstMatcher {
 		return opr.getMatchMap().get(constant.getValue());
 	}
 	
-	protected Type getWildcardVal(Type insType) {
-		Type t = matchType.get(insType.getTypeString());
+	protected Type getWildcardVal(OpRecognizer opr, Type insType) {
+		Type t = opr.getTypeMatchMap().get(insType.getTypeString());
 		return t;
 	}
 
@@ -89,21 +84,21 @@ public class InstMatcher {
 		opr.getMatchMap().put(wildcard.getValue(), var.getValue());
 	}
 	
-	protected void bind(Type wildcard, Type insType) {
-		matchType.put(wildcard.getTypeString(), insType);
+	protected void bind(OpRecognizer opr, Type wildcard, Type insType) {
+		opr.getTypeMatchMap().put(wildcard.getTypeString(), insType);
 	}
 
 	protected void unbind(OpRecognizer opr, Constant wildcard) {
 		opr.getMatchMap().remove(wildcard.getValue());
 	}
 
-	protected void unbind(Type wildcard) {
-		matchType.put(wildcard.getTypeString(), null);
+	protected void unbind(OpRecognizer opr, Type wildcard) {
+		opr.getTypeMatchMap().put(wildcard.getTypeString(), null);
 	}
 	
 	protected void unbindAll(OpRecognizer opr) {
 		opr.getMatchMap().clear();
-		matchType.clear();
+		opr.getTypeMatchMap().clear();
 	}
 
 	/**
@@ -149,11 +144,11 @@ public class InstMatcher {
 				
 				// wildcard
 				if (isWildcard(patType) &&
-						( isUnbound(opr, patType) || getWildcardVal(patType).equals(insType))) {
+						( isUnbound(opr, patType) || getWildcardVal(opr, patType).equals(insType))) {
 					// bind
 					if (isUnbound(opr, patType)) {
 						boundTypes.add(patType); // for backtrack
-						bind(patType, insType);
+						bind(opr, patType, insType);
 					}
 					continue;
 				}		
@@ -258,7 +253,7 @@ public class InstMatcher {
 
 		if (!success)
 			for (Type t : boundTypes)
-				unbind(t);
+				unbind(opr, t);
 		
 		return success;
 	}
@@ -294,8 +289,8 @@ public class InstMatcher {
 		OpGenerator opg = trn.getOpg();
 		
 		if (clearMatch) {
-			opr.getMatchMap().clear();		
-			matchType = new HashMap<String,Type>();
+			opr.getMatchMap().clear();
+			opr.getTypeMatchMap().clear();
 		}
 
 		boolean changed;
