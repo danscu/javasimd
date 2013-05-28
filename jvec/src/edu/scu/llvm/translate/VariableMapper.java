@@ -380,7 +380,8 @@ public class VariableMapper {
 	 */	
 	public void mapOperations(Translator trn, 
 			List<BasicBlock> basicBlocks, BasicBlock cleanupBlock,
-			List<BasicBlock> cleanupExtra, Constant cleanupOutLabel
+			List<BasicBlock> cleanupExtra, Constant cleanupOutLabel,
+			boolean clearMatch
 			) {
 		boolean first = true;
 		BasicBlock firstBlock = null;			
@@ -397,7 +398,7 @@ public class VariableMapper {
 			
 			if (trn.getOpr() != null)
 				matcher.matchAndModify(this, trn, list, firstBlock, basicBlocks, cleanupBlock,
-						cleanupExtra, cleanupOutLabel);
+						cleanupExtra, cleanupOutLabel, clearMatch);
 			
 			if (first) {
 				first = false;
@@ -411,7 +412,7 @@ public class VariableMapper {
 		for (Translator trn: translators) {
 			if (trn.getOpr() != null)
 				mapOperations(trn, basicBlocks, cleanupBlock,
-						cleanupExtra, cleanupOutLabel);
+						cleanupExtra, cleanupOutLabel, true);
 		}
 	}
 	

@@ -19,7 +19,29 @@ public abstract class StructElemGen extends OpGenerator {
 
 	@Override
 	public void insertInit(Translator trn,
-			List<Instruction> insList, ListIterator<Instruction> start) {
+			List<Instruction> insList, ListIterator<Instruction> start) {		
+		int elemNumber = getElemNumber();
+		initGetElem(trn, insList, start, elemNumber);
+	}
+
+	@Override
+	public void insertCleanup(Translator trn,
+			List<Instruction> insList, ListIterator<Instruction> start,
+			List<BasicBlock> extraBlocks, Constant outLabel) {					
+		int elemNumber = getElemNumber();
+		cleanupGetElem(trn, insList, start, extraBlocks, outLabel, elemNumber);
+	}
+
+	@Override
+	public void insert(Translator trn, List<Instruction> insList,
+			ListIterator<Instruction> start) {
+		int elemNumber = getElemNumber();
+		if (Debug.level >= 2)
+			System.out.println("Struct Elem Access: " + elemNumber);
+		modifyGetElem(trn, insList, start, elemNumber);
+	}
+
+	private int getElemNumber() {
 		String elemNoByte = opr.getMatchContent(OpRecognizer
 				.newWildcard("elem_no_byte"));
 		
@@ -33,28 +55,7 @@ public abstract class StructElemGen extends OpGenerator {
 			elemNumber = Integer.parseInt(elemNo);
 		}
 		
-		initGetElem(trn, insList, start, elemNumber);
-	}
-
-	@Override
-	public void insertCleanup(Translator trn,
-			List<Instruction> insList, ListIterator<Instruction> start,
-			List<BasicBlock> extraBlocks, Constant outLabel) {			
-		String elemNo = opr.getMatchContent(OpRecognizer
-				.newWildcard("elem_no"));
-		int elemNumber = Integer.parseInt(elemNo);
-		cleanupGetElem(trn, insList, start, extraBlocks, outLabel, elemNumber);
-	}
-
-	@Override
-	public void insert(Translator trn, List<Instruction> insList,
-			ListIterator<Instruction> start) {
-		String elemNo = opr.getMatchContent(OpRecognizer
-				.newWildcard("elem_no"));
-		if (Debug.level >= 2)
-			System.out.println("Struct Elem Access: " + elemNo);
-		int elemNumber = Integer.parseInt(elemNo);
-		modifyGetElem(trn, insList, start, elemNumber);
+		return elemNumber;
 	}
 
 	abstract public void modifyGetElem(Translator trn,

@@ -288,13 +288,15 @@ public class InstMatcher {
 	public boolean matchAndModify(VariableMapper mapper, Translator trn, 
 			List<Instruction> insList, BasicBlock initBlock,
 			List<BasicBlock> bbs, BasicBlock cleanupBlock,
-			List<BasicBlock> cleanupExtra, Constant cleanupOutLabel) {
+			List<BasicBlock> cleanupExtra, Constant cleanupOutLabel,
+			boolean clearMatch) {
 		OpRecognizer opr = trn.getOpr();
 		OpGenerator opg = trn.getOpg();
 		
-		opr.getMatchMap().clear();
-		
-		matchType = new HashMap<String,Type>();
+		if (clearMatch) {
+			opr.getMatchMap().clear();		
+			matchType = new HashMap<String,Type>();
+		}
 
 		boolean changed;
 		int instructAfterMatch = 0;
@@ -327,7 +329,7 @@ public class InstMatcher {
 					// Call translator children recursively
 					for (Translator subTrn : trn.getChildren())
 						if (subTrn.getOpr() != null) {
-							mapper.mapOperations(subTrn, bbs, cleanupBlock, cleanupExtra, cleanupOutLabel);
+							mapper.mapOperations(subTrn, bbs, cleanupBlock, cleanupExtra, cleanupOutLabel, false);
 							changed = true;
 						}
 					

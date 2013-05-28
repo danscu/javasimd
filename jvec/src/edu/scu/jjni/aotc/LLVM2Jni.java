@@ -167,14 +167,14 @@ public class LLVM2Jni extends FunctionConverter {
 				Arrays.asList(new Constant[] { pStruct }),
 				Arrays.asList(new Type[] { arrayPtrType, pi8_t }),
 				"bitcast");
-		elemOpRec.addInstruction(ins);		
+		elemOpRec.addInstruction(ins);
 		
-		// %5 = getelementptr inbounds i8* %4, i32 0, i32 (<elem_no> * 4)
+		// %5 = getelementptr inbounds i8* %4, i32 (<elem_no> * 4)
 		Constant pElem = new WildcardConstant(OpRecognizer.newWildcard("objElemPtr")); // publishable
 		ins = fac.createGetElePtrInst(pElem, InstType.getElePtrInst,
-				Arrays.asList(new Constant[] { pByte, vfac.createConstantValue(SimpleConstantValue.intConst, "0"),
+				Arrays.asList(new Constant[] { pByte,
 						new WildcardConstant(OpRecognizer.newWildcard("elem_no_byte")) }),
-				Arrays.asList(new Type[] { pi8_t, i32_t, i32_t}),
+				Arrays.asList(new Type[] { pi8_t, i32_t}),
 				true /* inbounds */);
 		elemOpRec.addInstruction(ins);
 		elemOpRec.addPublicVar(pElem);
@@ -233,12 +233,12 @@ public class LLVM2Jni extends FunctionConverter {
 		
 		OpRecognizer arrayBaseRec = new OpRecognizer(VariableMapper.Semcode.GET_ARRAY_BASE_POST,
 				javaStructPtr, type0xi32Ptr);
-		// %5 = bitcast [4 x i8]* %4 to [0 x i32]*
+		// %5 = bitcast i8* %4 to [0 x i32]*
 		pElem = new WildcardConstant(Translator.publicVarName("objElemPtr")); // published
 		Constant pArrayBaseAddr = new WildcardConstant(OpRecognizer.newWildcard("arrayBasePtr")); // publishable
 		ins = fac.createOperationInst(pArrayBaseAddr, InstType.converInst,
 				Arrays.asList(new Constant[] { pElem }),
-				Arrays.asList(new Type[] { type4xi8Ptr, type0xi32Ptr}),
+				Arrays.asList(new Type[] { pi8_t, type0xi32Ptr}),
 				"bitcast");
 		arrayBaseRec.addInstruction(ins);
 		arrayBaseRec.addPublicVar(pArrayBaseAddr);
@@ -485,7 +485,7 @@ public class LLVM2Jni extends FunctionConverter {
 		
 		Translator trnArrayLen = new Translator(arrayLenRefRec, arrayLenRefGen);
 		trnStructElem.addTranslator(trnArrayLen);		
-	}	
+	}
 	
 	protected static void addStructElemTranslator(VariableMapper mapper) {
 		// Initialize the mapper with rich type support
@@ -524,7 +524,7 @@ public class LLVM2Jni extends FunctionConverter {
 		addObjectRec64bit(mapper, trnStructBase);
 		addObjectRec32bit(mapper, trnStructBase);
 	}
-	
+
 	private static VariableMapper getJNIMapper() {
 		VariableMapper mapper = new VariableMapper();
 		
