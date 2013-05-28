@@ -207,13 +207,16 @@ public class FunctionConverter {
 		
 		// Code conversion for each argument
 		basicBlocksLast = fn.getBasicBlocks();
-		List<BasicBlock> cleanupBlocks = new LinkedList<BasicBlock>();		
-		BasicBlock cleanupBlock = new BasicBlock("JJNIcleanup", new LinkedList<Instruction>());
+		List<BasicBlock> cleanupBlocks = new LinkedList<BasicBlock>();
+		
+		// New return block
+		BasicBlock cleanupBlock = new BasicBlock("return", new LinkedList<Instruction>());
+		cleanupBlocks.add(cleanupBlock);
 		
 		Constant outLabel = new LocalVariable(mapper.getLabelTmpName());
 		List<BasicBlock> cleanupExtra = new ArrayList<BasicBlock>();
 		int lastExtraSize = 0;
-				
+		
 		for (String arg : mapper.getFuncArg()) {
 			if (Debug.level >= 1)
 				System.out.println("Processing argument: " + arg);						
@@ -222,32 +225,41 @@ public class FunctionConverter {
 			
 			mapper.mapOperations(basicBlocksLast, cleanupBlock, cleanupExtra, outLabel);
 			
-			if (cleanupExtra.size() != lastExtraSize) {
-				cleanupBlocks.add(cleanupBlock);
+			if (cleanupExtra.size() != lastExtraSize) {				
 				cleanupBlock = new BasicBlock(outLabel.getValue(), new LinkedList<Instruction>());
+				cleanupBlocks.add(cleanupBlock);
 				outLabel = new LocalVariable(mapper.getLabelTmpName());
 			}
 		}
 
 		// Add cleanup code for unconditional cleanup code (not specific to an argument)
 		mapper.addCleanupCode(cleanupBlock.getInstructions(), cleanupExtra, outLabel);
+		
+		// Add jump to original return block in the last cleanup block
 		InstFactory fac = new InstFactory();		
-		Constant retLabel = new LocalVariable("%return");
+		Constant retLabel = new LocalVariable("%org_return");
 
 		Instruction retJump = fac.createSimpleInst(null, InstType.brInst,
 				Arrays.asList(new Constant[] { retLabel }),
 				new ArrayList<Type>());
 		cleanupBlock.getInstructions().add(retJump);
 		
-		if (cleanupBlock.getNumInst() != 0) {
-			cleanupBlocks.add(cleanupBlock);			
+		// Add original return stuff here
+		BasicBlock orgReturn = basicBlocksLast.get(basicBlocksLast.size() - 1);
+		if (orgReturn.getBlockID().equals("return")) {
+			orgReturn.setBlockID("org_return");
+			basicBlocksLast.remove(orgReturn);
+		} else {
+			throw new RuntimeException("Cannot find 'return' block");
 		}
-
-		for (BasicBlock cb : cleanupBlocks)
-			basicBlocksLast.add(cb);
 		
 		for (BasicBlock cb : cleanupExtra)
 			basicBlocksLast.add(cb);
+
+		for (BasicBlock cb : cleanupBlocks)
+			basicBlocksLast.add(cb);			
+		
+		basicBlocksLast.add(orgReturn);
 		
 		// Convert code - Pass 2 (simple type mapping)
 		basicBlocks = basicBlocksLast;

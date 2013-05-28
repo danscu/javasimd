@@ -276,6 +276,16 @@ public class LLVM2Jni extends FunctionConverter {
 							Arrays.asList(new Type[] { pi32_t, type0xi32Ptr }),
 							"bitcast");
 					addInstruction(start, ins);
+					
+					Constant tab = trn.getVar(Translator.publicVarName("arrayTab"), true);					
+					// store returned array base to tab variable
+					ins = fac.createLoadStoreInst(null, InstType.storeInst,
+							Arrays.asList(new Constant[] { pRes, tab }),
+							Arrays.asList(new Type[] { pi32_t, TypeFactory.getPointerType(pi32_t)}),
+							false /* volatile */ );
+					
+					addInstruction(start, ins);
+					// Be cautious about using arrayBasePtr. It might not dominate the cleanup.
 					publishVar(trn, "arrayBasePtr", pRes.toString());
 				}
 		};

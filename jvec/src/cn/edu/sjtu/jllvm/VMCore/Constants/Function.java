@@ -66,7 +66,10 @@ public class Function extends GlobalValue{
 				first =false;
 			}
 		}
-		entry.parse(blockTable);
+		
+		// Danke: commented out this because entry parse is not used. However
+		// this check may be useful for verification
+//		entry.parse(blockTable);
 		
 		localVarTable = new Hashtable<String, Constant>();
 		

@@ -89,7 +89,7 @@ public class JniEnvCallGen extends OpGenerator {
 
 		// %tab = alloca i32*
 		Constant arrayTab = new LocalVariable(trn.getVar(Translator.publicVarName("argName"), true) + "_tab");
-		this.publishVar(trn, "arrayTab", isCopy.toString());
+		this.publishVar(trn, "arrayTab", arrayTab.toString());
 		ins = fac.createSimpleInst(arrayTab, InstType.allocaInst,
 				Arrays.asList(new Constant[] {}),
 				Arrays.asList(new Type[] { i32p_t }));
@@ -99,12 +99,14 @@ public class JniEnvCallGen extends OpGenerator {
 	@Override
 	public void insertCleanup(Translator trn, List<Instruction> insList,
 			ListIterator<Instruction> start, List<BasicBlock> extraBlocks, Constant outLabel) {
-		Constant alreadySetupArray = trn.getVar(Translator.publicVarName("arraySetupDone"), false);
-		if (alreadySetupArray != null)
-			clearupArgments(trn, insList, start, extraBlocks, outLabel);
+		Constant alreadySetupArray = trn.getVar(Translator.publicVarName("arrayCleanupDone"), false);
+		if (alreadySetupArray == null) {		
+			if (clearupArgments(trn, insList, start, extraBlocks, outLabel))
+				trn.setVar(Translator.publicVarName("arrayCleanupDone"), "1");
+		}
 	}
 
-	private void clearupArgments(Translator trn, List<Instruction> insList,
+	private boolean clearupArgments(Translator trn, List<Instruction> insList,
 			ListIterator<Instruction> start, List<BasicBlock> extraBlocks, Constant outLabel) {
 		InstFactory fac = new InstFactory();
 		ValueFactory vfac = new ValueFactory();
@@ -112,7 +114,7 @@ public class JniEnvCallGen extends OpGenerator {
 		
 		Constant pArrayBase = trn.getVar(Translator.publicVarName("arrayBasePtr"), false);
 		if (pArrayBase == null)
-			return;
+			return false;
 		
 		Constant pArrayIsCopy = trn.getVar(Translator.publicVarName("isCopy"), true);
 		
@@ -176,6 +178,8 @@ public class JniEnvCallGen extends OpGenerator {
 		
 		// Add to block list
 		extraBlocks.add(b1);
+		
+		return true;
 	}
 
 	/**

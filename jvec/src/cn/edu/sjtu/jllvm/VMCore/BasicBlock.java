@@ -266,8 +266,12 @@ public class BasicBlock extends Value{
 	
 	public String getBlockID() {
 		return blockID;
-	}
+	}		
 	
+	public void setBlockID(String blockID) {
+		this.blockID = blockID;
+	}
+
 	@Override
 	public String toString(){
 		String value = "";
