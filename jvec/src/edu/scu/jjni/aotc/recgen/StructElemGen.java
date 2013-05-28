@@ -20,9 +20,19 @@ public abstract class StructElemGen extends OpGenerator {
 	@Override
 	public void insertInit(Translator trn,
 			List<Instruction> insList, ListIterator<Instruction> start) {
-		String elemNo = opr.getMatchContent(OpRecognizer
+		String elemNoByte = opr.getMatchContent(OpRecognizer
+				.newWildcard("elem_no_byte"));
+		
+		int elemNumber;
+		
+		if (elemNoByte != null) {
+			elemNumber = Integer.parseInt(elemNoByte) / 4;
+		} else {
+			String elemNo = opr.getMatchContent(OpRecognizer
 				.newWildcard("elem_no"));
-		int elemNumber = Integer.parseInt(elemNo);
+			elemNumber = Integer.parseInt(elemNo);
+		}
+		
 		initGetElem(trn, insList, start, elemNumber);
 	}
 
