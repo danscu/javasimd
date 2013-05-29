@@ -34,20 +34,18 @@ public class HelloWorld {
       return sum;
     }
 
-    private void testArray(int a[]) {
-	int i;
-	for (i = 0; i < a.length; i++)
-	    a[i] = a[i] % 40;
+    private int findMinPos(int a[], int start) {
+	int minp = start;
+   	for (int j = start + 1; j < a.length; j++)
+		if (a[j] < a[minp])
+			minp = j;
+	return minp;
     }
 
     private void testSort(int a[]) {
 	int i, j, minp;
 	for (i = 0; i < a.length - 1; i++) {
-	    minp = i;
-	  for (j = i + 1; j < a.length; j++)
-		if (a[j] < a[minp])
-			minp = j;
-
+		minp = findMinPos(a, i);
 	    int tmp = a[i]; a[i] = a[minp]; a[minp] = tmp;
 	}
     }
@@ -68,14 +66,13 @@ public class HelloWorld {
 	System.out.println("Array sum = " + res); 
 
 	// Test 3
-	int N = 100;
+	int N = 100000;
 	Random r = new Random();
 	ia = new int[N];
 	for (int i = 0; i < N; i++)
 		ia[i] = r.nextInt();
 	inst.testSort(ia);
-	// inst.testArray(ia);
-	if (true) {	
+	if (false) {	
 	for (int i = 0; i < N; i++)
 		System.out.print(ia[i] + " ");
 	System.out.println();
