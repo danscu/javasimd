@@ -66,7 +66,12 @@ public class HelloWorld {
 	ia = new int[N];
 	for (int i = 0; i < N; i++)
 		ia[i] = r.nextInt();
+
+	long startMs = System.currentTimeMillis();
 	inst.testSort(ia);
+	long durationMs = System.currentTimeMillis() - startMs;
+	System.out.println(String.format("Sort time: %d ms", durationMs));
+
 	if (false) {	
 	for (int i = 0; i < N; i++)
 		System.out.print(ia[i] + " ");
