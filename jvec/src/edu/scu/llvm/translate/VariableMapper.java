@@ -129,6 +129,11 @@ public class VariableMapper {
 	 * Local recognizer variable ID
 	 */
 	protected int recVarId;
+
+	/**
+	 * Depth
+	 */	
+	protected int depth;
 	
 	/**
 	 * Constructor.
@@ -377,8 +382,11 @@ public class VariableMapper {
 			boolean clearMatch
 			) {
 		boolean first = true;
-		BasicBlock firstBlock = null;			
-				
+		BasicBlock firstBlock = null;
+		
+		if (Debug.level >= 10)
+			trn.log("Enter translator: " + trn.getName());
+		
 		// Convert code - Pass 1 (Semantic recognizer)
 		for (BasicBlock bs : basicBlocks) {
 			List<Instruction> list = bs.getInstructions();
@@ -392,6 +400,9 @@ public class VariableMapper {
 				firstBlock = bs;
 			}
 		}
+		
+		if (Debug.level >= 10)
+			trn.log("Exit translator: " + trn.getName());			
 	}
 	
 	public void mapOperations(List<BasicBlock> basicBlocks, BasicBlock cleanupBlock,
@@ -445,5 +456,19 @@ public class VariableMapper {
 
 	public String getRecTmpName() {
 		return OpRecognizer.getMatchName(recVarId++);
+	}
+
+	public void incDepth() {
+		depth++;
+	}
+	
+	public void decDepth() {
+		depth--;
+	}
+	
+	public void log(String string) {
+		for (int i = 0; i < depth; i++)
+			System.out.print(' ');
+		System.out.println(string);
 	}
 }

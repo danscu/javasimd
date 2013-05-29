@@ -132,7 +132,7 @@ public class OpRecognizer {
 		for (String name : publicNames) {
 			trn.setVar("@" + name, getMatchContent(name));
 			if (Debug.level >= 2)
-				System.out.println("Publish var: " + name + " val: " + getMatchContent(name));
+				trn.log("Publish var: " + name + " val: " + getMatchContent(name));
 		}
 	}
 }

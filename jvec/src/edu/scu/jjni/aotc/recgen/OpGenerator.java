@@ -20,6 +20,7 @@ public class OpGenerator {
 	protected Type typeIn;
 	protected Type typeOut;
 	OpRecognizer opr;
+	Translator trn;	
 	
 	public OpGenerator(Semcode semc, OpRecognizer opr, Type typeIn,
 			Type typeOut) {
@@ -27,6 +28,10 @@ public class OpGenerator {
 		this.opr = opr;
 		this.typeIn = typeIn;
 		this.typeOut = typeOut;
+	}	
+	
+	public void setTrn(Translator trn) {
+		this.trn = trn;
 	}
 
 	/**
@@ -49,7 +54,7 @@ public class OpGenerator {
 	public void addInstruction(ListIterator<Instruction> it, Instruction inst) {
 		it.add(inst);
 		if (Debug.level >= 2)
-			System.out.println("Inserting: " + inst);
+			trn.log("Inserting: " + inst);
 	}
 
 	public Type getTypeIn() {

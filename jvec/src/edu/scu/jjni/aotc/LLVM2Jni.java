@@ -69,6 +69,12 @@ public class LLVM2Jni extends FunctionConverter {
 	static public Type typeNullStructPtrPtr;
 	static public Type typeJavaObject;
 	static public Type typeJavaObjectPtr;
+
+	static public Type javaStructBase = new Type(Type.StructTyID, "%\"struct.int[]\""); // TODO handle the wild card by the matcher
+	static public Type javaStructPtr = TypeFactory.getPointerType(javaStructBase);
+
+	static public Type javaObjectArrayBase = new Type(Type.StructTyID, "%\"struct.java.lang.Object[]\"");
+	static public Type javaObjectArrayPtr = TypeFactory.getPointerType(javaObjectArrayBase);	
 	
 	static public Type i1_t = TypeFactory.getIntNType(1);
 	static public Type i8_t = TypeFactory.getIntNType(8);
@@ -86,7 +92,7 @@ public class LLVM2Jni extends FunctionConverter {
 		// 1st recognizer
 		OpGenerator envSetupGen = new JniEnvSetupGen(VariableMapper.Semcode.SETUP_JNI_ENV,
 				null, null);
-		Translator trn = new Translator(null, envSetupGen);
+		Translator trn = new Translator("envSetup", null, envSetupGen);
 		mapper.addTranslator(trn);
 	}
 	
@@ -94,7 +100,7 @@ public class LLVM2Jni extends FunctionConverter {
 		// 1st recognizer
 		OpRecognizer argStoreRec = new OpRecognizer(VariableMapper.Semcode.STORE_ARGUMENT,
 				null, null);
-		Translator trn = new Translator(argStoreRec, null);
+		Translator trn = new Translator("argStore", argStoreRec, null);
 		mapper.addTranslator(trn);
 
 		int wildNo = 0;
@@ -116,7 +122,7 @@ public class LLVM2Jni extends FunctionConverter {
 		// 2nd recognizer
 		OpRecognizer argLoadRec = new OpRecognizer(VariableMapper.Semcode.LOAD_ARGUMENT,
 				null, null);
-		trn = new Translator(argLoadRec, null);
+		trn = new Translator("argLoad", argLoadRec, null);
 		mapper.addTranslator(trn);
 		
 		// %0 = load i32* %unnamed_arg_addr1, align 4
@@ -132,13 +138,6 @@ public class LLVM2Jni extends FunctionConverter {
 	}
 
 	protected static void addObjectRec32bit(VariableMapper mapper, Translator trnStructBase) {
-		// Initialize the mapper with rich type support
-		Type javaStructBase = new Type(Type.StructTyID, "%\"struct.int[]\""); // TODO handle the wild card by the matcher
-		Type javaStructPtr = TypeFactory.getPointerType(javaStructBase);
-
-		Type javaObjectArrayBase = new Type(Type.StructTyID, "%\"struct.java.lang.Object[]\"");
-		Type javaObjectArrayPtr = TypeFactory.getPointerType(javaObjectArrayBase);
-		
 		Instruction ins;
 		
 		//// Object operation recognizer
@@ -146,7 +145,7 @@ public class LLVM2Jni extends FunctionConverter {
 				javaStructPtr, type0xi32Ptr);
 		ArrayAccessGen elemOpGen = new ArrayAccessGen(VariableMapper.Semcode.GET_STRUCT_ELEM, elemOpRec,
 				pi8_t, type0xi32Ptr);
-		Translator trnStructElem = new Translator(elemOpRec, elemOpGen);
+		Translator trnStructElem = new Translator("elemOp32", elemOpRec, elemOpGen);
 		trnStructBase.addTranslator(trnStructElem);
 		
 		Constant objBase = new WildcardConstant(Translator.publicVarName("objBase"));
@@ -179,160 +178,8 @@ public class LLVM2Jni extends FunctionConverter {
 		elemOpRec.addInstruction(ins);
 		elemOpRec.addPublicVar(pElem);
 		
-		/*
-		 *  Array element access generator (JNI call part)
-		 *
-		 *     1. Array Length
-		 */
-		
-		// Get existing public vars
-		Constant env_addr = new WildcardConstant(Translator.publicVarName("localEnv"));	
-		Constant iscopy = new WildcardConstant(Translator.publicVarName("isCopy"));
-		
-		// Array access generators
-		FunctionType arrayLenFType = (FunctionType) TypeFactory.getFunctionType(
-				Arrays.asList(new Type[] {
-						i32_t /* ret type */, envTypePtrPtr, pi8_t,
-		}));
-		
-		List<Instruction> extraInstr = new LinkedList<Instruction>();
-		
-		JniEnvCallGen arrayLenJniGen = new JniEnvCallGen(Semcode.GET_ARRAY_LENGTH,
-				elemOpRec, null, pi8_t, env_addr, JNIFunc_GetIntArrayLength,
-				true, /* call once at init */
-				arrayLenFType /* funcType */,
-				null/* list types */,
-				null/* list args */,
-				extraInstr,
-				"jniArrayLen");
-		elemOpGen.addGenerator(1 /* elem 1 */, arrayLenJniGen);
-		
-		/*
-		 *     2. Array base
-		 */		
-		FunctionType arrayBaseFType = (FunctionType) TypeFactory.getFunctionType(
-				Arrays.asList(new Type[] {
-						pi32_t /* ret type */, envTypePtrPtr, pi8_t, pi8_t
-		}));
-
-		extraInstr = new LinkedList<Instruction>();
-		// call i32 %6(%struct.JNINativeInterface_** %0, i8* %1) nounwind
-		JniEnvCallGen arrayBaseJniGen = new JniEnvCallGen(Semcode.GET_ARRAY_BASE,
-				elemOpRec, null, pi8_t, env_addr, JNIFunc_GetIntArrayElements,
-				true, /* call once at init */
-				arrayBaseFType /* funcType */,
-				Arrays.asList(new Type[] {pi8_t})/* list types */,
-				Arrays.asList(new Constant[] { iscopy })/* list args */,
-				extraInstr,
-				"jniArrayBase");
-		elemOpGen.addGenerator(2 /* elem 2 */, arrayBaseJniGen);		
-		
-		/*
-		 *  Array element access recognizer (process JNI call result)
-		 *  
-		 *     1. Array Base
-		 *     
-		 *  JNI env call result is returned in 'jniArrayBase'
-		 */
-		
-		OpRecognizer arrayBaseRec = new OpRecognizer(VariableMapper.Semcode.GET_ARRAY_BASE_POST,
-				javaStructPtr, type0xi32Ptr);
-		// %5 = bitcast i8* %4 to [0 x i32]*
-		pElem = new WildcardConstant(Translator.publicVarName("objElemPtr")); // published
-		Constant pArrayBaseAddr = new WildcardConstant(OpRecognizer.newWildcard("arrayBasePtr")); // publishable
-		ins = fac.createOperationInst(pArrayBaseAddr, InstType.converInst,
-				Arrays.asList(new Constant[] { pElem }),
-				Arrays.asList(new Type[] { pi8_t, type0xi32Ptr}),
-				"bitcast");
-		arrayBaseRec.addInstruction(ins);
-		arrayBaseRec.addPublicVar(pArrayBaseAddr);
-
-		OpGenerator arrayBaseGen = new OpGenerator(VariableMapper.Semcode.GET_ARRAY_BASE_POST, arrayBaseRec,
-				null, null) {
-				@Override				
-				public void insert(Translator trn,
-						List<Instruction> insList,
-						ListIterator<Instruction> start) {
-					
-					// bitcast i32* to [0 x i32]*
-					Instruction ins = null;
-					Constant pRes = trn.getVar(Translator.publicVarName("jniArrayBase"), true);
-					Constant arrayAddr = trn.getVar(Translator.publicVarName("arrayBasePtr"), true);
-					
-					ins = fac.createOperationInst(arrayAddr, InstType.converInst,
-							Arrays.asList(new Constant[] { pRes }),
-							Arrays.asList(new Type[] { pi32_t, type0xi32Ptr }),
-							"bitcast");
-					addInstruction(start, ins);
-					
-					// Be cautious about using arrayBasePtr. It might not dominate the cleanup.
-					publishVar(trn, "arrayBasePtr", pRes.toString());
-				}
-
-				@Override
-				public void insertInit(Translator trn,
-						List<Instruction> insList,
-						ListIterator<Instruction> start) {
-					Instruction ins;
-					
-					String jniDoneVariable = Translator.publicVarName("arrayAccessDone" + 
-							trn.getSubrecognizerKey());
-					Constant jniDone = trn.getVar(jniDoneVariable, false);					
-					
-					if (jniDone == null) {					
-						Constant tab = trn.getVar(Translator.publicVarName("arrayTab"), true);
-						Constant pRes = trn.getVar(Translator.publicVarName("jniArrayBase"), true);
-						
-						// store returned array base to tab variable
-						ins = fac.createLoadStoreInst(null, InstType.storeInst,
-								Arrays.asList(new Constant[] { pRes, tab }),
-								Arrays.asList(new Type[] { pi32_t, TypeFactory.getPointerType(pi32_t)}),
-								false /* volatile */ );
-						
-						addInstruction(start, ins);
-						
-						trn.setVar(jniDoneVariable, "1");
-					}
-				}
-		};
-		
-		Translator trnArrayBase  = new Translator(arrayBaseRec, arrayBaseGen);
-		trnStructElem.addTranslator("2", trnArrayBase);
-		
-		OpRecognizer arrayLenRefRec = new OpRecognizer(VariableMapper.Semcode.GET_ARRAY_LENGTH_POST,
-				javaStructPtr, type0xi32Ptr);		
-		// %8 = load i32* %7, align 8
-		pElem = new WildcardConstant(Translator.publicVarName("objElemPtr")); // published
-		Constant arrayLen = new WildcardConstant(OpRecognizer.newWildcard("arrayLen")); // publishable
-		ins = fac.createLoadStoreInst(arrayLen, InstType.loadInst,
-				Arrays.asList(new Constant[] { pElem }),
-				Arrays.asList(new Type[] { pi32_t }),
-				false /* volatile */ );
-		arrayLenRefRec.addInstruction(ins);
-		arrayLenRefRec.addPublicVar(arrayLen);
-		
-		OpGenerator arrayLenRefGen = new OpGenerator(VariableMapper.Semcode.GET_ARRAY_LENGTH_POST, arrayBaseRec,
-				null, null) {
-				@Override
-				public void insert(Translator trn,
-						List<Instruction> insList,
-						ListIterator<Instruction> start) {
-					
-					Instruction ins = null;
-					Constant pRes = trn.getVar(Translator.publicVarName("jniArrayLen"), true);
-					
-					// no instruction needed, just add a dummy one
-					Constant arrayAddr = trn.getVar(Translator.publicVarName("arrayLen"), true);
-					ins = fac.createBinaryInst(arrayAddr, InstType.binaryInst,
-							Arrays.asList(new Constant[] { pRes, vfac.createConstantValue(SimpleConstantValue.intConst, "0")}),
-							Arrays.asList(new Type[] { i32_t, i32_t }),
-							"add", "", "", "");
-					addInstruction(start, ins);					
-				}
-		};
-		
-		Translator trnArrayLen = new Translator(arrayLenRefRec, arrayLenRefGen);
-		trnStructElem.addTranslator("1", trnArrayLen);		
+		addArrayRef1(trnStructElem);
+		addArrayRef2(trnStructElem);		
 	}
 	
 	protected static void addObjectRec64bit(VariableMapper mapper, Translator trnStructBase) {
@@ -350,7 +197,7 @@ public class LLVM2Jni extends FunctionConverter {
 				javaStructPtr, type0xi32Ptr);
 		ArrayAccessGen elemOpGen = new ArrayAccessGen(VariableMapper.Semcode.GET_STRUCT_ELEM, elemOpRec,
 				pi8_t, type0xi32Ptr);
-		Translator trnStructElem = new Translator(elemOpRec, elemOpGen);
+		Translator trnStructElem = new Translator("elemOp64", elemOpRec, elemOpGen);
 		trnStructBase.addTranslator(trnStructElem);
 		
 		Constant objBase = new WildcardConstant(Translator.publicVarName("objBase"));
@@ -374,6 +221,14 @@ public class LLVM2Jni extends FunctionConverter {
 				true /* inbounds */);
 		elemOpRec.addInstruction(ins);
 		elemOpRec.addPublicVar(pElem);
+		
+		addArrayRef1(trnStructElem);
+		addArrayRef2(trnStructElem);
+	}
+	
+	protected static void addArrayRef1(Translator trnStructElem) {		
+		OpRecognizer elemOpRec = trnStructElem.getOpr();
+		ArrayAccessGen elemOpGen = (ArrayAccessGen)trnStructElem.getOpg();
 		
 		/*
 		 *  Array element access generator (JNI call part)
@@ -434,9 +289,9 @@ public class LLVM2Jni extends FunctionConverter {
 		OpRecognizer arrayBaseRec = new OpRecognizer(VariableMapper.Semcode.GET_ARRAY_BASE_POST,
 				javaStructPtr, type0xi32Ptr);
 		// %5 = bitcast [4 x i8]* %4 to [0 x i32]*
-		pElem = new WildcardConstant(Translator.publicVarName("objElemPtr")); // published
+		Constant pElem = new WildcardConstant(Translator.publicVarName("objElemPtr")); // published
 		Constant pArrayBaseAddr = new WildcardConstant(OpRecognizer.newWildcard("arrayBasePtr")); // publishable
-		ins = fac.createOperationInst(pArrayBaseAddr, InstType.converInst,
+		Instruction ins = fac.createOperationInst(pArrayBaseAddr, InstType.converInst,
 				Arrays.asList(new Constant[] { pElem }),
 				Arrays.asList(new Type[] { type4xi8Ptr, type0xi32Ptr}),
 				"bitcast");
@@ -492,7 +347,7 @@ public class LLVM2Jni extends FunctionConverter {
 				}
 		};
 		
-		Translator trnArrayBase  = new Translator(arrayBaseRec, arrayBaseGen);
+		Translator trnArrayBase  = new Translator("arrayBaseRef64", arrayBaseRec, arrayBaseGen);
 		trnStructElem.addTranslator("2", trnArrayBase);
 		
 		OpRecognizer arrayLenRefRec = new OpRecognizer(VariableMapper.Semcode.GET_ARRAY_LENGTH_POST,
@@ -527,7 +382,167 @@ public class LLVM2Jni extends FunctionConverter {
 				}
 		};
 		
-		Translator trnArrayLen = new Translator(arrayLenRefRec, arrayLenRefGen);
+		Translator trnArrayLen = new Translator("arrayLenRef64", arrayLenRefRec, arrayLenRefGen);
+		trnStructElem.addTranslator("1", trnArrayLen);		
+	}
+	
+	protected static void addArrayRef2(Translator trnStructElem) {
+		OpRecognizer elemOpRec = trnStructElem.getOpr();
+		ArrayAccessGen elemOpGen = (ArrayAccessGen)trnStructElem.getOpg();
+	
+		/*
+		 *  Array element access generator (JNI call part)
+		 *
+		 *     1. Array Length
+		 */
+		
+		// Get existing public vars
+		Constant env_addr = new WildcardConstant(Translator.publicVarName("localEnv"));	
+		Constant iscopy = new WildcardConstant(Translator.publicVarName("isCopy"));
+		
+		// Array access generators
+		FunctionType arrayLenFType = (FunctionType) TypeFactory.getFunctionType(
+				Arrays.asList(new Type[] {
+						i32_t /* ret type */, envTypePtrPtr, pi8_t,
+		}));
+		
+		List<Instruction> extraInstr = new LinkedList<Instruction>();
+		
+		JniEnvCallGen arrayLenJniGen = new JniEnvCallGen(Semcode.GET_ARRAY_LENGTH,
+				elemOpRec, null, pi8_t, env_addr, JNIFunc_GetIntArrayLength,
+				true, /* call once at init */
+				arrayLenFType /* funcType */,
+				null/* list types */,
+				null/* list args */,
+				extraInstr,
+				"jniArrayLen");
+		elemOpGen.addGenerator(1 /* elem 1 */, arrayLenJniGen);
+		
+		/*
+		 *     2. Array base
+		 */		
+		FunctionType arrayBaseFType = (FunctionType) TypeFactory.getFunctionType(
+				Arrays.asList(new Type[] {
+						pi32_t /* ret type */, envTypePtrPtr, pi8_t, pi8_t
+		}));
+
+		extraInstr = new LinkedList<Instruction>();
+		// call i32 %6(%struct.JNINativeInterface_** %0, i8* %1) nounwind
+		JniEnvCallGen arrayBaseJniGen = new JniEnvCallGen(Semcode.GET_ARRAY_BASE,
+				elemOpRec, null, pi8_t, env_addr, JNIFunc_GetIntArrayElements,
+				true, /* call once at init */
+				arrayBaseFType /* funcType */,
+				Arrays.asList(new Type[] {pi8_t})/* list types */,
+				Arrays.asList(new Constant[] { iscopy })/* list args */,
+				extraInstr,
+				"jniArrayBase");
+		elemOpGen.addGenerator(2 /* elem 2 */, arrayBaseJniGen);		
+		
+		/*
+		 *  Array element access recognizer (process JNI call result)
+		 *  
+		 *     1. Array Base
+		 *     
+		 *  JNI env call result is returned in 'jniArrayBase'
+		 */
+		
+		OpRecognizer arrayBaseRec = new OpRecognizer(VariableMapper.Semcode.GET_ARRAY_BASE_POST,
+				javaStructPtr, type0xi32Ptr);
+		// %5 = bitcast i8* %4 to [0 x i32]*
+		Constant pElem = new WildcardConstant(Translator.publicVarName("objElemPtr")); // published
+		Constant pArrayBaseAddr = new WildcardConstant(OpRecognizer.newWildcard("arrayBasePtr")); // publishable
+		Instruction ins = fac.createOperationInst(pArrayBaseAddr, InstType.converInst,
+				Arrays.asList(new Constant[] { pElem }),
+				Arrays.asList(new Type[] { pi8_t, type0xi32Ptr}),
+				"bitcast");
+		arrayBaseRec.addInstruction(ins);
+		arrayBaseRec.addPublicVar(pArrayBaseAddr);
+
+		OpGenerator arrayBaseGen = new OpGenerator(VariableMapper.Semcode.GET_ARRAY_BASE_POST, arrayBaseRec,
+				null, null) {
+				@Override				
+				public void insert(Translator trn,
+						List<Instruction> insList,
+						ListIterator<Instruction> start) {
+					
+					// bitcast i32* to [0 x i32]*
+					Instruction ins = null;
+					Constant pRes = trn.getVar(Translator.publicVarName("jniArrayBase"), true);
+					Constant arrayAddr = trn.getVar(Translator.publicVarName("arrayBasePtr"), true);
+					
+					ins = fac.createOperationInst(arrayAddr, InstType.converInst,
+							Arrays.asList(new Constant[] { pRes }),
+							Arrays.asList(new Type[] { pi32_t, type0xi32Ptr }),
+							"bitcast");
+					addInstruction(start, ins);
+					
+					// Be cautious about using arrayBasePtr. It might not dominate the cleanup.
+					publishVar(trn, "arrayBasePtr", pRes.toString());
+				}
+
+				@Override
+				public void insertInit(Translator trn,
+						List<Instruction> insList,
+						ListIterator<Instruction> start) {
+					Instruction ins;
+					
+					String jniDoneVariable = Translator.publicVarName("arrayAccessDone" + 
+							trn.getSubrecognizerKey());
+					Constant jniDone = trn.getVar(jniDoneVariable, false);					
+					
+					if (jniDone == null) {					
+						Constant tab = trn.getVar(Translator.publicVarName("arrayTab"), true);
+						Constant pRes = trn.getVar(Translator.publicVarName("jniArrayBase"), true);
+						
+						// store returned array base to tab variable
+						ins = fac.createLoadStoreInst(null, InstType.storeInst,
+								Arrays.asList(new Constant[] { pRes, tab }),
+								Arrays.asList(new Type[] { pi32_t, TypeFactory.getPointerType(pi32_t)}),
+								false /* volatile */ );
+						
+						addInstruction(start, ins);
+						
+						trn.setVar(jniDoneVariable, "1");
+					}
+				}
+		};
+		
+		Translator trnArrayBase  = new Translator("arrayBaseRef32", arrayBaseRec, arrayBaseGen);
+		trnStructElem.addTranslator("2", trnArrayBase);
+		
+		OpRecognizer arrayLenRefRec = new OpRecognizer(VariableMapper.Semcode.GET_ARRAY_LENGTH_POST,
+				javaStructPtr, type0xi32Ptr);		
+		// %8 = load i32* %7, align 8
+		pElem = new WildcardConstant(Translator.publicVarName("objElemPtr")); // published
+		Constant arrayLen = new WildcardConstant(OpRecognizer.newWildcard("arrayLen")); // publishable
+		ins = fac.createLoadStoreInst(arrayLen, InstType.loadInst,
+				Arrays.asList(new Constant[] { pElem }),
+				Arrays.asList(new Type[] { pi32_t }),
+				false /* volatile */ );
+		arrayLenRefRec.addInstruction(ins);
+		arrayLenRefRec.addPublicVar(arrayLen);
+		
+		OpGenerator arrayLenRefGen = new OpGenerator(VariableMapper.Semcode.GET_ARRAY_LENGTH_POST, arrayBaseRec,
+				null, null) {
+				@Override
+				public void insert(Translator trn,
+						List<Instruction> insList,
+						ListIterator<Instruction> start) {
+					
+					Instruction ins = null;
+					Constant pRes = trn.getVar(Translator.publicVarName("jniArrayLen"), true);
+					
+					// no instruction needed, just add a dummy one
+					Constant arrayAddr = trn.getVar(Translator.publicVarName("arrayLen"), true);
+					ins = fac.createBinaryInst(arrayAddr, InstType.binaryInst,
+							Arrays.asList(new Constant[] { pRes, vfac.createConstantValue(SimpleConstantValue.intConst, "0")}),
+							Arrays.asList(new Type[] { i32_t, i32_t }),
+							"add", "", "", "");
+					addInstruction(start, ins);					
+				}
+		};
+		
+		Translator trnArrayLen = new Translator("arrayLenRef32", arrayLenRefRec, arrayLenRefGen);
 		trnStructElem.addTranslator("1", trnArrayLen);		
 	}
 	
@@ -542,7 +557,7 @@ public class LLVM2Jni extends FunctionConverter {
 		//// Object base conversion recognizer
 		OpRecognizer arrayToi8Rec = new OpRecognizer(VariableMapper.Semcode.GET_STRUCT_BASE,
 				javaStructPtr, pi8_t);
-		Translator trnStructBase = new Translator(arrayToi8Rec, 
+		Translator trnStructBase = new Translator("arrayToi8", arrayToi8Rec, 
 				new OpGenerator(VariableMapper.Semcode.GET_STRUCT_BASE, 
 						null, null, null)  /* eraser */
 				);

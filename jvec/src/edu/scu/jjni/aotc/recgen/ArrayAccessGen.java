@@ -44,6 +44,7 @@ public class ArrayAccessGen extends StructElemGen {
 
 	public void addGenerator(int elemNo, OpGenerator opg) {
 		genMap.put(elemNo, opg);
+		opg.setTrn(trn);
 	}
 
 	@Override

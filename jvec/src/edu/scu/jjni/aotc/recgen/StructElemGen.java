@@ -38,7 +38,7 @@ public abstract class StructElemGen extends OpGenerator {
 			ListIterator<Instruction> start) {
 		int elemNumber = getElemNumber();
 		if (Debug.level >= 2)
-			System.out.println("Struct Elem Access: " + elemNumber);
+			trn.log("Struct Elem Access: " + elemNumber);
 		modifyGetElem(trn, insList, start, elemNumber);
 	}
 

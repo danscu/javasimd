@@ -28,6 +28,8 @@ import edu.scu.llvm.translate.VariableMapper;
  * @author danke 
  */
 public class Translator {
+	protected String name;
+	
 	protected OpRecognizer opr;
 	protected OpGenerator opg;
 	
@@ -35,17 +37,25 @@ public class Translator {
 	
 	protected List<Translator> children;
 	
-	protected Map<String,Translator> keyedChildren;
+	protected Map<String,List<Translator>> keyedChildren;
 	private String subrecognizerKey;
 	
-	public Translator(OpRecognizer opr, OpGenerator opg) {
+	public Translator(String name, OpRecognizer opr, OpGenerator opg) {
 		super();
+		this.name = name;
 		this.opr = opr;
 		this.opg = opg;
 		children = new ArrayList<Translator>();
-		keyedChildren = new HashMap<String,Translator>();
+		keyedChildren = new HashMap<String,List<Translator>>();
+		
+		if (opg != null)
+			opg.setTrn(this);
 	}
 
+	public String getName() {		
+		return name;
+	}	
+	
 	public OpRecognizer getOpr() {
 		return opr;
 	}
@@ -79,7 +89,7 @@ public class Translator {
 			List<BasicBlock> extraCleanupBlocks, Constant cleanupOutLabel) {
 		
 		if (Debug.level >= 1)
-			System.out.println("Modify code for " + trn.getOpg().semc);			
+			trn.log("Modify code for " + trn.getOpg().semc);			
 		
 		if (initBlock != null) {
 			// insert init code to initBlock
@@ -99,7 +109,7 @@ public class Translator {
 		for (int i = 0; i < opr.getInstructions().size(); i++) {
 			Instruction ins = start.next();
 			if (Debug.level >= 2)
-				System.out.println("Removing: " + ins);
+				trn.log("Removing: " + ins);
 			start.remove();
 		}
 
@@ -152,10 +162,13 @@ public class Translator {
 	public void addTranslator(Translator trn) {
 		children.add(trn);
 		trn.setMapper(mapper);
-	}	
+	}
 	
 	public void addTranslator(String key, Translator trn) {
-		keyedChildren.put(key, trn);
+		if (keyedChildren.get(key) == null)
+			keyedChildren.put(key, new ArrayList<Translator>());
+		List<Translator> list = keyedChildren.get(key);
+		list.add(trn);
 		trn.setMapper(mapper);
 	}
 	
@@ -163,17 +176,17 @@ public class Translator {
 		if (subrecognizerKey != null) {
 			List<Translator> c = new ArrayList<Translator>();
 			c.addAll(children);
-			Translator kt = getKeyedChildren(subrecognizerKey);
+			List<Translator> kt = getKeyedChildren(subrecognizerKey);
 			if (kt == null)
 				throw new RuntimeException("Cannot find keyed child");
-			c.add(kt);
+			c.addAll(kt);
 			return c;
 		}
 		
 		return children;
 	}
 	
-	public Translator getKeyedChildren(String key) {
+	public List<Translator> getKeyedChildren(String key) {
 		return keyedChildren.get(key);
 	}
 	
@@ -184,4 +197,8 @@ public class Translator {
 	public String getSubrecognizerKey() {
 		return subrecognizerKey;
 	}	
+	
+	public void log(String str) {
+		mapper.log(str);
+	}
 }

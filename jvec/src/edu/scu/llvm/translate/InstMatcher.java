@@ -1,21 +1,17 @@
 package edu.scu.llvm.translate;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Map;
 
 import cn.edu.sjtu.jllvm.VMCore.BasicBlock;
 import cn.edu.sjtu.jllvm.VMCore.Constants.Constant;
-import cn.edu.sjtu.jllvm.VMCore.Constants.LocalVariable;
 import cn.edu.sjtu.jllvm.VMCore.Instructions.Instruction;
 import cn.edu.sjtu.jllvm.VMCore.Types.Type;
 import edu.scu.jjni.aotc.Debug;
 import edu.scu.jjni.aotc.recgen.OpGenerator;
 import edu.scu.jjni.aotc.recgen.OpRecognizer;
 import edu.scu.jjni.aotc.recgen.Translator;
-import edu.scu.llvm.translate.VariableMapper.Semcode;
 
 /**
  * This class matches instructions against defined patterns 
@@ -264,14 +260,24 @@ public class InstMatcher {
 
 	protected MatchResult _match(Translator trn, ListIterator<Instruction> start,
 			OpRecognizer opr) {
+		boolean lastInstWasMatch = false;
 		
 		for (Instruction patIns : opr.getInstructions()) {
 			if (!start.hasNext())
 				return MatchResult.TOO_SHORT;
 
 			Instruction ins = start.next();
-			if (!matchInst(trn, ins, patIns))
+			if (!matchInst(trn, ins, patIns)) {
+				if (Debug.level >= 10 && lastInstWasMatch) {
+					trn.log("INS MISMATCH: " + ins.toString() + " PAT: " + patIns);
+				}
 				return MatchResult.MISMATCH;
+			}
+			
+			if (Debug.level >= 10) {
+				trn.log("INS MATCH: " + ins.toString() + " PAT: " + patIns);
+				lastInstWasMatch = true;
+			}
 		}
 
 		return MatchResult.MATCH;
@@ -295,19 +301,20 @@ public class InstMatcher {
 
 		boolean changed;
 		int instructAfterMatch = 0;
-		do {
+		do {			
 			changed = false;
 			ListIterator<Instruction> iit = insList.listIterator();
 			while (iit.hasNext()) {
 				ListIterator<Instruction> start = insList.listIterator(iit.nextIndex());				
-				MatchResult res = _match(trn, start, opr);
+				MatchResult res = _match(trn, start, opr);				
 				
 				if (res == MatchResult.TOO_SHORT)
 					break;
-				
-				if (res == MatchResult.MATCH) {
-					if (Debug.level >= 2)
-						System.out.println("Match " + opr.getSemc() + " " + opr.getMatchMap().toString());
+								
+				if (res == MatchResult.MATCH) {					
+					if (Debug.level >= 2) {
+						trn.log("Match " + opr.getSemc() + " " + opr.getMatchMap().toString());						
+					}
 					
 					/* Recognzier can publish matched vars to environment */
 					opr.publishVars(trn);
@@ -315,27 +322,35 @@ public class InstMatcher {
 					instructAfterMatch = iit.nextIndex();
 					
 					if (opg != null) {
-						changed = true;						
+						changed = true;
 						modifyCode(trn, insList, iit, initBlock, cleanupBlock, cleanupExtra, cleanupOutLabel);						
 					} else {
 						instructAfterMatch += opr.getInstructions().size();						
 					}
 					
+					if (Debug.level >= 2) {
+						trn.log("");
+					}
+					
 					// Call translator children recursively
 					for (Translator subTrn : trn.getChildren())
-						if (subTrn.getOpr() != null) {
+						if (subTrn.getOpr() != null) {							
+							mapper.incDepth();
 							/* XXX check last parametr */
-							mapper.mapOperations(subTrn, bbs, cleanupBlock, cleanupExtra, cleanupOutLabel, false);
+							mapper.mapOperations(subTrn, bbs, cleanupBlock, cleanupExtra, cleanupOutLabel, true);
 							changed = true;
-						}
-
-					unbindAll(opr);
+							mapper.decDepth();
+						}					
 
 					if (changed) {
 						// set the iterator to find other matches
 						iit = insList.listIterator(instructAfterMatch);					
 					}
 				}
+				
+				/* unbind matched variables */
+				unbindAll(opr);
+				
 				iit.next();
 			}
 		} while (changed);
