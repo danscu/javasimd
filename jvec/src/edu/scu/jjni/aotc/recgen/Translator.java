@@ -1,8 +1,10 @@
 package edu.scu.jjni.aotc.recgen;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
 
 import cn.edu.sjtu.jllvm.VMCore.BasicBlock;
 import cn.edu.sjtu.jllvm.VMCore.Constants.Constant;
@@ -33,11 +35,15 @@ public class Translator {
 	
 	protected List<Translator> children;
 	
+	protected Map<String,Translator> keyedChildren;
+	private String subrecognizerKey;
+	
 	public Translator(OpRecognizer opr, OpGenerator opg) {
 		super();
 		this.opr = opr;
 		this.opg = opg;
 		children = new ArrayList<Translator>();
+		keyedChildren = new HashMap<String,Translator>();
 	}
 
 	public OpRecognizer getOpr() {
@@ -146,9 +152,36 @@ public class Translator {
 	public void addTranslator(Translator trn) {
 		children.add(trn);
 		trn.setMapper(mapper);
+	}	
+	
+	public void addTranslator(String key, Translator trn) {
+		keyedChildren.put(key, trn);
+		trn.setMapper(mapper);
 	}
 	
 	public List<Translator> getChildren() {
+		if (subrecognizerKey != null) {
+			List<Translator> c = new ArrayList<Translator>();
+			c.addAll(children);
+			Translator kt = getKeyedChildren(subrecognizerKey);
+			if (kt == null)
+				throw new RuntimeException("Cannot find keyed child");
+			c.add(kt);
+			return c;
+		}
+		
 		return children;
 	}
+	
+	public Translator getKeyedChildren(String key) {
+		return keyedChildren.get(key);
+	}
+	
+	public void setSubrecognizerKey(String key) {
+		subrecognizerKey = key;
+	}
+
+	public String getSubrecognizerKey() {
+		return subrecognizerKey;
+	}	
 }

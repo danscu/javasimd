@@ -324,12 +324,13 @@ public class InstMatcher {
 					// Call translator children recursively
 					for (Translator subTrn : trn.getChildren())
 						if (subTrn.getOpr() != null) {
+							/* XXX check last parametr */
 							mapper.mapOperations(subTrn, bbs, cleanupBlock, cleanupExtra, cleanupOutLabel, false);
 							changed = true;
 						}
-					
+
 					unbindAll(opr);
-					
+
 					if (changed) {
 						// set the iterator to find other matches
 						iit = insList.listIterator(instructAfterMatch);					

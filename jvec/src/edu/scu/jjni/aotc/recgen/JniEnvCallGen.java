@@ -30,12 +30,14 @@ public class JniEnvCallGen extends OpGenerator {
 	protected List<Constant> args;
 	protected List<Instruction> extraInstr;
 	protected boolean initCall;
+	protected String resultName;
 	
 	public JniEnvCallGen(Semcode semc, OpRecognizer opr, Type typeIn, Type typeOut, Constant env_addr,
 			int jniEnvFuncNo,
 			boolean callOnceAtInit,
 			FunctionType funcType, List<Type> argTypes, List<Constant> args,
-			List<Instruction> extraInstr) {
+			List<Instruction> extraInstr,
+			String resultName) {
 		super(semc, opr, typeIn, typeOut);
 		this.env_addr = env_addr;
 		this.jniEnvFuncNo = jniEnvFuncNo;
@@ -44,6 +46,7 @@ public class JniEnvCallGen extends OpGenerator {
 		this.argTypes = argTypes;
 		this.args = args;
 		this.extraInstr = extraInstr;
+		this.resultName = resultName;
 	}
 	
 	protected Constant resolve(Translator trn, Constant var) {
@@ -73,7 +76,10 @@ public class JniEnvCallGen extends OpGenerator {
 			setupArgments(trn, insList, start);
 		}		
 
-		String jniDoneVariable = Translator.publicVarName("arraySetupDone" + jniEnvFuncNo);		
+		assert(trn.getSubrecognizerKey() != null);
+		
+		String jniDoneVariable = Translator.publicVarName("arraySetupDone" +
+				trn.getSubrecognizerKey());
 		Constant jniDone = trn.getVar(jniDoneVariable, false);		
 		
 		if (jniDone == null) {
@@ -329,10 +335,10 @@ public class JniEnvCallGen extends OpGenerator {
 				args, argTypes, jniEnvFuncNo, true /* has ret */);
 
 		// Publish the result
-		publishVar(trn, "jniCallRes", pRes.toString());
+		publishVar(trn, resultName, pRes.toString());
 
 		/*
 		 * Generate specific code
-		 */		
+		 */
 	}
 }

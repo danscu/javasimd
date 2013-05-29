@@ -379,12 +379,6 @@ public class VariableMapper {
 		boolean first = true;
 		BasicBlock firstBlock = null;			
 				
-		// Debug
-		if (Debug.level >= 10) {
-			if (trn.getOpr() != null && trn.getOpr().getSemc() == Semcode.GET_ARRAY_BASE_POST)
-				System.out.println("Testing arraybase post");
-		}				
-		
 		// Convert code - Pass 1 (Semantic recognizer)
 		for (BasicBlock bs : basicBlocks) {
 			List<Instruction> list = bs.getInstructions();

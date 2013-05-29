@@ -21,6 +21,7 @@ public abstract class StructElemGen extends OpGenerator {
 	public void insertInit(Translator trn,
 			List<Instruction> insList, ListIterator<Instruction> start) {		
 		int elemNumber = getElemNumber();
+		trn.setSubrecognizerKey(Integer.toString(elemNumber));
 		initGetElem(trn, insList, start, elemNumber);
 	}
 

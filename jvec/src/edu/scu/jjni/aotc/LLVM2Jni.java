@@ -203,7 +203,8 @@ public class LLVM2Jni extends FunctionConverter {
 				arrayLenFType /* funcType */,
 				null/* list types */,
 				null/* list args */,
-				extraInstr);
+				extraInstr,
+				"jniArrayLen");
 		elemOpGen.addGenerator(1 /* elem 1 */, arrayLenJniGen);
 		
 		/*
@@ -222,7 +223,8 @@ public class LLVM2Jni extends FunctionConverter {
 				arrayBaseFType /* funcType */,
 				Arrays.asList(new Type[] {pi8_t})/* list types */,
 				Arrays.asList(new Constant[] { iscopy })/* list args */,
-				extraInstr);
+				extraInstr,
+				"jniArrayBase");
 		elemOpGen.addGenerator(2 /* elem 2 */, arrayBaseJniGen);		
 		
 		/*
@@ -230,7 +232,7 @@ public class LLVM2Jni extends FunctionConverter {
 		 *  
 		 *     1. Array Base
 		 *     
-		 *  JNI env call result is returned in 'jniCallRes'
+		 *  JNI env call result is returned in 'jniArrayBase'
 		 */
 		
 		OpRecognizer arrayBaseRec = new OpRecognizer(VariableMapper.Semcode.GET_ARRAY_BASE_POST,
@@ -247,14 +249,14 @@ public class LLVM2Jni extends FunctionConverter {
 
 		OpGenerator arrayBaseGen = new OpGenerator(VariableMapper.Semcode.GET_ARRAY_BASE_POST, arrayBaseRec,
 				null, null) {
-				@Override
+				@Override				
 				public void insert(Translator trn,
 						List<Instruction> insList,
 						ListIterator<Instruction> start) {
 					
 					// bitcast i32* to [0 x i32]*
 					Instruction ins = null;
-					Constant pRes = trn.getVar(Translator.publicVarName("jniCallRes"), true);
+					Constant pRes = trn.getVar(Translator.publicVarName("jniArrayBase"), true);
 					Constant arrayAddr = trn.getVar(Translator.publicVarName("arrayBasePtr"), true);
 					
 					ins = fac.createOperationInst(arrayAddr, InstType.converInst,
@@ -263,21 +265,39 @@ public class LLVM2Jni extends FunctionConverter {
 							"bitcast");
 					addInstruction(start, ins);
 					
-					Constant tab = trn.getVar(Translator.publicVarName("arrayTab"), true);					
-					// store returned array base to tab variable
-					ins = fac.createLoadStoreInst(null, InstType.storeInst,
-							Arrays.asList(new Constant[] { pRes, tab }),
-							Arrays.asList(new Type[] { pi32_t, TypeFactory.getPointerType(pi32_t)}),
-							false /* volatile */ );
-					
-					addInstruction(start, ins);
 					// Be cautious about using arrayBasePtr. It might not dominate the cleanup.
 					publishVar(trn, "arrayBasePtr", pRes.toString());
+				}
+
+				@Override
+				public void insertInit(Translator trn,
+						List<Instruction> insList,
+						ListIterator<Instruction> start) {
+					Instruction ins;
+					
+					String jniDoneVariable = Translator.publicVarName("arrayAccessDone" + 
+							trn.getSubrecognizerKey());
+					Constant jniDone = trn.getVar(jniDoneVariable, false);					
+					
+					if (jniDone == null) {					
+						Constant tab = trn.getVar(Translator.publicVarName("arrayTab"), true);
+						Constant pRes = trn.getVar(Translator.publicVarName("jniArrayBase"), true);
+						
+						// store returned array base to tab variable
+						ins = fac.createLoadStoreInst(null, InstType.storeInst,
+								Arrays.asList(new Constant[] { pRes, tab }),
+								Arrays.asList(new Type[] { pi32_t, TypeFactory.getPointerType(pi32_t)}),
+								false /* volatile */ );
+						
+						addInstruction(start, ins);
+						
+						trn.setVar(jniDoneVariable, "1");
+					}
 				}
 		};
 		
 		Translator trnArrayBase  = new Translator(arrayBaseRec, arrayBaseGen);
-		trnStructElem.addTranslator(trnArrayBase);
+		trnStructElem.addTranslator("2", trnArrayBase);
 		
 		OpRecognizer arrayLenRefRec = new OpRecognizer(VariableMapper.Semcode.GET_ARRAY_LENGTH_POST,
 				javaStructPtr, type0xi32Ptr);		
@@ -299,7 +319,7 @@ public class LLVM2Jni extends FunctionConverter {
 						ListIterator<Instruction> start) {
 					
 					Instruction ins = null;
-					Constant pRes = trn.getVar(Translator.publicVarName("jniCallRes"), true);
+					Constant pRes = trn.getVar(Translator.publicVarName("jniArrayLen"), true);
 					
 					// no instruction needed, just add a dummy one
 					Constant arrayAddr = trn.getVar(Translator.publicVarName("arrayLen"), true);
@@ -312,7 +332,7 @@ public class LLVM2Jni extends FunctionConverter {
 		};
 		
 		Translator trnArrayLen = new Translator(arrayLenRefRec, arrayLenRefGen);
-		trnStructElem.addTranslator(trnArrayLen);		
+		trnStructElem.addTranslator("1", trnArrayLen);		
 	}
 	
 	protected static void addObjectRec64bit(VariableMapper mapper, Translator trnStructBase) {
@@ -379,7 +399,8 @@ public class LLVM2Jni extends FunctionConverter {
 				arrayLenFType /* funcType */,
 				null/* list types */,
 				null/* list args */,
-				extraInstr);
+				extraInstr,
+				"jniArrayLen");
 		elemOpGen.addGenerator(1 /* elem 1 */, arrayLenJniGen);
 		
 		/*
@@ -398,7 +419,8 @@ public class LLVM2Jni extends FunctionConverter {
 				arrayBaseFType /* funcType */,
 				Arrays.asList(new Type[] {pi8_t})/* list types */,
 				Arrays.asList(new Constant[] { iscopy })/* list args */,
-				extraInstr);
+				extraInstr,
+				"jniArrayBase");
 		elemOpGen.addGenerator(2 /* elem 2 */, arrayBaseJniGen);		
 		
 		/*
@@ -406,7 +428,7 @@ public class LLVM2Jni extends FunctionConverter {
 		 *  
 		 *     1. Array Base
 		 *     
-		 *  JNI env call result is returned in 'jniCallRes'
+		 *  JNI env call result is returned in 'jniArrayBase'
 		 */
 		
 		OpRecognizer arrayBaseRec = new OpRecognizer(VariableMapper.Semcode.GET_ARRAY_BASE_POST,
@@ -430,7 +452,7 @@ public class LLVM2Jni extends FunctionConverter {
 					
 					// bitcast i32 to [0 x i32]*
 					Instruction ins = null;
-					Constant pRes = trn.getVar(Translator.publicVarName("jniCallRes"), true);
+					Constant pRes = trn.getVar(Translator.publicVarName("jniArrayBase"), true);
 					Constant arrayAddr = trn.getVar(Translator.publicVarName("arrayBasePtr"), true);
 					
 					ins = fac.createOperationInst(arrayAddr, InstType.converInst,
@@ -439,21 +461,39 @@ public class LLVM2Jni extends FunctionConverter {
 							"bitcast");
 					addInstruction(start, ins);
 					
-					Constant tab = trn.getVar(Translator.publicVarName("arrayTab"), true);					
-					// store returned array base to tab variable
-					ins = fac.createLoadStoreInst(null, InstType.storeInst,
-							Arrays.asList(new Constant[] { pRes, tab }),
-							Arrays.asList(new Type[] { pi32_t, TypeFactory.getPointerType(pi32_t)}),
-							false /* volatile */ );
-					
-					addInstruction(start, ins);
 					// Be cautious about using arrayBasePtr. It might not dominate the cleanup.
 					publishVar(trn, "arrayBasePtr", pRes.toString());
+				}
+				
+				@Override
+				public void insertInit(Translator trn,
+						List<Instruction> insList,
+						ListIterator<Instruction> start) {
+					Instruction ins;
+					
+					String jniDoneVariable = Translator.publicVarName("arrayAccessDone" + 
+							trn.getSubrecognizerKey());
+					Constant jniDone = trn.getVar(jniDoneVariable, false);
+					
+					if (jniDone == null) {
+						Constant tab = trn.getVar(Translator.publicVarName("arrayTab"), true);
+						Constant pRes = trn.getVar(Translator.publicVarName("jniArrayBase"), true);
+						
+						// store returned array base to tab variable
+						ins = fac.createLoadStoreInst(null, InstType.storeInst,
+								Arrays.asList(new Constant[] { pRes, tab }),
+								Arrays.asList(new Type[] { pi32_t, TypeFactory.getPointerType(pi32_t)}),
+								false /* volatile */ );
+						
+						addInstruction(start, ins);
+						
+						trn.setVar(jniDoneVariable, "1");
+					}
 				}
 		};
 		
 		Translator trnArrayBase  = new Translator(arrayBaseRec, arrayBaseGen);
-		trnStructElem.addTranslator(trnArrayBase);
+		trnStructElem.addTranslator("2", trnArrayBase);
 		
 		OpRecognizer arrayLenRefRec = new OpRecognizer(VariableMapper.Semcode.GET_ARRAY_LENGTH_POST,
 				javaStructPtr, type0xi32Ptr);		
@@ -475,7 +515,7 @@ public class LLVM2Jni extends FunctionConverter {
 						ListIterator<Instruction> start) {
 					
 					Instruction ins = null;
-					Constant pRes = trn.getVar(Translator.publicVarName("jniCallRes"), true);
+					Constant pRes = trn.getVar(Translator.publicVarName("jniArrayLen"), true);
 					
 					// no instruction needed, just add a dummy one
 					Constant arrayAddr = trn.getVar(Translator.publicVarName("arrayLen"), true);
@@ -488,7 +528,7 @@ public class LLVM2Jni extends FunctionConverter {
 		};
 		
 		Translator trnArrayLen = new Translator(arrayLenRefRec, arrayLenRefGen);
-		trnStructElem.addTranslator(trnArrayLen);		
+		trnStructElem.addTranslator("1", trnArrayLen);		
 	}
 	
 	protected static void addStructElemTranslator(VariableMapper mapper) {
