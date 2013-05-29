@@ -199,6 +199,7 @@ public class LLVM2Jni extends FunctionConverter {
 		
 		JniEnvCallGen arrayLenJniGen = new JniEnvCallGen(Semcode.GET_ARRAY_LENGTH,
 				elemOpRec, null, pi8_t, env_addr, JNIFunc_GetIntArrayLength,
+				true, /* call once at init */
 				arrayLenFType /* funcType */,
 				null/* list types */,
 				null/* list args */,
@@ -217,6 +218,7 @@ public class LLVM2Jni extends FunctionConverter {
 		// call i32 %6(%struct.JNINativeInterface_** %0, i8* %1) nounwind
 		JniEnvCallGen arrayBaseJniGen = new JniEnvCallGen(Semcode.GET_ARRAY_BASE,
 				elemOpRec, null, pi8_t, env_addr, JNIFunc_GetIntArrayElements,
+				true, /* call once at init */
 				arrayBaseFType /* funcType */,
 				Arrays.asList(new Type[] {pi8_t})/* list types */,
 				Arrays.asList(new Constant[] { iscopy })/* list args */,
@@ -250,7 +252,7 @@ public class LLVM2Jni extends FunctionConverter {
 						List<Instruction> insList,
 						ListIterator<Instruction> start) {
 					
-					// bitcast i32 to [0 x i32]*
+					// bitcast i32* to [0 x i32]*
 					Instruction ins = null;
 					Constant pRes = trn.getVar(Translator.publicVarName("jniCallRes"), true);
 					Constant arrayAddr = trn.getVar(Translator.publicVarName("arrayBasePtr"), true);
@@ -373,6 +375,7 @@ public class LLVM2Jni extends FunctionConverter {
 		
 		JniEnvCallGen arrayLenJniGen = new JniEnvCallGen(Semcode.GET_ARRAY_LENGTH,
 				elemOpRec, null, pi8_t, env_addr, JNIFunc_GetIntArrayLength,
+				true, /* call once at init */
 				arrayLenFType /* funcType */,
 				null/* list types */,
 				null/* list args */,
@@ -391,6 +394,7 @@ public class LLVM2Jni extends FunctionConverter {
 		// call i32 %6(%struct.JNINativeInterface_** %0, i8* %1) nounwind
 		JniEnvCallGen arrayBaseJniGen = new JniEnvCallGen(Semcode.GET_ARRAY_BASE,
 				elemOpRec, null, pi8_t, env_addr, JNIFunc_GetIntArrayElements,
+				true, /* call once at init */
 				arrayBaseFType /* funcType */,
 				Arrays.asList(new Type[] {pi8_t})/* list types */,
 				Arrays.asList(new Constant[] { iscopy })/* list args */,

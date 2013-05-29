@@ -77,7 +77,9 @@ public class Translator {
 		
 		if (initBlock != null) {
 			// insert init code to initBlock
-			opg.insertInit(trn, initBlock.getInstructions(), initBlock.getInstructions().listIterator());
+			List<Instruction> list = initBlock.getInstructions();
+			// insert before br instruction
+			opg.insertInit(trn, list, list.listIterator(list.size() - 1));
 		} else {
 			// this is the init block, insert init code to front
 			Instruction startIns = start.next();

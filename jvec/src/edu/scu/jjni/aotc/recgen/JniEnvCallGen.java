@@ -24,17 +24,22 @@ import edu.scu.llvm.translate.VariableMapper.Semcode;
 public class JniEnvCallGen extends OpGenerator {
 	protected Constant env_addr;
 	protected int jniEnvFuncNo;
+	protected boolean callOnceAtInit;
 	protected FunctionType funcType;
 	protected List<Type> argTypes;
 	protected List<Constant> args;
 	protected List<Instruction> extraInstr;
+	protected boolean initCall;
 	
 	public JniEnvCallGen(Semcode semc, OpRecognizer opr, Type typeIn, Type typeOut, Constant env_addr,
-			int jniEnvFuncNo, FunctionType funcType, List<Type> argTypes, List<Constant> args,
+			int jniEnvFuncNo,
+			boolean callOnceAtInit,
+			FunctionType funcType, List<Type> argTypes, List<Constant> args,
 			List<Instruction> extraInstr) {
 		super(semc, opr, typeIn, typeOut);
 		this.env_addr = env_addr;
 		this.jniEnvFuncNo = jniEnvFuncNo;
+		this.callOnceAtInit = callOnceAtInit;
 		this.funcType = funcType;
 		this.argTypes = argTypes;
 		this.args = args;
@@ -59,12 +64,26 @@ public class JniEnvCallGen extends OpGenerator {
 	@Override
 	public void insertInit(Translator trn,
 			List<Instruction> insList, ListIterator<Instruction> start) {				
-
-		Constant alreadySetupArray = trn.getVar(Translator.publicVarName("arraySetupDone"), false);
-		if (alreadySetupArray == null) {
-			trn.setVar(Translator.publicVarName("arraySetupDone"), "1");
+		
+		String arraySetupDone = Translator.publicVarName("arraySetupDone");		
+		Constant setupDone = trn.getVar(arraySetupDone, false);
+		
+		if (setupDone == null) {
+			trn.setVar(arraySetupDone, "1");
 			setupArgments(trn, insList, start);
-		}
+		}		
+
+		String jniDoneVariable = Translator.publicVarName("arraySetupDone" + jniEnvFuncNo);		
+		Constant jniDone = trn.getVar(jniDoneVariable, false);		
+		
+		if (jniDone == null) {
+			trn.setVar(jniDoneVariable, "1");
+			
+			if (callOnceAtInit) {
+				// generate jni code at init
+				insertJniCall(trn, insList, start);
+			}
+		}			
 	}
 
 	private void setupArgments(Translator trn, List<Instruction> insList,
@@ -298,16 +317,22 @@ public class JniEnvCallGen extends OpGenerator {
 	
 	@Override
 	public void insert(Translator trn, List<Instruction> insList,
-			ListIterator<Instruction> start) {				
-		
+			ListIterator<Instruction> start) {		
+		if (!callOnceAtInit) {
+			insertJniCall(trn, insList, start);
+		}
+	}
+	
+	protected void insertJniCall(Translator trn, List<Instruction> insList,
+			ListIterator<Instruction> start) {
 		Constant pRes = insertJniCall(trn, insList, start, funcType, 
 				args, argTypes, jniEnvFuncNo, true /* has ret */);
-		
+
 		// Publish the result
 		publishVar(trn, "jniCallRes", pRes.toString());
-		
+
 		/*
 		 * Generate specific code
-		 */
+		 */		
 	}
 }
