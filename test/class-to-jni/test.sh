@@ -11,13 +11,14 @@ FUNC="testSum testArraySum testSort"
 if [ "$1" == "" ]; then
   echo Usage: test.sh ClassName
 else
-echo 0. Compiling Java \(if classfile does not exist\)
-if [ ! -f $FILE.class ]; then
+
+echo 0. Compiling Java
+if [ -f $FILE.java ]; then
   javac $FILE.java
 fi
 
 echo 1. Compile Java to LLVM
-$GCJ -save-temps -fplugin=$DRAGONEGG -fplugin-arg-dragonegg-emit-ir -S $1.java
+$GCJ -save-temps -fplugin=$DRAGONEGG -fplugin-arg-dragonegg-emit-ir -S $FILE.java
 
 echo 2. Compile java byte code to LLVM
 opt -S -vectorize-loops -bb-vectorize -loop-vectorize -vectorize -force-vector-width=2 -o $FILE.opt.s $FILE.s
