@@ -34,18 +34,13 @@ public class HelloWorld {
       return sum;
     }
 
-    private int findMinPos(int a[], int start) {
-	int minp = start;
-   	for (int j = start + 1; j < a.length; j++)
-		if (a[j] < a[minp])
-			minp = j;
-	return minp;
-    }
-
     private void testSort(int a[]) {
 	int i, j, minp;
 	for (i = 0; i < a.length - 1; i++) {
-		minp = findMinPos(a, i);
+	    minp = i;
+	  for (j = i + 1; j < a.length; j++)
+		if (a[j] < a[minp])
+			minp = j;
 	    int tmp = a[i]; a[i] = a[minp]; a[minp] = tmp;
 	}
     }
