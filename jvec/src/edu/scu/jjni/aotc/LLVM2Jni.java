@@ -275,18 +275,18 @@ public class LLVM2Jni extends FunctionConverter {
 		
 		// %0 = getelementptr inbounds %"struct.int[]"* %unnamed_arg2, i64 0, i32 2, i64 %7
 		Constant pArrayElem = new WildcardConstant(OpRecognizer.newWildcard("arrayElemPtr")); // publishable
-		Constant arrayIndex = new WildcardConstant(OpRecognizer.newWildcard("arrayIndex")); // publishable
+		Constant byteIndex = new WildcardConstant(OpRecognizer.newWildcard("byteIndex")); // publishable
 		ins = fac.createGetElePtrInst(pArrayElem, InstType.getElePtrInst,
 				Arrays.asList(new Constant[] { argName,
 						vfac.createConstantValue(SimpleConstantValue.intConst, "0"),
 						new WildcardConstant(OpRecognizer.newWildcard("elem_no")),
-						arrayIndex /* match user array index */
+						byteIndex /* match user array index */
 				}),
 				Arrays.asList(new Type[] { arrayPtrType, i64_t, i32_t, i64_t }),
 				true /* inbounds */);
 		elemOpRec.addInstruction(ins);
 		elemOpRec.addPublicVar(pArrayElem);
-		elemOpRec.addPublicVar(arrayIndex);
+		elemOpRec.addPublicVar(byteIndex);
 		
 		addArrayRef3(trnStructElem);
 	}
@@ -682,15 +682,25 @@ public class LLVM2Jni extends FunctionConverter {
 					
 					Instruction ins = null;
 					Constant pElem = trn.getVar(Translator.publicVarName("arrayElemPtrTyped"), true);
-					Constant arrayIndex = trn.getVar(Translator.publicVarName("arrayIndex"), true);
+					Constant byteIndex = trn.getVar(Translator.publicVarName("byteIndex"), true);
+					Constant intIndex = new LocalVariable(trn.getGenTmpName());
+					
+					// Divide by 4
+					// %. = shr nsw i64 %6, 2
+					ins = fac.createBinaryInst(intIndex, InstType.binaryInst,
+							Arrays.asList(new Constant[] { byteIndex,
+									vfac.createConstantValue(SimpleConstantValue.intConst, "2") }),
+							Arrays.asList(new Type[] { i64_t, i64_t }),
+							"ashr", "", "", "");
+					addInstruction(start, ins);
 					
 					// %. = getelementptr inbounds i32* <base>, i64 <index>
 					Constant pRes = trn.getVar(Translator.publicVarName("jniArrayBase"), true);
 					ins = fac.createGetElePtrInst(pElem, InstType.getElePtrInst,
-							Arrays.asList(new Constant[] { pRes, arrayIndex }),
+							Arrays.asList(new Constant[] { pRes, intIndex }),
 							Arrays.asList(new Type[] { pi32_t, i64_t }),
 							true /* inbounds */);
-					addInstruction(start, ins);					
+					addInstruction(start, ins);
 					
 					// Be cautious about using arrayBasePtr. It might not dominate the cleanup.
 					// Setting it is only used to indicate array base has been retrieved.
