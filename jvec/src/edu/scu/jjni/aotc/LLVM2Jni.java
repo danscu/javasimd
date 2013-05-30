@@ -804,6 +804,7 @@ public class LLVM2Jni extends FunctionConverter {
 		ignoreCalls.add("@llvm.dbg.value");
 		ignoreCalls.add("@llvm.dbg.declare");
 		ignoreCalls.add("@_Jv_ThrowBadArrayIndex");
+		ignoreCalls.add("@_Jv_ThrowNullPointerException");
 		return ignoreCalls;
 	}
 	
