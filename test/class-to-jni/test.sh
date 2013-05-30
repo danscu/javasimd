@@ -6,7 +6,7 @@ if [[ ! `uname -a` =~ .*_64.* ]]; then
   LLC_ARCH="-march=x86"
 fi
 
-FUNC="testSum testArraySum testSort"
+FUNC="testSum testArraySum testSort quicksort"
 
 if [ "$1" == "" ]; then
   echo Usage: test.sh ClassName
@@ -20,8 +20,9 @@ fi
 echo 1. Compile Java to LLVM
 $GCJ -save-temps -fplugin=$DRAGONEGG -fplugin-arg-dragonegg-emit-ir -S $FILE.java
 
-echo 2. Compile java byte code to LLVM
-opt -S -vectorize-loops -bb-vectorize -loop-vectorize -vectorize -force-vector-width=2 -o $FILE.opt.s $FILE.s
+echo 2. Optimizing LLVM code
+#opt -S -vectorize-loops -bb-vectorize -loop-vectorize -vectorize -force-vector-width=2 -o $FILE.opt.s $FILE.s
+opt -O3 -disable-inlining -vectorize -vectorize-loops --bb-vectorize --loop-vectorize -force-vector-width=8 -S -o $FILE.opt.s $FILE.s
 
 echo 3. Compiling LLVM-IR to LLVM bitcode \(.bc\)
 ./optimize.sh $FILE $FILE.opt.s ${FUNC}
