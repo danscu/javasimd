@@ -245,13 +245,29 @@ public class FunctionConverter {
 				new ArrayList<Type>());
 		cleanupBlock.getInstructions().add(retJump);
 		
+		boolean noOriginalReturn = false;
+		
 		// Add original return stuff here
 		BasicBlock orgReturn = basicBlocksLast.get(basicBlocksLast.size() - 1);
 		if (orgReturn.getBlockID().equals("return")) {
+			// Rename return to org_return and place at the end
 			orgReturn.setBlockID("org_return");
 			basicBlocksLast.remove(orgReturn);
 		} else {
-			throw new RuntimeException("Cannot find 'return' block");
+			noOriginalReturn = true;
+			// Create a return block containing only the last instruction
+			List<Instruction> list = new ArrayList<Instruction>();		
+			list.add(orgReturn.getInstruction(orgReturn.getNumInst() - 1));
+			orgReturn.getInstructions().remove(orgReturn.getNumInst() - 1);
+			
+			// Add jump to original last block
+			retJump = fac.createSimpleInst(null, InstType.brInst,
+					Arrays.asList(new Constant[] { new LocalVariable("%return") }),
+					new ArrayList<Type>());
+			orgReturn.getInstructions().add(retJump);
+			
+			// Create return block containing only the last instruction
+			orgReturn = new BasicBlock("org_return", list);
 		}
 		
 		for (BasicBlock cb : cleanupExtra)
