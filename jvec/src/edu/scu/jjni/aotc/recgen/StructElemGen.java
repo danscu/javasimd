@@ -45,10 +45,14 @@ public abstract class StructElemGen extends OpGenerator {
 	private int getElemNumber() {
 		String elemNoByte = opr.getMatchContent(OpRecognizer
 				.newWildcard("elem_no_byte"));
+		String elemNoHalf = opr.getMatchContent(OpRecognizer
+				.newWildcard("elem_no_half"));
 		
 		int elemNumber;
 		
-		if (elemNoByte != null) {
+		if (elemNoHalf != null) {
+			elemNumber = Integer.parseInt(elemNoHalf) * 2;
+		} else if (elemNoByte != null) {
 			elemNumber = Integer.parseInt(elemNoByte) / 4;
 		} else {
 			String elemNo = opr.getMatchContent(OpRecognizer
