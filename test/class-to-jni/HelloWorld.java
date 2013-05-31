@@ -72,7 +72,7 @@ public class HelloWorld {
 	long durationMs = System.currentTimeMillis() - startMs;
 	System.out.println(String.format("Sort time: %d ms", durationMs));
 
-	if (false) {	
+	if (true) {	
 	for (int i = 0; i < N; i++)
 		System.out.print(ia[i] + " ");
 	System.out.println();

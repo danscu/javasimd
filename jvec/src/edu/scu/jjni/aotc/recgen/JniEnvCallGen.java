@@ -199,7 +199,7 @@ public class JniEnvCallGen extends OpGenerator {
 		// Insert release elements jni call
 		insertJniCall(trn, iList, it, funcType, 
 				Arrays.asList(new Constant[] { arrayBase,
-						vfac.createConstantValue(SimpleConstantValue.intConst, "2") /* JNIABORT */		
+						vfac.createConstantValue(SimpleConstantValue.intConst, "0") /* writeback */		
 				}),
 				Arrays.asList(new Type[] { LLVM2Jni.pi32_t, LLVM2Jni.i32_t }),
 				jniEnvFuncNo, false/* has no retval */);
