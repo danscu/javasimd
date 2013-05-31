@@ -25,7 +25,10 @@ echo 2. Optimizing LLVM code
 opt -O3 -disable-inlining -vectorize -vectorize-loops --bb-vectorize --loop-vectorize -force-vector-width=8 -S -o $FILE.opt.s $FILE.s
 
 echo 3. Compiling LLVM-IR to LLVM bitcode \(.bc\)
-./optimize.sh $FILE $FILE.opt.s ${FUNC}
+./optimize.sh $FILE $FILE.s ${FUNC}
+
+echo 3+. Optimizing translated code
+opt -O3 -disable-inlining -S -o vdir/$FILE.opt.s vdir/$FILE.s
 
 echo 4. Compile modified LLVM IR
 llvm-as vdir/$FILE.opt.s -o $FILE.ll.bc
