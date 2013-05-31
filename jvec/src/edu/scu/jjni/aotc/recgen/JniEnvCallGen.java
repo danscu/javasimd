@@ -144,7 +144,7 @@ public class JniEnvCallGen extends OpGenerator {
 		Constant pArrayIsCopy = trn.getVar(Translator.publicVarName("isCopy"), true);
 		
 		// %26 = load i8* %iscopy, align 1
-		Constant iscopy = new LocalVariable(trn.getGenTmpName());		
+		Constant iscopy = new LocalVariable(trn.getGenTmpName());
 		ins = fac.createLoadStoreInst(iscopy /* dest */, InstType.loadInst,
 				Arrays.asList(new Constant[] { pArrayIsCopy,
 						vfac.createConstantValue(SimpleConstantValue.intConst, "1")} /* align 1 */),
@@ -322,11 +322,12 @@ public class JniEnvCallGen extends OpGenerator {
 	}
 	
 	@Override
-	public void insert(Translator trn, List<Instruction> insList,
+	public int insert(Translator trn, List<Instruction> insList,
 			ListIterator<Instruction> start) {		
 		if (!callOnceAtInit) {
 			insertJniCall(trn, insList, start);
 		}
+		return super.insert(trn, insList, start);
 	}
 	
 	protected void insertJniCall(Translator trn, List<Instruction> insList,

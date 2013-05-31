@@ -170,7 +170,8 @@ public class LLVM2Jni extends FunctionConverter {
 		elemOpRec.addInstruction(ins);
 		
 		// %5 = getelementptr inbounds i8* %4, i32 (<elem_no> * 4)
-		Constant pElem = new WildcardConstant(OpRecognizer.newWildcard("objElemPtr")); // publishable
+		Constant pElem = new WildcardConstant(
+				OpRecognizer.newWildcard("objElemPtr")); // publishable
 		ins = fac.createGetElePtrInst(pElem, InstType.getElePtrInst,
 				Arrays.asList(new Constant[] { pByte,
 						new WildcardConstant(OpRecognizer.newWildcard("elem_no_byte")) }),
@@ -288,7 +289,7 @@ public class LLVM2Jni extends FunctionConverter {
 		Constant arrayBasePtr = new WildcardConstant(OpRecognizer.newWildcard("arrayBasePtr")); // publishable
 		ins = fac.createOperationInst(arrayBasePtr, InstType.converInst,
 				Arrays.asList(new Constant[] { pArrayBaseInStruct }),
-				Arrays.asList(new Type[] { arrayPtrType, i8_t}),
+				Arrays.asList(new Type[] { arrayPtrType, pi8_t}),
 				"bitcast");
 		elemOpRec.addInstruction(ins);
 		elemOpRec.addPublicVar(arrayBasePtr);
@@ -435,14 +436,15 @@ public class LLVM2Jni extends FunctionConverter {
 		OpGenerator arrayBaseGen = new OpGenerator(VariableMapper.Semcode.GET_ARRAY_BASE_POST, arrayBaseRec,
 				null, null) {
 				@Override
-				public void insert(Translator trn,
+				public int insert(Translator trn,
 						List<Instruction> insList,
 						ListIterator<Instruction> start) {
 					
 					// bitcast i32 to [0 x i32]*
 					Instruction ins = null;
 					Constant pRes = trn.getVar(Translator.publicVarName("jniArrayBase"), true);
-					Constant arrayAddr = trn.getVar(Translator.publicVarName("arrayBasePtr"), true);
+				Constant arrayAddr = trn.getVar(
+						Translator.publicVarName("arrayBasePtr"), true);
 					
 					ins = fac.createOperationInst(arrayAddr, InstType.converInst,
 							Arrays.asList(new Constant[] { pRes }),
@@ -452,6 +454,8 @@ public class LLVM2Jni extends FunctionConverter {
 					
 					// Be cautious about using arrayBasePtr. It might not dominate the cleanup.
 					publishVar(trn, "arrayBasePtr", pRes.toString());
+					
+					return super.insert(trn, insList, start);
 				}
 				
 				@Override
@@ -505,7 +509,7 @@ public class LLVM2Jni extends FunctionConverter {
 		OpGenerator arrayLenRefGen = new OpGenerator(VariableMapper.Semcode.GET_ARRAY_LENGTH_POST, arrayBaseRec,
 				null, null) {
 				@Override
-				public void insert(Translator trn,
+				public int insert(Translator trn,
 						List<Instruction> insList,
 						ListIterator<Instruction> start) {
 					
@@ -518,7 +522,9 @@ public class LLVM2Jni extends FunctionConverter {
 							Arrays.asList(new Constant[] { pRes, vfac.createConstantValue(SimpleConstantValue.intConst, "0")}),
 							Arrays.asList(new Type[] { i32_t, i32_t }),
 							"add", "", "", "");
-					addInstruction(start, ins);					
+					addInstruction(start, ins);
+					
+					return super.insert(trn, insList, start);
 				}
 		};
 		
@@ -601,7 +607,7 @@ public class LLVM2Jni extends FunctionConverter {
 		OpGenerator arrayBaseGen = new OpGenerator(VariableMapper.Semcode.GET_ARRAY_BASE_POST, arrayBaseRec,
 				null, null) {
 				@Override				
-				public void insert(Translator trn,
+				public int insert(Translator trn,
 						List<Instruction> insList,
 						ListIterator<Instruction> start) {
 					
@@ -618,6 +624,8 @@ public class LLVM2Jni extends FunctionConverter {
 					
 					// Be cautious about using arrayBasePtr. It might not dominate the cleanup.
 					publishVar(trn, "arrayBasePtr", pRes.toString());
+					
+					return super.insert(trn, insList, start);
 				}
 
 				@Override
@@ -671,7 +679,7 @@ public class LLVM2Jni extends FunctionConverter {
 		OpGenerator arrayLenRefGen = new OpGenerator(VariableMapper.Semcode.GET_ARRAY_LENGTH_POST, arrayBaseRec,
 				null, null) {
 				@Override
-				public void insert(Translator trn,
+				public int insert(Translator trn,
 						List<Instruction> insList,
 						ListIterator<Instruction> start) {
 					
@@ -684,7 +692,9 @@ public class LLVM2Jni extends FunctionConverter {
 							Arrays.asList(new Constant[] { pRes, vfac.createConstantValue(SimpleConstantValue.intConst, "0")}),
 							Arrays.asList(new Type[] { i32_t, i32_t }),
 							"add", "", "", "");
-					addInstruction(start, ins);					
+					addInstruction(start, ins);
+					
+					return super.insert(trn, insList, start);
 				}
 		};
 		
@@ -745,7 +755,7 @@ public class LLVM2Jni extends FunctionConverter {
 		OpGenerator arrayBaseGen = new OpGenerator(VariableMapper.Semcode.GET_ARRAY_BASE_POST, arrayBaseRec,
 				null, null) {
 				@Override
-				public void insert(Translator trn,
+				public int insert(Translator trn,
 						List<Instruction> insList,
 						ListIterator<Instruction> start) {
 					
@@ -774,6 +784,8 @@ public class LLVM2Jni extends FunctionConverter {
 					// Be cautious about using arrayBasePtr. It might not dominate the cleanup.
 					// Setting it is only used to indicate array base has been retrieved.
 					publishVar(trn, "arrayBasePtr", pRes.toString());
+					
+					return super.insert(trn, insList, start);
 				}
 				
 				@Override
@@ -851,8 +863,8 @@ public class LLVM2Jni extends FunctionConverter {
 		Constant arrayBasePtr = new WildcardConstant(Translator.publicVarName("arrayBasePtr")); // published
 		Constant elemPtr = new WildcardConstant(OpRecognizer.newWildcard("elemPtr")); // publishable
 		Constant index = new WildcardConstant(OpRecognizer.newWildcard("elemIndex")); // publishable
-		Instruction ins = fac.createGetElePtrInst(arrayBasePtr, InstType.getElePtrInst,
-				Arrays.asList(new Constant[] { arrayBasePtr,  }),
+		Instruction ins = fac.createGetElePtrInst(elemPtr, InstType.getElePtrInst,
+				Arrays.asList(new Constant[] { arrayBasePtr, index }),
 				Arrays.asList(new Type[] { pi8_t, i32_t }),
 				false /* inbounds */);
 		arrayBaseRec.addInstruction(ins);
@@ -862,15 +874,15 @@ public class LLVM2Jni extends FunctionConverter {
 		OpGenerator arrayBaseGen = new OpGenerator(VariableMapper.Semcode.GET_ARRAY_BASE_POST, arrayBaseRec,
 				null, null) {
 				@Override
-				public void insert(Translator trn,
+				public int insert(Translator trn,
 						List<Instruction> insList,
 						ListIterator<Instruction> start) {
 					
 					Instruction ins = null;
 					Constant pRes = trn.getVar(Translator.publicVarName("jniArrayBase"), true);
-					Constant arrayBase = trn.getVar(Translator.publicVarName("arrayBasePtr"), true);
 					Constant elemPtr = trn.getVar(Translator.publicVarName("elemPtr"), true);
 					Constant index = trn.getVar(Translator.publicVarName("elemIndex"), true);
+					Constant arrayBase = new LocalVariable(trn.getGenTmpName());
 					
 					// bitcast
 					ins = fac.createOperationInst(arrayBase, InstType.converInst,			
@@ -883,12 +895,10 @@ public class LLVM2Jni extends FunctionConverter {
 					ins = fac.createGetElePtrInst(elemPtr, InstType.getElePtrInst,
 							Arrays.asList(new Constant[] { arrayBase, index }),
 							Arrays.asList(new Type[] { pi8_t, i32_t }),
-							true /* inbounds */);
+							false /* inbounds */);
 					addInstruction(start, ins);
 					
-					// Be cautious about using arrayBasePtr. It might not dominate the cleanup.
-					// Setting it is only used to indicate array base has been retrieved.
-					publishVar(trn, "arrayBasePtr", pRes.toString());
+					return super.insert(trn, insList, start);
 				}
 				
 				@Override

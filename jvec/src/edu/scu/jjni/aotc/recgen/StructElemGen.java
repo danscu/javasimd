@@ -34,12 +34,13 @@ public abstract class StructElemGen extends OpGenerator {
 	}
 
 	@Override
-	public void insert(Translator trn, List<Instruction> insList,
+	public int insert(Translator trn, List<Instruction> insList,
 			ListIterator<Instruction> start) {
 		int elemNumber = getElemNumber();
 		if (Debug.level >= 2)
 			trn.log("Struct Elem Access: " + elemNumber);
 		modifyGetElem(trn, insList, start, elemNumber);
+		return super.insert(trn, insList, start);
 	}
 
 	private int getElemNumber() {

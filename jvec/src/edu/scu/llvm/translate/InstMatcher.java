@@ -323,7 +323,8 @@ public class InstMatcher {
 					
 					if (opg != null) {
 						changed = true;
-						modifyCode(trn, insList, iit, initBlock, cleanupBlock, cleanupExtra, cleanupOutLabel);						
+						int insertCount = modifyCode(trn, insList, iit, initBlock, cleanupBlock, cleanupExtra, cleanupOutLabel);
+						instructAfterMatch += insertCount;
 					} else {
 						instructAfterMatch += opr.getInstructions().size();						
 					}
@@ -340,7 +341,7 @@ public class InstMatcher {
 							mapper.mapOperations(subTrn, bbs, cleanupBlock, cleanupExtra, cleanupOutLabel, true);
 							changed = true;
 							mapper.decDepth();
-						}					
+						}
 
 					if (changed) {
 						// set the iterator to find other matches
@@ -368,11 +369,11 @@ public class InstMatcher {
 	 * @param cleanupBlock 
 	 * @param opg
 	 *            Code generator.
-	 * @return The modified instructions.
+	 * @return The number of inserted instructions at the current block.
 	 */
-	private void modifyCode(Translator trn, List<Instruction> insList,
+	private int modifyCode(Translator trn, List<Instruction> insList,
 			ListIterator<Instruction> start, BasicBlock initBlock, BasicBlock cleanupBlock,
 			List<BasicBlock> cleanupExtraBlocks, Constant cleanupOutLabel) {
-		trn.modify(trn, insList, start, initBlock, cleanupBlock, cleanupExtraBlocks, cleanupOutLabel);
+		return trn.modify(trn, insList, start, initBlock, cleanupBlock, cleanupExtraBlocks, cleanupOutLabel);
 	}
 }

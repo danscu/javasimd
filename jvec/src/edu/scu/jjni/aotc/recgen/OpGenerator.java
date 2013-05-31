@@ -21,6 +21,7 @@ public class OpGenerator {
 	protected Type typeOut;
 	OpRecognizer opr;
 	Translator trn;	
+	protected int insertCount;
 	
 	public OpGenerator(Semcode semc, OpRecognizer opr, Type typeIn,
 			Type typeOut) {
@@ -34,6 +35,10 @@ public class OpGenerator {
 		this.trn = trn;
 	}
 
+	public void resetInsertCount() {
+		insertCount = 0;
+	}
+	
 	/**
 	 * Use this function to generate temporary variable names in the
 	 * pattern. In the actual generated code, the variable names will be
@@ -52,6 +57,7 @@ public class OpGenerator {
 	}
 
 	public void addInstruction(ListIterator<Instruction> it, Instruction inst) {
+		insertCount++;
 		it.add(inst);
 		if (Debug.level >= 2)
 			trn.log("Inserting: " + inst);
@@ -76,13 +82,16 @@ public class OpGenerator {
 	}
 	
 	/**
-	 * Modify code at a point where other code is recognized.
+	 * Modify code at a point where other code is recognized. It returns the number of
+	 * inserted instructions. A subclass can call this function to return the value.
 	 * @param trn The translator context.
 	 * @param insList
-	 * @param start	 * 
+	 * @param start	 *
+	 * @return The number of inserted instructions. 
 	 */
-	public void insert(Translator trn, List<Instruction> insList,
+	public int insert(Translator trn, List<Instruction> insList,
 			ListIterator<Instruction> start) {
+		return insertCount;
 	}
 	
 	/**
@@ -98,5 +107,7 @@ public class OpGenerator {
 	
 	protected void publishVar(Translator trn, String publicVar, String value) {		
 		trn.setVar(Translator.publicVarName(publicVar), value);
+		if (Debug.level >= 2)
+			trn.log("Generator publishes var: " + publicVar + " val: " + value);
 	}
 }

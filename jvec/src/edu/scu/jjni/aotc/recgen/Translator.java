@@ -84,7 +84,18 @@ public class Translator {
 		this.mapper = mapper;
 	}
 
-	public void modify(Translator trn, List<Instruction> insList,
+	/**
+	 * Modify code for a matched pattern
+	 * @param trn
+	 * @param insList
+	 * @param start
+	 * @param initBlock
+	 * @param cleanupBlock
+	 * @param extraCleanupBlocks
+	 * @param cleanupOutLabel
+	 * @return The number of inserted instructions at the current block.
+	 */
+	public int modify(Translator trn, List<Instruction> insList,
 			ListIterator<Instruction> start, BasicBlock initBlock, BasicBlock cleanupBlock,
 			List<BasicBlock> extraCleanupBlocks, Constant cleanupOutLabel) {
 		
@@ -117,8 +128,12 @@ public class Translator {
 		opg.insertCleanup(trn, cleanupBlock.getInstructions(),
 				cleanupBlock.getInstructions().listIterator(),
 				extraCleanupBlocks, cleanupOutLabel);
+
+		// Reset the insert count to count instructions inserted at the
+		// current block
+		opg.resetInsertCount();
 		
-		opg.insert(trn, insList, start);
+		return opg.insert(trn, insList, start);
 	}
 
 	/**
