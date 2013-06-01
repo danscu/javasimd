@@ -55,14 +55,14 @@ public class VectorTest {
 	res = inst.testArraySum(ia);
 	System.out.println("Array sum = " + res); 
 
-	// Test 4
+	// Test 3
 	inst.testSLPVectorize(10, 20, 30, 40, ia);
 	System.out.println("Straight line program result = " + ia[0] + " " +
 		ia[1]); 
 
-	// Test 3
-	int N = 100000;
-	Random r = new Random();
+	// Test 4
+	int N = 40000;
+	Random r = new Random(0);
 	ia = new int[N];
 	for (int i = 0; i < N; i++)
 		ia[i] = r.nextInt();
