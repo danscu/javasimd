@@ -1,4 +1,4 @@
-if [[ ! `uname -a` =~ .*_64.* ]]; then
+if [[ `uname -a` =~ .*_64.* ]]; then
   LLV="_64"
 fi
 

@@ -20,30 +20,31 @@ public class Operator {
 		ashr = 14,
 		and = 15,
 		or = 16,
-		xor = 17;
+		xor = 17,
+		srem = 18;
 		
 	//public static String[] 
 	
 	//'trunc' | 'zext' | 'sext' | 'fptrunc' | 'fpext' | 'fptoui' | 'fptosi' | 'uitofp' | 'sitofp' | 'ptrtoint' | 'inttoptr' | 'bitcast'
 	//conversion_op
 	public static final int 
-		trunc = 18,
-		zext  = 19,
-		sext = 20,
-		fptrunc = 21,
-		fpext = 22,
-		fptoui = 23,
-		fptosi = 24,
-		uitofp = 25,
-		sitofp = 26,
-		ptrtoint = 27,
-		inttoptr = 28,
-		bitcast = 29,
+		trunc = 19,
+		zext  = 20,
+		sext = 21,
+		fptrunc = 22,
+		fpext = 23,
+		fptoui = 24,
+		fptosi = 25,
+		uitofp = 26,
+		sitofp = 27,
+		ptrtoint = 28,
+		inttoptr = 29,
+		bitcast = 30,
 	
 	//compare_op getElementPtr
-		icmp = 30,
-		fcmp = 31,
-		getElementPtr = 32;
+		icmp = 31,
+		fcmp = 32,
+		getElementPtr = 33;
 	
 	public static boolean isConvert(int opcode){
 		return opcode>Operator.xor;
@@ -101,7 +102,9 @@ public class Operator {
 		if(op.equals("xor")){
 			return Operator.xor;
 		}
-		
+		if(op.equals("srem")){
+			return Operator.srem;
+		}		
 		
 		if(op.equals("trunc")){
 			return Operator.trunc;
@@ -187,6 +190,8 @@ public class Operator {
 				return "or";
 			case Operator.xor:
 				return "xor";
+			case Operator.srem:
+				return "srem";
 				
 			case Operator.trunc:
 				return "trunc";

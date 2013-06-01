@@ -16,9 +16,7 @@
  *
  *************************************************************************/
 
-import java.util.Random;
-
-public class HelloWorld {
+public class H1 {
     private int testSum(int n) {
 	int i;
 	int sum = 0;
@@ -34,51 +32,83 @@ public class HelloWorld {
       return sum;
     }
 
-    private void testSort(int a[]) {
-	int i, j, minp;
-	for (i = 0; i < a.length - 1; i++) {
-	    minp = i;
-	  for (j = i + 1; j < a.length; j++)
-		if (a[j] < a[minp])
-			minp = j;
-	    int tmp = a[i]; a[i] = a[minp]; a[minp] = tmp;
+    private int primeCount(int range) {
+	int count = 0;
+	int number;
+	int i;
+
+	for (number = 2; number <= range; number++) {
+		boolean isPrime = true;
+		// test prime by definition
+		for (i = 2; i < number; i++) {
+			if (number % i == 0) {
+				isPrime = false;
+				break;
+			}
+		}
+		if (isPrime)
+			count++;
 	}
+
+	return count;
+    }
+
+    private int factorial(int number) {
+	int i, result = 1;
+	for(i = 1 ; i <= number; i++)
+	{
+		result = result * i;
+	}
+	return result;
+    }
+
+    private int gcd(int a, int b) {
+	int temp;	
+	while(b != 0){
+		temp = b;
+		b = a % b;
+		a = temp;
+	}
+	return a;
     }
 
     public static void main(String[] args) {
         System.out.println("Hello, World");
-	HelloWorld inst = new HelloWorld();
+	H1 inst = new H1();
 
 	// Test 1	
 	int res = inst.testSum(100);
 	System.out.println("Sum = " + res); 
 
 	// Test 2
-	int[] ia = new int[200];
-	for (int i = 0; i < 200; i++)
+	int[] ia = new int[100];
+	for (int i = 0; i < 100; i++)
 		ia[i] = i;
 	res = inst.testArraySum(ia);
 	System.out.println("Array sum = " + res); 
 
-	// Test 3
-	int N = 100000;
-	Random r = new Random();
-	ia = new int[N];
-	for (int i = 0; i < N; i++)
-		ia[i] = r.nextInt();
+	// Test 4 - Prime Count
 
+	int i, facresult;
 	long startMs = System.currentTimeMillis();
-	inst.testSort(ia);
+	final int primeRange = 100000;
+	int count = inst.primeCount(primeRange);
 	long durationMs = System.currentTimeMillis() - startMs;
-	System.out.println(String.format("Sort time: %d ms", durationMs));
+	System.err.println(durationMs);
+	System.out.println("There are " + count + " primes <= " + primeRange);
 
-	boolean showSorted = false;
-	if (showSorted) {
-		for (int i = 0; i < N; i++)
-			System.out.print(ia[i] + " ");
-		System.out.println();
+	// Test 5
+
+	for(i = 1; i < 10; i++)
+	{
+		facresult = inst.factorial(i);
+		System.out.println(facresult);
 	}
-	System.out.println("Sorting done, N = " + N);
+
+	// Test 6
+	
+	int res2 = inst.gcd(2322, 654);
+	System.out.println("The GCD of 2322 and 654 is " + res2);
     }
 }
 
