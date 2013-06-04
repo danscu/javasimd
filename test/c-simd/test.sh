@@ -1,13 +1,13 @@
 DRAGONEGG=../../dragonegg.so
-LLVMFLAGS=-fslp-vectorize -fslp-vectorize-aggressive 
+LLVMFLAGS="-bb-vectorize -loop-vectorize"
 
 echo 1. Compiling C to LLVM-IR
 #gcc -O0 -fplugin=$DRAGONEGG -fplugin-arg-dragonegg-emit-ir -S sum.c
-clang -O3 -S -emit-llvm $LLVMFLAGS sum.c
+clang -O0 -S -emit-llvm sum.c
 
 if [ "$1" != "0" ]; then
   echo 2. Optimize
-  opt -S -loop-vectorize -force-vector-width=2 -o sum.opt.s sum.s
+  opt -O3 $LLVMFLAGS -S -o sum.opt.s sum.s
   llvm-as -o sum.s.bc sum.opt.s
 else
   echo 2. No-optimize

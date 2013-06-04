@@ -37,6 +37,8 @@ if [[ ! `uname -a` =~ .*_64.* ]]; then
 fi
 
 FUNC="testSum testArraySum testSLPVectorize testSort quicksort isPrime gcd primeCount $2 $3 $4 $5 $6 $7 $8 $9"
+LLVMFLAGS="-disable-inlining --bb-vectorize --loop-vectorize -force-vector-width=$VECTOR_SIZE"
+# -vectorize -vectorize-loops 
 
 if [ "$1" == "" ]; then
   echo Usage: test.sh ClassName \{methods\}*
@@ -68,7 +70,7 @@ $GCJ -save-temps -fplugin=$DRAGONEGG -fplugin-arg-dragonegg-emit-ir -S $FILE.jav
 
 echo 1+. Optimize after LLVM generation
 if [ "$OPT_BEFORE_JNI" == "1" ]; then
-    opt -O$OLEVEL -disable-inlining -vectorize -vectorize-loops --bb-vectorize --loop-vectorize -force-vector-width=$VECTOR_SIZE -S -o $FILE.opt.1.s $FILE.s
+    opt -O$OLEVEL $LLVMFLAGS -S -o $FILE.opt.1.s $FILE.s
 else
     cp $FILE.s $FILE.opt.1.s
 fi
@@ -80,7 +82,7 @@ echo 3+. Optimizing translated code
 if [ "$OLEVEL" == "0" -o "$OPT_AFTER_JNI" != "1" ]; then
   cp vdir/$FILE.opt.1.s vdir/$FILE.opt.2.s
 else
-  opt -O$OLEVEL -disable-inlining -S -o vdir/$FILE.opt.2.s vdir/$FILE.opt.1.s
+  opt -O$OLEVEL $LLVMFLAGS -S -o vdir/$FILE.opt.2.s vdir/$FILE.opt.1.s
 fi
 
 echo 4. Compile modified LLVM IR
