@@ -11,6 +11,10 @@ if [ "$OLEVEL" == "" ]; then
    OLEVEL=3
 fi
 
+if [ "$VECTORIZE" == "" ]; then
+   VECTORIZE="1"
+fi
+
 # Vector size
 if [ "$VECTOR_SIZE" == "" ]; then
    VECTOR_SIZE=8
@@ -18,12 +22,12 @@ fi
 
 # Pre-JNI Optimization
 if [ "$OPT_BEFORE_JNI" == "" ]; then
-    OPT_BEFORE_JNI="1"
+    OPT_BEFORE_JNI="0"
 fi
 
 # Post-JNI Optimization
 if [ "$OPT_AFTER_JNI" == "" ]; then
-    OPT_AFTER_JNI="1"
+    OPT_AFTER_JNI="0"
 fi
 
 # JNI native code compilation optimization
@@ -37,8 +41,12 @@ if [[ ! `uname -a` =~ .*_64.* ]]; then
 fi
 
 FUNC="testSum testArraySum testSLPVectorize testSort quicksort isPrime gcd primeCount $2 $3 $4 $5 $6 $7 $8 $9"
+
+if [ "$VECTORIZE" == "1" ]; then
 LLVMFLAGS="-disable-inlining --bb-vectorize --loop-vectorize -force-vector-width=$VECTOR_SIZE"
-# -vectorize -vectorize-loops 
+else
+LLVMFLAGS="-disable-inlining"
+fi
 
 if [ "$1" == "" ]; then
   echo Usage: test.sh ClassName \{methods\}*
@@ -48,12 +56,14 @@ else
 echo OLEVEL=$OLEVEL >> $LOG
 echo VECTOR_SIZE=$VECTOR_SIZE >> $LOG
 echo MACHINETYPE=`uname -a` >> $LOG
+echo VECTORIZE=$VECTORIZE >> $LOG
 echo OPT_BEFORE_JNI=$OPT_BEFORE_JNI >> $LOG
 echo OPT_AFTER_JNI=$OPT_AFTER_JNI >> $LOG
 echo OPT_COMPILE_NATIVE=$OPT_COMPILE_NATIVE >> $LOG
 
 echo ==============================================================================================
 echo OLEVEL=$OLEVEL VECTOR_SIZE=$VECTOR_SIZE
+echo VECTORIZE=$VECTORIZE
 echo OPT_BEFORE_JNI=$OPT_BEFORE_JNI
 echo OPT_AFTER_JNI=$OPT_AFTER_JNI
 echo OPT_COMPILE_NATIVE=$OPT_COMPILE_NATIVE
