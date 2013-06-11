@@ -39,13 +39,13 @@ public class VectorTest {
 	}
     }
 
-    void testSLPVectorize(int a1, int a2, int b1, int b2, int A[], int B[]) {
+    void testSLPVectorize(int a1, int a2, int b1, int b2, int A[]) {
 	int i;
 	int r;
 	for (r = 0; r < 100; r++)
-	for (i = 0; i < A.length; i++) {
+	for (i = 0; i < A.length - 1; i += 2) {
         	A[i] = a1*(a1 + b1)/b1 + 50*b1/a1;
-        	B[i] = a2*(a2 + b2)/b2 + 50*b2/a2;
+        	A[i + 1] = a2*(a2 + b2)/b2 + 50*b2/a2;
 	}
     }
 
@@ -145,10 +145,10 @@ public class VectorTest {
 
 	// Test 2 SLP
 	startMs = System.currentTimeMillis();
-	inst.testSLPVectorize(10, 20, 30, 40, ia, ib);
+	inst.testSLPVectorize(10, 20, 30, 40, ia);
 	durationMs = System.currentTimeMillis() - startMs;
 	System.out.println("Straight line program result = " + ia[0] + " " +
-		ia[1] + " " + ib[0] + " " + ib[1]); 
+		ia[1]);
 	System.out.println(String.format("SLP time: %d ms", durationMs));
 	System.err.println(durationMs);
 
@@ -180,10 +180,16 @@ public class VectorTest {
 	for (int i = 0; i < N; i++)
 		ia[i] = r.nextInt();
 	startMs = System.currentTimeMillis();
-	inst.testSort(ia);
+	inst.testInsertionSort(ia);
 	durationMs = System.currentTimeMillis() - startMs;
 	System.out.println(String.format("Insertion sort time: %d ms", durationMs));
 	System.err.println(durationMs);
+
+	if (showSorted) {
+		for (int i = 0; i < N; i++)
+			System.out.print(ia[i] + " ");
+		System.out.println();
+	}
     }
 }
 
