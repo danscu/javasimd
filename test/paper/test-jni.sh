@@ -117,6 +117,6 @@ echo 7. Generate dynamic library
 gcc -shared -o lib$FILE.so -Wl,-soname,$FILE $FILE.o
 
 echo 8. Run optimized JAVA code
-java -Djava.library.path=. -cp vdir $FILE 2>> $LOG
+time java -Djava.library.path=. -cp vdir $FILE 2>> $LOG
 
 fi

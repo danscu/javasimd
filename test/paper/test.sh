@@ -20,7 +20,11 @@ for i in 3; do
   # Optimization places
   for opt in 14 6 4; do
     if [ "$opt" == "14" ]; then
-       export VSIZES="4"
+       if [ "$2" == "size" ]; then
+	   export VSIZES="0 2 4 8 16"
+       else
+           export VSIZES="4"
+       fi
     else
        export VSIZES="0"
     fi
