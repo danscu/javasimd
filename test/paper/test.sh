@@ -9,7 +9,7 @@ date >> $LOG
 echo ======================================================================================= >> $LOG
 
 # Test java
-./test-java.sh $1
+./test-java.sh $1 $2
 
 FOLDER=out-java
 mkdir -p $FOLDER
@@ -20,7 +20,7 @@ for i in 3; do
   # Optimization places
   for opt in 14 6 4; do
     if [ "$opt" == "14" ]; then
-       export VSIZES="0 2 4 8 16"
+       export VSIZES="4"
     else
        export VSIZES="0"
     fi
@@ -45,6 +45,8 @@ for i in 3; do
       mkdir -p $FOLDER
       cp lib$1.so $1.ll.s vdir/$1.* $FOLDER
       cp $1.opt.1.s $FOLDER/$1.opt.0.s
+
+      echo >> $LOG
     done
   done
 done

@@ -53,13 +53,18 @@ if [ "$1" == "" ]; then
 else
 
 # Print parameters
-echo OLEVEL=$OLEVEL >> $LOG
-echo VECTOR_SIZE=$VECTOR_SIZE >> $LOG
-echo MACHINETYPE=`uname -a` >> $LOG
-echo VECTORIZE=$VECTORIZE >> $LOG
-echo OPT_BEFORE_JNI=$OPT_BEFORE_JNI >> $LOG
-echo OPT_AFTER_JNI=$OPT_AFTER_JNI >> $LOG
+echo -n MACHINETYPE=`uname -i` >> $LOG
+echo -n " " >> $LOG
+echo -n VECTORIZE=$VECTORIZE >> $LOG
+echo -n " " >> $LOG
+echo -n VECTOR_SIZE=$VECTOR_SIZE >> $LOG
+echo -n " " >> $LOG
+echo -n OPT_BEFORE_JNI=$OPT_BEFORE_JNI >> $LOG
+echo -n " " >> $LOG
+echo -n OPT_AFTER_JNI=$OPT_AFTER_JNI >> $LOG
+echo -n " " >> $LOG
 echo OPT_COMPILE_NATIVE=$OPT_COMPILE_NATIVE >> $LOG
+echo Results: >> $LOG
 
 echo ==============================================================================================
 echo OLEVEL=$OLEVEL VECTOR_SIZE=$VECTOR_SIZE

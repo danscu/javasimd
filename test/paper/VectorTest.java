@@ -10,14 +10,6 @@
 import java.util.Random;
 
 public class VectorTest {
-    private int testSum(int n) {
-	int i;
-	int sum = 0;
-	for (i = 0; i < n; i++)
-		sum += i;
-	return sum;
-    }
-
     private int testArraySum(int[] ia) {
       int sum = 0;
       for (int redundant = 0; redundant < 1000; redundant++) { 
@@ -46,67 +38,6 @@ public class VectorTest {
 	for (i = 0; i < A.length - 1; i += 2) {
         	A[i] = a1*(a1 + b1)/b1 + 50*b1/a1;
         	A[i + 1] = a2*(a2 + b2)/b2 + 50*b2/a2;
-	}
-    }
-
-    private void testNRMSort(int a[]) {
-	if(a.length < 2)
-		return;
-	int step = 1;
-	int startL, startR;
-	while(step < a.length) {
-		startL = 0;
-		startR = step;
-		while(startR + step <= a.length) {
-			//merge
-			int right[] = new int[(startR + step) - startR + 1];
-			int left[] = new int[(startL + step) - startL - 1];
-			for(int i = 0, k = startR; i < (right.length - 1); ++i, ++k) {
-				right[i] = a[k];
-			}
-			for(int i = 0, k = startL; i < (left.length - 1); ++i, ++k) {
-				left[i] = a[k];
-			}
-			right[right.length-1] = Integer.MAX_VALUE;
-			left[left.length-1] = Integer.MAX_VALUE;
-			for(int k = startL, m = 0, n = 0; k < (startR + step); ++k) {
-				if(left[m] <= right[n]) {
-					a[k] = left[m];
-					m++;
-				}
-				else {
-					a[k] = right[n];
-					n++;
-				}
-			}
-
-			startL = startR + step;
-			startR = startL + step;
-		}
-		if(startR < a.length) {
-			//merge
-			int right[] = new int[(startR + step) - startR + 1];
-			int left[] = new int[(startL + step) - startL - 1];
-			for(int i = 0, k = startR; i < (right.length - 1); ++i, ++k) {
-				right[i] = a[k];
-			}
-			for(int i = 0, k = startL; i < (left.length - 1); ++i, ++k) {
-				left[i] = a[k];
-			}
-			right[right.length-1] = Integer.MAX_VALUE;
-			left[left.length-1] = Integer.MAX_VALUE;
-			for(int k = startL, m = 0, n = 0; k < (startR + step); ++k) {
-				if(left[m] <= right[n]) {
-					a[k] = left[m];
-					m++;
-				}
-				else {
-					a[k] = right[n];
-					n++;
-				}
-			}
-		}
-		step *= 2;
 	}
     }
 
