@@ -17,8 +17,8 @@ import edu.scu.llvm.parser.LLVMParser;
 import edu.scu.llvm.translate.FunctionConverter;
 
 public class LLVMJniUtil {
-	public static String filePath = "./Example/HelloWorld.s"; // default
-	public static String fileFolder = "./Example/";	
+	public static String filePath = "HelloWorld.s"; // default
+	public static String fileFolder = ".";
 	public String[] methodNames;
 	public String[] outputMethodNames;
 	

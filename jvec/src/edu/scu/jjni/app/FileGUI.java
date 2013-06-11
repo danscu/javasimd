@@ -184,7 +184,7 @@ public class FileGUI extends javax.swing.JFrame {
 		JFileChooser chooser = new JFileChooser();
 		chooser.setCurrentDirectory(new File(LLVMJniUtil.fileFolder));
 		FileFilter filter = new ExtensionFileFilter("llvm file",
-				new String[] { "ll" });
+				new String[] { "ll", "s" });
 		chooser.setFileFilter(filter);
 		int returnVal = chooser.showOpenDialog(this);
 		if (returnVal == JFileChooser.APPROVE_OPTION) {

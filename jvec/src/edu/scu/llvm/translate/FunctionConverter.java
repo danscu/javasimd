@@ -379,9 +379,12 @@ public class FunctionConverter {
 				
 				// Modify operands
 				for (Constant c : ins.getOperands()) {
-					String newOperand = renumMap.get(c.getValue());
-					if (newOperand != null) {
-						c.setValue(newOperand);
+					String cname = c.getValue();
+					if (cname != null) {
+						String newOperand = renumMap.get(cname);
+						if (newOperand != null) {
+							c.setValue(newOperand);
+						}
 					}
 				}
 			}
